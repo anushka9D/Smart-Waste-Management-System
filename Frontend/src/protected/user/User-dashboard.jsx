@@ -1,10 +1,18 @@
 
 import React from 'react'
+import { useAuth } from '../../Common/auth/AuthProvider';
 
 function Userdashboard() {
+
+  const { role, user } = useAuth();
   return (
     <div className='flex justify-center items-center h-screen'>
-      <h1>User dashboard</h1>
+      <div className='flex flex-col'>
+        <h1>User dashboard</h1>
+        <h2>Your role is: {role}</h2>
+        <h2>Your email is: {user?.email}</h2>
+      </div>
+
     </div>
   )
 }

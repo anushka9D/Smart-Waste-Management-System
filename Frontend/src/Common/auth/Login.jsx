@@ -1,20 +1,30 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import {
   signInWithEmailAndPassword,
   GoogleAuthProvider,
   signInWithPopup,
- 
 } from "firebase/auth";
 import { auth } from "../../config/firebase-config";
 import LandingImage from "../../../public/landingpage.jpg";
 
 function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  
+  const routeByRole = async () => {
+  const u = auth.currentUser;
+  if (!u) return;
+  const t = await u.getIdTokenResult(true); 
+  const r = t.claims.role || "user";
+  navigate(r === "admin" ? "/protected/admin/dashboard" : "/protected/user/dashboard", { replace: true });
+};
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -23,7 +33,7 @@ function Login() {
 
     try {
       await signInWithEmailAndPassword(auth, email.trim(), password);
-      navigate("/protected/user/dashboard", { replace: true });
+      await routeByRole();
     } catch (err) {
       const code = err?.code || "";
       if (code === "auth/invalid-credential" || code === "auth/wrong-password") {
@@ -46,8 +56,7 @@ function Login() {
     try {
       const provider = new GoogleAuthProvider();
       await signInWithPopup(auth, provider);
-     
-      navigate("/protected/user/dashboard", { replace: true });
+      await routeByRole();
     } catch (err) {
       setError("Google sign-in failed. Please try again.");
     } finally {
@@ -64,7 +73,7 @@ function Login() {
     >
       <form
         onSubmit={handleSubmit}
-        className="z-10 border max-w-md w-full border-white/20 shadow-xl backdrop-blur-lg p-6 rounded-lg  space-y-4"
+        className="z-10 border max-w-md w-full border-white/20 shadow-xl backdrop-blur-lg p-6 rounded-lg space-y-4"
       >
         <h1 className="text-2xl font-bold text-center text-white">Login</h1>
 
