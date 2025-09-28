@@ -18,21 +18,13 @@ function Login() {
 
   
   const routeByRole = async () => {
-    const u = auth.currentUser;
-    if (!u) return;
+  const u = auth.currentUser;
+  if (!u) return;
+  const t = await u.getIdTokenResult(true); 
+  const r = t.claims.role || "user";
+  navigate(r === "admin" ? "/protected/admin/dashboard" : "/protected/user/dashboard", { replace: true });
+};
 
-   
-    const token = await u.getIdTokenResult(true);
-    const role = token.claims.role || "user";
-
-    if (role === "admin") {
-      navigate("/protected/admin/dashboard", { replace: true });
-    } else {
-    
-      const from = location.state?.from?.pathname || "/protected/user/dashboard";
-      navigate(from, { replace: true });
-    }
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
