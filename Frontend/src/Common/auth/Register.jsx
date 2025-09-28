@@ -13,7 +13,7 @@ function Register() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
 
@@ -34,7 +34,7 @@ function Register() {
         await updateProfile(cred.user, { displayName: name.trim() });
       }
      
-      navigate("/user/dashboard"); 
+      navigate("/protected/user/dashboard"); 
     } catch (err) {
       const code = err?.code || "";
       if (code === "auth/email-already-in-use") setError("Email is already registered.");
@@ -125,7 +125,7 @@ function Register() {
         >
           {loading ? "Creating account..." : "Register"}
         </button>
-        
+
          <div className="flex items-center gap-3">
           <div className="h-px flex-1 bg-white/20" />
           <span className="text-white/70 text-xs">or</span>

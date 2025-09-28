@@ -5,6 +5,7 @@ import Header from "./Common/Header";
 import Login from "./Common/auth/login";
 import Register from "./Common/auth/Register";
 import Userdashboard from "./protected/user/User-dashboard";
+import Admindashboard from "./protected/admin/Admin-dashboard";
 
 //protected route componet
 import ProtectedRoute from "./Common/auth/Protected-Route";
@@ -28,6 +29,13 @@ function App() {
               <Userdashboard />
             </ProtectedRoute>
           } />
+
+          <Route path="/protected/admin/dashboard"
+          element={
+            <ProtectedRoute>
+              <Admindashboard/>
+            </ProtectedRoute>
+          } /> 
       </Routes>
       </AuthProvider>
     </BrowserRouter>
