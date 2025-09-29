@@ -20,10 +20,22 @@ function Login() {
   const routeByRole = async () => {
   const u = auth.currentUser;
   if (!u) return;
-  const t = await u.getIdTokenResult(true); 
+
+  const t = await u.getIdTokenResult(true);       
   const r = t.claims.role || "user";
-  navigate(r === "admin" ? "/protected/admin/dashboard" : "/protected/user/dashboard", { replace: true });
+
+  switch (r) {
+    case "admin":
+      navigate("/protected/admin/dashboard", { replace: true });
+      break;
+    case "driver":
+      navigate("/protected/driver/dashboard", { replace: true });
+      break;
+    default:
+      navigate("/protected/user/dashboard", { replace: true });
+  }
 };
+
 
 
   const handleSubmit = async (e) => {
