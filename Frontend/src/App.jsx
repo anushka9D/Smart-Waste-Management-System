@@ -6,6 +6,7 @@ import Login from "./Common/auth/login";
 import Register from "./Common/auth/Register";
 import Userdashboard from "./protected/user/User-dashboard";
 import Admindashboard from "./protected/admin/Admin-dashboard";
+import Driverdashboard from "./protected/driver/Driver-dashboard";
 
 //protected route componet
 import ProtectedRoute from "./Common/auth/Protected-Route";
@@ -36,6 +37,13 @@ function App() {
               <Admindashboard/>
             </ProtectedRoute>
           } /> 
+
+          <Route path="/protected/driver/dashboard"
+          element={
+            <ProtectedRoute>
+              <Driverdashboard/>
+            </ProtectedRoute>
+          } />
       </Routes>
       </AuthProvider>
     </BrowserRouter>

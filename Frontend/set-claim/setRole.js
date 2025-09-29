@@ -8,7 +8,7 @@ admin.initializeApp({
 
 async function main(uid, role) {
   if (!uid || !role) {
-    console.log("Usage: node setRole.js <uid> <admin|user>");
+    console.log("Usage: node setRole.js <uid> <admin|user|driver>");
     process.exit(1);
   }
   await admin.auth().setCustomUserClaims(uid, { role });
