@@ -1,35 +1,56 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+
+import Landing from "./Common/Landing";
+import Header from "./Common/Header";
+import Login from "./Common/auth/login";
+import Register from "./Common/auth/Register";
+import Userdashboard from "./protected/user/User-dashboard";
+import Admindashboard from "./protected/admin/Admin-dashboard";
+import Driverdashboard from "./protected/driver/Driver-dashboard";
+
+//protected route componet
+import ProtectedRoute from "./Common/auth/Protected-Route";
+
+import { AuthProvider } from "./Common/auth/AuthProvider";
 
 function App() {
-  const [count, setCount] = useState(0)
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    <BrowserRouter>
+      <Header />
+      <AuthProvider>
+      <Routes>
+        <Route path="/" element={<Landing />} />
+        <Route path="/common/auth/login" element={<Login />} />
+        <Route path="/common/auth/register" element={<Register />} />
+
+        <Route path="/protected/user/dashboard"
+          element={
+            <ProtectedRoute>
+              <Userdashboard />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/protected/admin/dashboard"
+          element={
+            <ProtectedRoute>
+              <Admindashboard/>
+            </ProtectedRoute>
+          } /> 
+
+          <Route path="/protected/driver/dashboard"
+          element={
+            <ProtectedRoute>
+              <Driverdashboard/>
+            </ProtectedRoute>
+          } />
+      </Routes>
+      </AuthProvider>
+    </BrowserRouter>
+
+
   )
+
 }
 
-export default App
+export default App;
