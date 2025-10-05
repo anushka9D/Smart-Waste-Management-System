@@ -1,4 +1,4 @@
-package com.swms.dto;
+package com.swms.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
