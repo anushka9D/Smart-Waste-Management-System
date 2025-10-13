@@ -2,10 +2,9 @@ package com.swms.service;
 
 import com.swms.dto.AuthResponse;
 import com.swms.dto.LoginRequest;
-import com.swms.dto.RegisterRequest;
-import com.swms.dto.UserInfoResponse;
-import com.swms.model.User;
-import com.swms.repository.UserRepository;
+import com.swms.dto.CitizenRequest;
+import com.swms.model.Citizen;
+import com.swms.repository.CitizenRepository;
 import com.swms.security.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -16,14 +15,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
 
 @Service
 public class AuthService {
 
     @Autowired
-    private UserRepository userRepository;
+    private CitizenRepository citizenRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -34,82 +31,68 @@ public class AuthService {
     @Autowired
     private AuthenticationManager authenticationManager;
 
-    public AuthResponse register(RegisterRequest request) {
-        // Check if username already exists
-        if (userRepository.existsByUsername(request.getUsername())) {
-            throw new RuntimeException("Username is already taken");
-        }
-
+    public AuthResponse register(CitizenRequest request) {
         // Check if email already exists
-        if (userRepository.existsByEmail(request.getEmail())) {
+        if (citizenRepository.existsByEmail(request.getEmail())) {
             throw new RuntimeException("Email is already registered");
         }
 
-        // Create new user
-        User user = new User();
-        user.setUsername(request.getUsername());
-        user.setEmail(request.getEmail());
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setName(request.getName());
-        user.setPhoneNumber(request.getPhoneNumber());
-        user.setAddress(request.getAddress());
-        
-        Set<String> roles = new HashSet<>();
-        roles.add("CITIZEN");
-        user.setRoles(roles);
-        
-        user.setCreatedAt(LocalDateTime.now());
-        user.setUpdatedAt(LocalDateTime.now());
-        user.setEnabled(true);
+        // Create new citizen
+        Citizen citizen = new Citizen();
+        citizen.setName(request.getName());
+        citizen.setEmail(request.getEmail()); // This is now directly on Citizen
+        citizen.setPhone(request.getPhone());
+        citizen.setPassword(passwordEncoder.encode(request.getPassword()));
+        citizen.setUserType(request.getUserType());
+        citizen.setAge(request.getAge());
+        citizen.setCreatedAt(LocalDateTime.now());
+        citizen.setUpdatedAt(LocalDateTime.now());
+        citizen.setEnabled(true);
 
-        User savedUser = userRepository.save(user);
+        Citizen savedCitizen = citizenRepository.save(citizen);
 
         // Generate JWT token
-        String token = jwtUtil.generateToken(savedUser.getId(), savedUser.getUsername(), savedUser.getName());
+        String token = jwtUtil.generateToken(
+            savedCitizen.getUserId(), 
+            savedCitizen.getName(), 
+            savedCitizen.getEmail()
+        );
 
         return new AuthResponse(
                 token,
-                savedUser.getId(),
-                savedUser.getUsername(),
-                savedUser.getName(),
-                savedUser.getEmail(),
-                "User registered successfully"
+                savedCitizen.getUserId(),
+                savedCitizen.getName(),
+                savedCitizen.getEmail(),
+                savedCitizen.getPhone(),
+                savedCitizen.getUserType(),
+                "Citizen registered successfully"
         );
     }
 
     public AuthResponse login(LoginRequest request) {
         Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
+                new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
         );
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        User user = userRepository.findByUsername(request.getUsername())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        Citizen citizen = citizenRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new RuntimeException("Citizen not found"));
 
-        String token = jwtUtil.generateToken(user.getId(), user.getUsername(), user.getName());
+        String token = jwtUtil.generateToken(
+            citizen.getUserId(), 
+            citizen.getName(), 
+            citizen.getEmail()
+        );
 
         return new AuthResponse(
                 token,
-                user.getId(),
-                user.getUsername(),
-                user.getName(),
-                user.getEmail(),
+                citizen.getUserId(),
+                citizen.getName(),
+                citizen.getEmail(),
+                citizen.getPhone(),
+                citizen.getUserType(),
                 "Login successful"
-        );
-    }
-
-    public UserInfoResponse getUserInfo(String username) {
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        return new UserInfoResponse(
-                user.getId(),
-                user.getUsername(),
-                user.getName(),
-                user.getEmail(),
-                user.getPhoneNumber(),
-                user.getAddress()
         );
     }
 }

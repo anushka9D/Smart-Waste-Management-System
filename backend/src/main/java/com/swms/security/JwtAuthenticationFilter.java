@@ -29,8 +29,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
         
+        // Skip JWT processing for public endpoints
+        String requestPath = request.getRequestURI();
+        if (requestPath.startsWith("/api/auth/") || requestPath.startsWith("/api/citizens/")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+        
         String token = null;
-        String username = null;
+        String email = null;
 
         // Try to get token from Authorization header
         String authHeader = request.getHeader("Authorization");
@@ -51,18 +58,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
         }
 
-        // Extract username from token
+        // Extract email from token
         if (token != null) {
             try {
-                username = jwtUtil.getUsernameFromToken(token);
+                email = jwtUtil.getEmailFromToken(token);
             } catch (Exception e) {
                 logger.error("JWT Token validation error: " + e.getMessage());
             }
         }
 
         // Validate token and set authentication
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+        if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            UserDetails userDetails = userDetailsService.loadUserByUsername(email);
 
             if (jwtUtil.validateToken(token, userDetails.getUsername())) {
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
