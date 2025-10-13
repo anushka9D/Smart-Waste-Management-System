@@ -23,7 +23,7 @@ import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity
+//@EnableMethodSecurity
 public class SecurityConfig {
 
     @Autowired
@@ -38,8 +38,18 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/api/auth/register/citizen").permitAll()
+                .requestMatchers("/api/auth/register/city-authority").permitAll()
+                .requestMatchers("/api/auth/register/driver").permitAll()
+                .requestMatchers("/api/auth/register/waste-collection-staff").permitAll()
+                .requestMatchers("/api/auth/login").permitAll()
+                .requestMatchers("/api/auth/logout").permitAll()
+                .requestMatchers("/api/auth/validate").permitAll()
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/citizens/**").permitAll()
+                .requestMatchers("/api/city-authorities/**").permitAll()
+                .requestMatchers("/api/drivers/**").permitAll()
+                .requestMatchers("/api/waste-collection-staff/**").permitAll()
                 .anyRequest().authenticated()
             )
             .exceptionHandling(ex -> ex

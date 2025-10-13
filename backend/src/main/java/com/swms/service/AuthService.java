@@ -3,8 +3,18 @@ package com.swms.service;
 import com.swms.dto.AuthResponse;
 import com.swms.dto.LoginRequest;
 import com.swms.dto.CitizenRequest;
+import com.swms.dto.CityAuthorityRequest;
+import com.swms.dto.DriverRequest;
+import com.swms.dto.WasteCollectionStaffRequest;
 import com.swms.model.Citizen;
+import com.swms.model.CityAuthority;
+import com.swms.model.Driver;
+import com.swms.model.User;
+import com.swms.model.WasteCollectionStaff;
 import com.swms.repository.CitizenRepository;
+import com.swms.repository.CityAuthorityRepository;
+import com.swms.repository.DriverRepository;
+import com.swms.repository.WasteCollectionStaffRepository;
 import com.swms.security.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -15,12 +25,22 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Service
 public class AuthService {
 
     @Autowired
     private CitizenRepository citizenRepository;
+    
+    @Autowired
+    private CityAuthorityRepository cityAuthorityRepository;
+    
+    @Autowired
+    private DriverRepository driverRepository;
+    
+    @Autowired
+    private WasteCollectionStaffRepository wasteCollectionStaffRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -31,19 +51,24 @@ public class AuthService {
     @Autowired
     private AuthenticationManager authenticationManager;
 
-    public AuthResponse register(CitizenRequest request) {
+    // Citizen registration
+    public AuthResponse registerCitizen(CitizenRequest request) {
         // Check if email already exists
-        if (citizenRepository.existsByEmail(request.getEmail())) {
+        if (citizenRepository.existsByEmail(request.getEmail()) ||
+            cityAuthorityRepository.existsByEmail(request.getEmail()) ||
+            driverRepository.existsByEmail(request.getEmail()) ||
+            wasteCollectionStaffRepository.existsByEmail(request.getEmail())) {
             throw new RuntimeException("Email is already registered");
         }
 
         // Create new citizen
         Citizen citizen = new Citizen();
+        citizen.setUserId(UUID.randomUUID().toString());
         citizen.setName(request.getName());
-        citizen.setEmail(request.getEmail()); // This is now directly on Citizen
+        citizen.setEmail(request.getEmail());
         citizen.setPhone(request.getPhone());
         citizen.setPassword(passwordEncoder.encode(request.getPassword()));
-        citizen.setUserType(request.getUserType());
+        citizen.setUserType("CITIZEN");
         citizen.setAge(request.getAge());
         citizen.setCreatedAt(LocalDateTime.now());
         citizen.setUpdatedAt(LocalDateTime.now());
@@ -68,6 +93,135 @@ public class AuthService {
                 "Citizen registered successfully"
         );
     }
+    
+    // City Authority registration
+    public AuthResponse registerCityAuthority(CityAuthorityRequest request) {
+        // Check if email already exists
+        if (citizenRepository.existsByEmail(request.getEmail()) ||
+            cityAuthorityRepository.existsByEmail(request.getEmail()) ||
+            driverRepository.existsByEmail(request.getEmail()) ||
+            wasteCollectionStaffRepository.existsByEmail(request.getEmail())) {
+            throw new RuntimeException("Email is already registered");
+        }
+
+        // Create new city authority
+        CityAuthority cityAuthority = new CityAuthority();
+        cityAuthority.setUserId(UUID.randomUUID().toString());
+        cityAuthority.setName(request.getName());
+        cityAuthority.setEmail(request.getEmail());
+        cityAuthority.setPhone(request.getPhone());
+        cityAuthority.setPassword(passwordEncoder.encode(request.getPassword()));
+        cityAuthority.setEmployeeId(request.getEmployeeId());
+        cityAuthority.setDepartment(request.getDepartment());
+        cityAuthority.setCreatedAt(LocalDateTime.now());
+        cityAuthority.setUpdatedAt(LocalDateTime.now());
+        cityAuthority.setEnabled(true);
+
+        CityAuthority savedCityAuthority = cityAuthorityRepository.save(cityAuthority);
+
+        // Generate JWT token
+        String token = jwtUtil.generateToken(
+            savedCityAuthority.getUserId(), 
+            savedCityAuthority.getName(), 
+            savedCityAuthority.getEmail()
+        );
+
+        return new AuthResponse(
+                token,
+                savedCityAuthority.getUserId(),
+                savedCityAuthority.getName(),
+                savedCityAuthority.getEmail(),
+                savedCityAuthority.getPhone(),
+                "CITY_AUTHORITY",
+                "City Authority registered successfully"
+        );
+    }
+    
+    // Driver registration
+    public AuthResponse registerDriver(DriverRequest request) {
+        // Check if email already exists
+        if (citizenRepository.existsByEmail(request.getEmail()) ||
+            cityAuthorityRepository.existsByEmail(request.getEmail()) ||
+            driverRepository.existsByEmail(request.getEmail()) ||
+            wasteCollectionStaffRepository.existsByEmail(request.getEmail())) {
+            throw new RuntimeException("Email is already registered");
+        }
+
+        // Create new driver
+        Driver driver = new Driver();
+        driver.setUserId(UUID.randomUUID().toString());
+        driver.setName(request.getName());
+        driver.setEmail(request.getEmail());
+        driver.setPhone(request.getPhone());
+        driver.setPassword(passwordEncoder.encode(request.getPassword()));
+        driver.setLicenseNumber(request.getLicenseNumber());
+        driver.setVehicleType(request.getVehicleType());
+        driver.setCreatedAt(LocalDateTime.now());
+        driver.setUpdatedAt(LocalDateTime.now());
+        driver.setEnabled(true);
+
+        Driver savedDriver = driverRepository.save(driver);
+
+        // Generate JWT token
+        String token = jwtUtil.generateToken(
+            savedDriver.getUserId(), 
+            savedDriver.getName(), 
+            savedDriver.getEmail()
+        );
+
+        return new AuthResponse(
+                token,
+                savedDriver.getUserId(),
+                savedDriver.getName(),
+                savedDriver.getEmail(),
+                savedDriver.getPhone(),
+                "DRIVER",
+                "Driver registered successfully"
+        );
+    }
+    
+    // Waste Collection Staff registration
+    public AuthResponse registerWasteCollectionStaff(WasteCollectionStaffRequest request) {
+        // Check if email already exists
+        if (citizenRepository.existsByEmail(request.getEmail()) ||
+            cityAuthorityRepository.existsByEmail(request.getEmail()) ||
+            driverRepository.existsByEmail(request.getEmail()) ||
+            wasteCollectionStaffRepository.existsByEmail(request.getEmail())) {
+            throw new RuntimeException("Email is already registered");
+        }
+
+        // Create new waste collection staff
+        WasteCollectionStaff staff = new WasteCollectionStaff();
+        staff.setUserId(UUID.randomUUID().toString());
+        staff.setName(request.getName());
+        staff.setEmail(request.getEmail());
+        staff.setPhone(request.getPhone());
+        staff.setPassword(passwordEncoder.encode(request.getPassword()));
+        staff.setEmployeeId(request.getEmployeeId());
+        staff.setRouteArea(request.getRouteArea());
+        staff.setCreatedAt(LocalDateTime.now());
+        staff.setUpdatedAt(LocalDateTime.now());
+        staff.setEnabled(true);
+
+        WasteCollectionStaff savedStaff = wasteCollectionStaffRepository.save(staff);
+
+        // Generate JWT token
+        String token = jwtUtil.generateToken(
+            savedStaff.getUserId(), 
+            savedStaff.getName(), 
+            savedStaff.getEmail()
+        );
+
+        return new AuthResponse(
+                token,
+                savedStaff.getUserId(),
+                savedStaff.getName(),
+                savedStaff.getEmail(),
+                savedStaff.getPhone(),
+                "WASTE_COLLECTION_STAFF",
+                "Waste Collection Staff registered successfully"
+        );
+    }
 
     public AuthResponse login(LoginRequest request) {
         Authentication authentication = authenticationManager.authenticate(
@@ -76,23 +230,59 @@ public class AuthService {
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        Citizen citizen = citizenRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("Citizen not found"));
+        // Try to find user among all types
+        User user = findUserByEmail(request.getEmail());
+        
+        if (user == null) {
+            throw new RuntimeException("User not found");
+        }
 
         String token = jwtUtil.generateToken(
-            citizen.getUserId(), 
-            citizen.getName(), 
-            citizen.getEmail()
+            user.getUserId(), 
+            user.getName(), 
+            user.getEmail()
         );
 
         return new AuthResponse(
                 token,
-                citizen.getUserId(),
-                citizen.getName(),
-                citizen.getEmail(),
-                citizen.getPhone(),
-                citizen.getUserType(),
+                user.getUserId(),
+                user.getName(),
+                user.getEmail(),
+                user.getPhone(),
+                getUserType(user),
                 "Login successful"
         );
+    }
+    
+    private User findUserByEmail(String email) {
+        // Try to find citizen
+        return citizenRepository.findByEmail(email)
+                .map(user -> (User) user)
+                .orElseGet(() -> 
+                    cityAuthorityRepository.findByEmail(email)
+                        .map(user -> (User) user)
+                        .orElseGet(() -> 
+                            driverRepository.findByEmail(email)
+                                .map(user -> (User) user)
+                                .orElseGet(() -> 
+                                    wasteCollectionStaffRepository.findByEmail(email)
+                                        .map(user -> (User) user)
+                                        .orElse(null)
+                                )
+                        )
+                );
+    }
+    
+    private String getUserType(User user) {
+        if (user instanceof Citizen) {
+            return "CITIZEN";
+        } else if (user instanceof CityAuthority) {
+            return "CITY_AUTHORITY";
+        } else if (user instanceof Driver) {
+            return "DRIVER";
+        } else if (user instanceof WasteCollectionStaff) {
+            return "WASTE_COLLECTION_STAFF";
+        }
+        return "UNKNOWN";
     }
 }
