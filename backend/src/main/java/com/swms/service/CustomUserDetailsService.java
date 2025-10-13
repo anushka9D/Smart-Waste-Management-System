@@ -1,7 +1,7 @@
 package com.swms.service;
 
-import com.swms.model.User;
-import com.swms.repository.UserRepository;
+import com.swms.model.Citizen;
+import com.swms.repository.CitizenRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -10,34 +10,34 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.stream.Collectors;
 
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
 
     @Autowired
-    private UserRepository userRepository;
+    private CitizenRepository citizenRepository;
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        Citizen citizen = citizenRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("Citizen not found with email: " + email));
 
         return new org.springframework.security.core.userdetails.User(
-                user.getUsername(),
-                user.getPassword(),
-                user.isEnabled(),
+                citizen.getEmail(),
+                citizen.getPassword(),
+                citizen.isEnabled(),
                 true,
                 true,
                 true,
-                getAuthorities(user)
+                getAuthorities(citizen)
         );
     }
 
-    private Collection<? extends GrantedAuthority> getAuthorities(User user) {
-        return user.getRoles().stream()
-                .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
-                .collect(Collectors.toList());
+    private Collection<? extends GrantedAuthority> getAuthorities(Citizen citizen) {
+        Collection<GrantedAuthority> authorities = new ArrayList<>();
+        authorities.add(new SimpleGrantedAuthority("ROLE_" + citizen.getUserType()));
+        return authorities;
     }
 }

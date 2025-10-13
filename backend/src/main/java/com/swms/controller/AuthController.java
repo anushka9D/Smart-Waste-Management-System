@@ -9,12 +9,12 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth")
-public class AuthController extends BaseController {
+@CrossOrigin(originPatterns = "*", maxAge = 3600)
+public class AuthController {
 
     @Autowired
     private AuthService authService;
@@ -27,7 +27,7 @@ public class AuthController extends BaseController {
 
     @PostMapping("/register")
     public ResponseEntity<ApiResponse<AuthResponse>> register(
-            @Valid @RequestBody RegisterRequest request,
+            @Valid @RequestBody CitizenRequest request,
             HttpServletResponse response) {
         try {
             AuthResponse authResponse = authService.register(request);
@@ -35,9 +35,11 @@ public class AuthController extends BaseController {
             // Set JWT in cookie
             setJwtCookie(response, authResponse.getToken());
             
-            return success("User registered successfully", authResponse);
+            return ResponseEntity.ok(ApiResponse.success("Citizen registered successfully", authResponse));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(ApiResponse.error(e.getMessage()));
         } catch (Exception e) {
-            return error(e.getMessage());
+            return ResponseEntity.internalServerError().body(ApiResponse.error("Internal server error during registration"));
         }
     }
 
@@ -51,9 +53,9 @@ public class AuthController extends BaseController {
             // Set JWT in cookie
             setJwtCookie(response, authResponse.getToken());
             
-            return success("Login successful", authResponse);
+            return ResponseEntity.ok(ApiResponse.success("Login successful", authResponse));
         } catch (Exception e) {
-            return error("Invalid username or password");
+            return ResponseEntity.badRequest().body(ApiResponse.error("Invalid email or password"));
         }
     }
 
@@ -62,23 +64,12 @@ public class AuthController extends BaseController {
         // Clear JWT cookie
         Cookie cookie = new Cookie("jwt", null);
         cookie.setHttpOnly(true);
-        cookie.setSecure(false); // Set to true in production with HTTPS
+        cookie.setSecure(isHttpsEnabled());
         cookie.setPath("/");
         cookie.setMaxAge(0);
         response.addCookie(cookie);
 
-        return success("Logout successful", null);
-    }
-
-    @GetMapping("/me")
-    public ResponseEntity<ApiResponse<UserInfoResponse>> getCurrentUser(Authentication authentication) {
-        try {
-            String username = authentication.getName();
-            UserInfoResponse userInfo = authService.getUserInfo(username);
-            return success(userInfo);
-        } catch (Exception e) {
-            return error("User not found");
-        }
+        return ResponseEntity.ok(ApiResponse.success("Logout successful", null));
     }
 
     @GetMapping("/validate")
@@ -86,22 +77,29 @@ public class AuthController extends BaseController {
         try {
             if (token != null && token.startsWith("Bearer ")) {
                 String jwt = token.substring(7);
-                String username = jwtUtil.getUsernameFromToken(jwt);
-                boolean isValid = jwtUtil.validateToken(jwt, username);
-                return success(isValid);
+                String email = jwtUtil.getEmailFromToken(jwt);
+                boolean isValid = jwtUtil.validateToken(jwt, email);
+                return ResponseEntity.ok(ApiResponse.success(isValid));
             }
-            return success(false);
+            return ResponseEntity.ok(ApiResponse.success(false));
         } catch (Exception e) {
-            return success(false);
+            return ResponseEntity.ok(ApiResponse.success(false));
         }
     }
 
     private void setJwtCookie(HttpServletResponse response, String token) {
         Cookie cookie = new Cookie("jwt", token);
         cookie.setHttpOnly(true);
-        cookie.setSecure(false); // Set to true in production with HTTPS
+        cookie.setSecure(isHttpsEnabled());
         cookie.setPath("/");
         cookie.setMaxAge(cookieExpiration);
         response.addCookie(cookie);
+    }
+    
+    // Helper method to determine if HTTPS should be enabled
+    private boolean isHttpsEnabled() {
+        // In production, you would check environment variables or properties
+        // For now, returning false to maintain current behavior
+        return false;
     }
 }
