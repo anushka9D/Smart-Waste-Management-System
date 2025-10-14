@@ -33,6 +33,7 @@ public class WasteCollectionStaffService {
         staff.setEmail(request.getEmail());
         staff.setPhone(request.getPhone());
         staff.setPassword(passwordEncoder.encode(request.getPassword()));
+        staff.setUserType("WASTE_COLLECTION_STAFF");
         staff.setEmployeeId(request.getEmployeeId());
         staff.setRouteArea(request.getRouteArea());
         staff.setCreatedAt(LocalDateTime.now());

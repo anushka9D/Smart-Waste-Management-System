@@ -76,11 +76,12 @@ public class AuthService {
 
         Citizen savedCitizen = citizenRepository.save(citizen);
 
-        // Generate JWT token
+        // Generate JWT token with userType
         String token = jwtUtil.generateToken(
             savedCitizen.getUserId(), 
             savedCitizen.getName(), 
-            savedCitizen.getEmail()
+            savedCitizen.getEmail(),
+            savedCitizen.getUserType()
         );
 
         return new AuthResponse(
@@ -111,6 +112,7 @@ public class AuthService {
         cityAuthority.setEmail(request.getEmail());
         cityAuthority.setPhone(request.getPhone());
         cityAuthority.setPassword(passwordEncoder.encode(request.getPassword()));
+        cityAuthority.setUserType("CITY_AUTHORITY");
         cityAuthority.setEmployeeId(request.getEmployeeId());
         cityAuthority.setDepartment(request.getDepartment());
         cityAuthority.setCreatedAt(LocalDateTime.now());
@@ -119,11 +121,12 @@ public class AuthService {
 
         CityAuthority savedCityAuthority = cityAuthorityRepository.save(cityAuthority);
 
-        // Generate JWT token
+        // Generate JWT token with userType
         String token = jwtUtil.generateToken(
             savedCityAuthority.getUserId(), 
             savedCityAuthority.getName(), 
-            savedCityAuthority.getEmail()
+            savedCityAuthority.getEmail(),
+            savedCityAuthority.getUserType()
         );
 
         return new AuthResponse(
@@ -132,7 +135,7 @@ public class AuthService {
                 savedCityAuthority.getName(),
                 savedCityAuthority.getEmail(),
                 savedCityAuthority.getPhone(),
-                "CITY_AUTHORITY",
+                savedCityAuthority.getUserType(),
                 "City Authority registered successfully"
         );
     }
@@ -154,6 +157,7 @@ public class AuthService {
         driver.setEmail(request.getEmail());
         driver.setPhone(request.getPhone());
         driver.setPassword(passwordEncoder.encode(request.getPassword()));
+        driver.setUserType("DRIVER");
         driver.setLicenseNumber(request.getLicenseNumber());
         driver.setVehicleType(request.getVehicleType());
         driver.setCreatedAt(LocalDateTime.now());
@@ -162,11 +166,12 @@ public class AuthService {
 
         Driver savedDriver = driverRepository.save(driver);
 
-        // Generate JWT token
+        // Generate JWT token with userType
         String token = jwtUtil.generateToken(
             savedDriver.getUserId(), 
             savedDriver.getName(), 
-            savedDriver.getEmail()
+            savedDriver.getEmail(),
+            savedDriver.getUserType()
         );
 
         return new AuthResponse(
@@ -175,7 +180,7 @@ public class AuthService {
                 savedDriver.getName(),
                 savedDriver.getEmail(),
                 savedDriver.getPhone(),
-                "DRIVER",
+                savedDriver.getUserType(),
                 "Driver registered successfully"
         );
     }
@@ -197,6 +202,7 @@ public class AuthService {
         staff.setEmail(request.getEmail());
         staff.setPhone(request.getPhone());
         staff.setPassword(passwordEncoder.encode(request.getPassword()));
+        staff.setUserType("WASTE_COLLECTION_STAFF");
         staff.setEmployeeId(request.getEmployeeId());
         staff.setRouteArea(request.getRouteArea());
         staff.setCreatedAt(LocalDateTime.now());
@@ -205,11 +211,12 @@ public class AuthService {
 
         WasteCollectionStaff savedStaff = wasteCollectionStaffRepository.save(staff);
 
-        // Generate JWT token
+        // Generate JWT token with userType
         String token = jwtUtil.generateToken(
             savedStaff.getUserId(), 
             savedStaff.getName(), 
-            savedStaff.getEmail()
+            savedStaff.getEmail(),
+            savedStaff.getUserType()
         );
 
         return new AuthResponse(
@@ -218,7 +225,7 @@ public class AuthService {
                 savedStaff.getName(),
                 savedStaff.getEmail(),
                 savedStaff.getPhone(),
-                "WASTE_COLLECTION_STAFF",
+                savedStaff.getUserType(),
                 "Waste Collection Staff registered successfully"
         );
     }
@@ -237,10 +244,14 @@ public class AuthService {
             throw new RuntimeException("User not found");
         }
 
+        String userType = getUserType(user);
+
+        // Generate JWT token with userType
         String token = jwtUtil.generateToken(
             user.getUserId(), 
             user.getName(), 
-            user.getEmail()
+            user.getEmail(),
+            userType
         );
 
         return new AuthResponse(
@@ -249,7 +260,7 @@ public class AuthService {
                 user.getName(),
                 user.getEmail(),
                 user.getPhone(),
-                getUserType(user),
+                userType,
                 "Login successful"
         );
     }

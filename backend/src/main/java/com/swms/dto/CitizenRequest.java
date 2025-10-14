@@ -16,10 +16,7 @@ public class CitizenRequest {
     
     @NotBlank(message = "Password is required")
     private String password;
-    
-    @NotBlank(message = "User type is required")
-    private String userType;
-    
+      
     private int age;
 
     // Default constructor
@@ -43,10 +40,6 @@ public class CitizenRequest {
         return password;
     }
 
-    public String getUserType() {
-        return userType;
-    }
-
     public int getAge() {
         return age;
     }
@@ -66,10 +59,6 @@ public class CitizenRequest {
 
     public void setPassword(String password) {
         this.password = password;
-    }
-
-    public void setUserType(String userType) {
-        this.userType = userType;
     }
 
     public void setAge(int age) {

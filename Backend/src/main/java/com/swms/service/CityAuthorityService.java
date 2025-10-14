@@ -33,6 +33,7 @@ public class CityAuthorityService {
         cityAuthority.setEmail(request.getEmail());
         cityAuthority.setPhone(request.getPhone());
         cityAuthority.setPassword(passwordEncoder.encode(request.getPassword()));
+        cityAuthority.setUserType("CITY_AUTHORITY");
         cityAuthority.setEmployeeId(request.getEmployeeId());
         cityAuthority.setDepartment(request.getDepartment());
         cityAuthority.setCreatedAt(LocalDateTime.now());

@@ -17,6 +17,8 @@ public class User {
     
     private String password;
     
+    private String userType;
+    
     private LocalDateTime createdAt;
     
     private LocalDateTime updatedAt;
@@ -29,12 +31,13 @@ public class User {
     
     // Constructor with all fields
     public User(String userId, String name, String email, String phone, String password, 
-                LocalDateTime createdAt, LocalDateTime updatedAt, boolean enabled) {
+                String userType, LocalDateTime createdAt, LocalDateTime updatedAt, boolean enabled) {
         this.userId = userId;
         this.name = name;
         this.email = email;
         this.phone = phone;
         this.password = password;
+        this.userType = userType;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
         this.enabled = enabled;
@@ -59,6 +62,10 @@ public class User {
     
     public String getPassword() {
         return password;
+    }
+    
+    public String getUserType() {
+        return userType;
     }
     
     public LocalDateTime getCreatedAt() {
@@ -92,6 +99,10 @@ public class User {
     
     public void setPassword(String password) {
         this.password = password;
+    }
+    
+    public void setUserType(String userType) {
+        this.userType = userType;
     }
     
     public void setCreatedAt(LocalDateTime createdAt) {
