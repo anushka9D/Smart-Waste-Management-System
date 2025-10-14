@@ -27,11 +27,11 @@ function Login() {
 
     try {
       const response = await loginApi(formData);
-      
+
       if (response.success) {
         const userData = response.data;
         login(userData);
-        
+
         // Redirect based on user type
         switch (userData.userType) {
           case 'CITIZEN':
@@ -45,6 +45,9 @@ function Login() {
             break;
           case 'WASTE_COLLECTION_STAFF':
             navigate('/waste-collection-staff-dashboard');
+            break;
+          case 'SENSOR_MANAGER':
+            navigate('/sensor-manager-dashboard');
             break;
           default:
             navigate('/');
@@ -62,11 +65,11 @@ function Login() {
   return (
     <div className="min-h-screen flex flex-col">
       <GuestHeader />
-      
+
       <main className="flex-grow flex items-center justify-center bg-gray-50 py-12 px-4">
         <div className="max-w-md w-full bg-white rounded-lg shadow-md p-8">
           <h2 className="text-3xl font-bold text-center text-gray-800 mb-8">Login</h2>
-          
+
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -115,7 +118,7 @@ function Login() {
           </p>
         </div>
       </main>
-      
+
       <GuestFooter />
     </div>
   );

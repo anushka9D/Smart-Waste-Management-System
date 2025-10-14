@@ -34,6 +34,11 @@ export const registerWasteCollectionStaff = async (data) => {
   return response.data;
 };
 
+export const registerSensorManager = async (data) => {
+  const response = await api.post('/auth/register/sensor-manager', data);
+  return response.data;
+};
+
 // Login
 export const login = async (credentials) => {
   const response = await api.post('/auth/login', credentials);

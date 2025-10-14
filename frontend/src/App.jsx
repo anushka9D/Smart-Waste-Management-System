@@ -10,6 +10,7 @@ import CitizenDashboard from './pages/CitizenDashboard';
 import CityAuthorityDashboard from './pages/CityAuthorityDashboard';
 import DriverDashboard from './pages/DriverDashboard';
 import WasteCollectionStaffDashboard from './pages/WasteCollectionStaffDashboard';
+import SensorManagerDashboard from './pages/SensorManagerDashboard';
 
 function App() {
   return (
@@ -51,6 +52,14 @@ function App() {
             element={
               <PrivateRoute allowedUserTypes={['WASTE_COLLECTION_STAFF']}>
                 <WasteCollectionStaffDashboard />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/sensor-manager-dashboard"
+            element={
+              <PrivateRoute allowedUserTypes={['SENSOR_MANAGER']}>
+                <SensorManagerDashboard />
               </PrivateRoute>
             }
           />

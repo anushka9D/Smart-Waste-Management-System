@@ -6,6 +6,7 @@ import {
   registerCityAuthority,
   registerDriver,
   registerWasteCollectionStaff,
+  registerSensorManager
 } from '../services/api';
 import GuestHeader from '../components/GuestHeader';
 import GuestFooter from '../components/GuestFooter';
@@ -30,6 +31,8 @@ function Register() {
     vehicleType: '',
     // Waste Collection Staff specific
     routeArea: '',
+    // Sensor Manager specific
+    assignedZone: '',
   });
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
@@ -103,6 +106,17 @@ function Register() {
             password: dataToSend.password,
             employeeId: dataToSend.employeeId,
             routeArea: dataToSend.routeArea,
+          });
+          break;
+
+        case 'SENSOR_MANAGER':
+          response = await registerSensorManager({
+            name: dataToSend.name,
+            email: dataToSend.email,
+            phone: dataToSend.phone,
+            password: dataToSend.password,
+            employeeId: dataToSend.employeeId,
+            assignedZone: dataToSend.assignedZone,
           });
           break;
 
@@ -183,6 +197,15 @@ function Register() {
           <div className="text-4xl mb-4">👷</div>
           <h3 className="text-xl font-bold mb-2">Waste Collection Staff</h3>
           <p className="text-gray-600 text-sm">Register as waste collection staff member</p>
+        </button>
+
+        <button
+          onClick={() => handleUserTypeSelect('SENSOR_MANAGER')}
+          className="p-6 border-2 border-gray-300 rounded-lg hover:border-green-500 hover:bg-green-50 transition"
+        >
+          <div className="text-4xl mb-4">📡</div>
+          <h3 className="text-xl font-bold mb-2">Sensor Manager</h3>
+          <p className="text-gray-600 text-sm">Register as a sensor manager to monitor IoT devices</p>
         </button>
       </div>
 
@@ -352,6 +375,36 @@ function Register() {
                 required
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                 placeholder="Enter your route area"
+              />
+            </div>
+          </>
+        )}
+
+        {userType === 'SENSOR_MANAGER' && (
+          <>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Employee ID</label>
+              <input
+                type="text"
+                name="employeeId"
+                value={formData.employeeId}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                placeholder="Enter your employee ID"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Assigned Zone</label>
+              <input
+                type="text"
+                name="assignedZone"
+                value={formData.assignedZone}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                placeholder="Enter your assigned zone"
               />
             </div>
           </>

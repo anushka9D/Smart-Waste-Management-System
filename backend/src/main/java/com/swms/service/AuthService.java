@@ -15,6 +15,9 @@ import com.swms.repository.CitizenRepository;
 import com.swms.repository.CityAuthorityRepository;
 import com.swms.repository.DriverRepository;
 import com.swms.repository.WasteCollectionStaffRepository;
+import com.swms.dto.SensorManagerRequest;
+import com.swms.model.SensorManager;
+import com.swms.repository.SensorManagerRepository;
 import com.swms.security.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -38,6 +41,9 @@ public class AuthService {
     
     @Autowired
     private DriverRepository driverRepository;
+
+    @Autowired
+    private SensorManagerRepository sensorManagerRepository;
     
     @Autowired
     private WasteCollectionStaffRepository wasteCollectionStaffRepository;
@@ -230,6 +236,51 @@ public class AuthService {
         );
     }
 
+    public AuthResponse registerSensorManager(SensorManagerRequest request) {
+    // Check if email already exists
+    if (citizenRepository.existsByEmail(request.getEmail()) ||
+        cityAuthorityRepository.existsByEmail(request.getEmail()) ||
+        driverRepository.existsByEmail(request.getEmail()) ||
+        wasteCollectionStaffRepository.existsByEmail(request.getEmail()) ||
+        sensorManagerRepository.existsByEmail(request.getEmail())) {
+        throw new RuntimeException("Email is already registered");
+    }
+
+    // Create new sensor manager
+    SensorManager sensorManager = new SensorManager();
+    sensorManager.setUserId(UUID.randomUUID().toString());
+    sensorManager.setName(request.getName());
+    sensorManager.setEmail(request.getEmail());
+    sensorManager.setPhone(request.getPhone());
+    sensorManager.setPassword(passwordEncoder.encode(request.getPassword()));
+    sensorManager.setUserType("SENSOR_MANAGER");
+    sensorManager.setEmployeeId(request.getEmployeeId());
+    sensorManager.setAssignedZone(request.getAssignedZone());
+    sensorManager.setCreatedAt(LocalDateTime.now());
+    sensorManager.setUpdatedAt(LocalDateTime.now());
+    sensorManager.setEnabled(true);
+
+    SensorManager savedSensorManager = sensorManagerRepository.save(sensorManager);
+
+    // Generate JWT token with userType
+    String token = jwtUtil.generateToken(
+        savedSensorManager.getUserId(), 
+        savedSensorManager.getName(), 
+        savedSensorManager.getEmail(),
+        savedSensorManager.getUserType()
+    );
+
+    return new AuthResponse(
+            token,
+            savedSensorManager.getUserId(),
+            savedSensorManager.getName(),
+            savedSensorManager.getEmail(),
+            savedSensorManager.getPhone(),
+            savedSensorManager.getUserType(),
+            "Sensor Manager registered successfully"
+    );
+}
+
     public AuthResponse login(LoginRequest request) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
@@ -278,7 +329,11 @@ public class AuthService {
                                 .orElseGet(() -> 
                                     wasteCollectionStaffRepository.findByEmail(email)
                                         .map(user -> (User) user)
-                                        .orElse(null)
+                                        .orElseGet(() -> 
+                                            sensorManagerRepository.findByEmail(email)
+                                                .map(user -> (User) user)
+                                                .orElse(null)
+                                        )
                                 )
                         )
                 );
@@ -293,6 +348,8 @@ public class AuthService {
             return "DRIVER";
         } else if (user instanceof WasteCollectionStaff) {
             return "WASTE_COLLECTION_STAFF";
+        } else if (user instanceof SensorManager) {
+            return "SENSOR_MANAGER";
         }
         return "UNKNOWN";
     }

@@ -9,6 +9,8 @@ import com.swms.repository.CitizenRepository;
 import com.swms.repository.CityAuthorityRepository;
 import com.swms.repository.DriverRepository;
 import com.swms.repository.WasteCollectionStaffRepository;
+import com.swms.model.SensorManager;
+import com.swms.repository.SensorManagerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -25,15 +27,18 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Autowired
     private CitizenRepository citizenRepository;
-    
+
     @Autowired
     private CityAuthorityRepository cityAuthorityRepository;
-    
+
     @Autowired
     private DriverRepository driverRepository;
-    
+
     @Autowired
     private WasteCollectionStaffRepository wasteCollectionStaffRepository;
+
+    @Autowired
+    private SensorManagerRepository sensorManagerRepository;
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
@@ -47,10 +52,9 @@ public class CustomUserDetailsService implements UserDetailsService {
                     true,
                     true,
                     true,
-                    getAuthorities(citizen)
-            );
+                    getAuthorities(citizen));
         }
-        
+
         // Try to find city authority
         CityAuthority cityAuthority = cityAuthorityRepository.findByEmail(email).orElse(null);
         if (cityAuthority != null) {
@@ -61,10 +65,9 @@ public class CustomUserDetailsService implements UserDetailsService {
                     true,
                     true,
                     true,
-                    getAuthorities(cityAuthority)
-            );
+                    getAuthorities(cityAuthority));
         }
-        
+
         // Try to find driver
         Driver driver = driverRepository.findByEmail(email).orElse(null);
         if (driver != null) {
@@ -75,10 +78,9 @@ public class CustomUserDetailsService implements UserDetailsService {
                     true,
                     true,
                     true,
-                    getAuthorities(driver)
-            );
+                    getAuthorities(driver));
         }
-        
+
         // Try to find waste collection staff
         WasteCollectionStaff wasteCollectionStaff = wasteCollectionStaffRepository.findByEmail(email).orElse(null);
         if (wasteCollectionStaff != null) {
@@ -89,16 +91,27 @@ public class CustomUserDetailsService implements UserDetailsService {
                     true,
                     true,
                     true,
-                    getAuthorities(wasteCollectionStaff)
-            );
+                    getAuthorities(wasteCollectionStaff));
         }
-        
+
+        SensorManager sensorManager = sensorManagerRepository.findByEmail(email).orElse(null);
+        if (sensorManager != null) {
+            return new org.springframework.security.core.userdetails.User(
+                    sensorManager.getEmail(),
+                    sensorManager.getPassword(),
+                    sensorManager.isEnabled(),
+                    true,
+                    true,
+                    true,
+                    getAuthorities(sensorManager));
+        }
+
         throw new UsernameNotFoundException("User not found with email: " + email);
     }
 
     private Collection<? extends GrantedAuthority> getAuthorities(User user) {
         Collection<GrantedAuthority> authorities = new ArrayList<>();
-        
+
         // Determine role based on the actual class type
         if (user instanceof Citizen) {
             authorities.add(new SimpleGrantedAuthority("ROLE_CITIZEN"));
@@ -108,8 +121,10 @@ public class CustomUserDetailsService implements UserDetailsService {
             authorities.add(new SimpleGrantedAuthority("ROLE_DRIVER"));
         } else if (user instanceof WasteCollectionStaff) {
             authorities.add(new SimpleGrantedAuthority("ROLE_WASTE_COLLECTION_STAFF"));
+        } else if (user instanceof SensorManager) {
+            authorities.add(new SimpleGrantedAuthority("ROLE_SENSOR_MANAGER"));
         }
-        
+
         return authorities;
     }
 }
