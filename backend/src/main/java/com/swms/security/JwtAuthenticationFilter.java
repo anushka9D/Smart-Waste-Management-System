@@ -28,18 +28,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-        
+
         // Skip JWT processing for public endpoints
         String requestPath = request.getRequestURI();
-        if (requestPath.startsWith("/api/auth/") || 
-            requestPath.startsWith("/api/citizens/") || 
-            requestPath.startsWith("/api/city-authorities/") || 
-            requestPath.startsWith("/api/drivers/") || 
-            requestPath.startsWith("/api/waste-collection-staff/")) {
+        if (requestPath.startsWith("/api/auth/") ||
+                requestPath.startsWith("/api/citizens/") ||
+                requestPath.startsWith("/api/city-authorities/") ||
+                requestPath.startsWith("/api/drivers/") ||
+                requestPath.startsWith("/api/waste-collection-staff/")) {
             filterChain.doFilter(request, response);
             return;
         }
-        
+
         String token = null;
         String email = null;
 
@@ -79,7 +79,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                         userDetails, null, userDetails.getAuthorities());
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                
+
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }
         }
