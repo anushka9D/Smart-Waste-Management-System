@@ -28,10 +28,10 @@ public class CitizenService {
 
         Citizen citizen = new Citizen();
         citizen.setName(request.getName());
-        citizen.setEmail(request.getEmail()); // This is now directly on Citizen
+        citizen.setEmail(request.getEmail());
         citizen.setPhone(request.getPhone());
         citizen.setPassword(passwordEncoder.encode(request.getPassword()));
-        citizen.setUserType(request.getUserType());
+        citizen.setUserType("CITIZEN");
         citizen.setAge(request.getAge());
         citizen.setCreatedAt(LocalDateTime.now());
         citizen.setUpdatedAt(LocalDateTime.now());
@@ -64,9 +64,8 @@ public class CitizenService {
         if (existingCitizen.isPresent()) {
             Citizen citizen = existingCitizen.get();
             citizen.setName(request.getName());
-            citizen.setEmail(request.getEmail()); // This is now directly on Citizen
+            citizen.setEmail(request.getEmail());
             citizen.setPhone(request.getPhone());
-            citizen.setUserType(request.getUserType());
             citizen.setAge(request.getAge());
             citizen.setUpdatedAt(LocalDateTime.now());
             

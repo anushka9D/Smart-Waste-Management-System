@@ -18,8 +18,8 @@ public class Driver extends User {
     
     // Constructor
     public Driver(String userId, String name, String email, String phone, String password, 
-                 String licenseNumber, String vehicleType) {
-        super(userId, name, email, phone, password, java.time.LocalDateTime.now(), 
+                 String userType, String licenseNumber, String vehicleType) {
+        super(userId, name, email, phone, password, userType, java.time.LocalDateTime.now(), 
               java.time.LocalDateTime.now(), true);
         this.licenseNumber = licenseNumber;
         this.vehicleType = vehicleType;

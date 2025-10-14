@@ -33,6 +33,7 @@ public class DriverService {
         driver.setEmail(request.getEmail());
         driver.setPhone(request.getPhone());
         driver.setPassword(passwordEncoder.encode(request.getPassword()));
+        driver.setUserType("DRIVER");
         driver.setLicenseNumber(request.getLicenseNumber());
         driver.setVehicleType(request.getVehicleType());
         driver.setCreatedAt(LocalDateTime.now());

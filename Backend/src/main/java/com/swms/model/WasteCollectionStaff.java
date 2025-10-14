@@ -18,8 +18,8 @@ public class WasteCollectionStaff extends User {
     
     // Constructor
     public WasteCollectionStaff(String userId, String name, String email, String phone, String password, 
-                               String employeeId, String routeArea) {
-        super(userId, name, email, phone, password, java.time.LocalDateTime.now(), 
+                               String userType, String employeeId, String routeArea) {
+        super(userId, name, email, phone, password, userType, java.time.LocalDateTime.now(), 
               java.time.LocalDateTime.now(), true);
         this.employeeId = employeeId;
         this.routeArea = routeArea;

@@ -3,7 +3,7 @@ package com.swms.dto;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 
-public class CitizenRequest {
+public class SensorManagerRequest {
     @NotBlank(message = "Name is required")
     private String name;
     
@@ -16,11 +16,15 @@ public class CitizenRequest {
     
     @NotBlank(message = "Password is required")
     private String password;
-      
-    private int age;
+    
+    @NotBlank(message = "Employee ID is required")
+    private String employeeId;
+    
+    @NotBlank(message = "Assigned zone is required")
+    private String assignedZone;
 
     // Default constructor
-    public CitizenRequest() {
+    public SensorManagerRequest() {
     }
 
     // Getters
@@ -40,8 +44,12 @@ public class CitizenRequest {
         return password;
     }
 
-    public int getAge() {
-        return age;
+    public String getEmployeeId() {
+        return employeeId;
+    }
+
+    public String getAssignedZone() {
+        return assignedZone;
     }
 
     // Setters
@@ -61,7 +69,11 @@ public class CitizenRequest {
         this.password = password;
     }
 
-    public void setAge(int age) {
-        this.age = age;
+    public void setEmployeeId(String employeeId) {
+        this.employeeId = employeeId;
+    }
+
+    public void setAssignedZone(String assignedZone) {
+        this.assignedZone = assignedZone;
     }
 }
