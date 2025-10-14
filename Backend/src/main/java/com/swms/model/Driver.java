@@ -3,6 +3,8 @@ package com.swms.model;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.time.LocalDateTime;
+
 @Document(collection = "drivers")
 public class Driver extends User {
     
@@ -10,6 +12,12 @@ public class Driver extends User {
     private String licenseNumber;
     
     private String vehicleType;
+    
+    private boolean availability = true; // true = available, false = unavailable
+    
+    private String currentRouteId; // null if not assigned to any route
+    
+    private LocalDateTime lastUpdated;
     
     // Default constructor
     public Driver() {
@@ -23,6 +31,8 @@ public class Driver extends User {
               java.time.LocalDateTime.now(), true);
         this.licenseNumber = licenseNumber;
         this.vehicleType = vehicleType;
+        this.availability = true;
+        this.lastUpdated = java.time.LocalDateTime.now();
     }
     
     // Getters
@@ -34,6 +44,18 @@ public class Driver extends User {
         return vehicleType;
     }
     
+    public boolean isAvailability() {
+        return availability;
+    }
+    
+    public String getCurrentRouteId() {
+        return currentRouteId;
+    }
+    
+    public LocalDateTime getLastUpdated() {
+        return lastUpdated;
+    }
+    
     // Setters
     public void setLicenseNumber(String licenseNumber) {
         this.licenseNumber = licenseNumber;
@@ -41,5 +63,19 @@ public class Driver extends User {
     
     public void setVehicleType(String vehicleType) {
         this.vehicleType = vehicleType;
+    }
+    
+    public void setAvailability(boolean availability) {
+        this.availability = availability;
+        this.lastUpdated = LocalDateTime.now();
+    }
+    
+    public void setCurrentRouteId(String currentRouteId) {
+        this.currentRouteId = currentRouteId;
+        this.lastUpdated = LocalDateTime.now();
+    }
+    
+    public void setLastUpdated(LocalDateTime lastUpdated) {
+        this.lastUpdated = lastUpdated;
     }
 }

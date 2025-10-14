@@ -50,6 +50,8 @@ public class SecurityConfig {
                 .requestMatchers("/api/city-authorities/**").permitAll()
                 .requestMatchers("/api/drivers/**").permitAll()
                 .requestMatchers("/api/waste-collection-staff/**").permitAll()
+                .requestMatchers("/api/trucks/**").permitAll()
+                .requestMatchers("/api/smartbins/**").permitAll()
                 .anyRequest().authenticated()
             )
             .exceptionHandling(ex -> ex

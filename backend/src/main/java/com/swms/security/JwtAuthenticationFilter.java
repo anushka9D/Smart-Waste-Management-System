@@ -23,15 +23,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private JwtUtil jwtUtil;
 
     @Autowired
-    private CustomUserDetailsService userDetailsService;
-
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
         
         // Skip JWT processing for public endpoints
         String requestPath = request.getRequestURI();
-        if (requestPath.startsWith("/api/auth/") || 
+        if (requestPath.startsWith("/api/auth/register") || 
+            requestPath.equals("/api/auth/login") ||
+            requestPath.equals("/api/auth/validate") ||
             requestPath.startsWith("/api/citizens/") || 
             requestPath.startsWith("/api/city-authorities/") || 
             requestPath.startsWith("/api/drivers/") || 
@@ -42,8 +42,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         
         String token = null;
         String email = null;
-
-        // Try to get token from Authorization header
         String authHeader = request.getHeader("Authorization");
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             token = authHeader.substring(7);
