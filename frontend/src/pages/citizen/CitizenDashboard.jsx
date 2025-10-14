@@ -1,9 +1,11 @@
-import { useAuth } from '../context/AuthContext';
-import AuthHeader from '../components/AuthHeader';
-import AuthFooter from '../components/AuthFooter';
+import { useAuth } from '../../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
+import AuthHeader from '../../components/AuthHeader';
+import AuthFooter from '../../components/AuthFooter';
 
 function CitizenDashboard() {
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -28,24 +30,36 @@ function CitizenDashboard() {
             </div>
 
             <div className="grid md:grid-cols-2 gap-6">
-              <div className="bg-blue-50 p-6 rounded-lg">
-                <h3 className="text-lg font-semibold text-blue-800 mb-2">Report a Bin</h3>
+              <button
+                onClick={() => navigate('/citizen/report-bin-request')}
+                className="bg-blue-50 p-6 rounded-lg hover:bg-blue-100 transition text-left"
+              >
+                <h3 className="text-lg font-semibold text-blue-800 mb-2">
+                  Report Bin / Request Pickup
+                </h3>
                 <p className="text-gray-600 text-sm">Report overflowing bins in your area</p>
-              </div>
+              </button>
 
-              <div className="bg-purple-50 p-6 rounded-lg">
-                <h3 className="text-lg font-semibold text-purple-800 mb-2">Request Service</h3>
-                <p className="text-gray-600 text-sm">Request additional waste collection</p>
-              </div>
+              <button
+                onClick={() => navigate('/citizen/track-requests')}
+                className="bg-purple-50 p-6 rounded-lg hover:bg-purple-100 transition text-left"
+              >
+                <h3 className="text-lg font-semibold text-purple-800 mb-2">
+                  Track Requests
+                </h3>
+                <p className="text-gray-600 text-sm">View your submitted requests status</p>
+              </button>
 
-              <div className="bg-yellow-50 p-6 rounded-lg">
+              <div className="bg-yellow-50 p-6 rounded-lg opacity-60 cursor-not-allowed">
                 <h3 className="text-lg font-semibold text-yellow-800 mb-2">My Reports</h3>
                 <p className="text-gray-600 text-sm">View your submitted reports</p>
+                <p className="text-xs text-gray-500 mt-2 italic">Coming soon...</p>
               </div>
 
-              <div className="bg-pink-50 p-6 rounded-lg">
+              <div className="bg-pink-50 p-6 rounded-lg opacity-60 cursor-not-allowed">
                 <h3 className="text-lg font-semibold text-pink-800 mb-2">Feedback</h3>
                 <p className="text-gray-600 text-sm">Provide feedback on services</p>
+                <p className="text-xs text-gray-500 mt-2 italic">Coming soon...</p>
               </div>
             </div>
           </div>
