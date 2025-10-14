@@ -1,6 +1,5 @@
 package com.swms.model;
 
-import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
@@ -8,7 +7,6 @@ import java.time.LocalDateTime;
 @Document(collection = "citizens")
 public class Citizen extends User {
     
-    @Indexed(unique = true)
     private String userType;
     
     private int age;
@@ -41,9 +39,5 @@ public class Citizen extends User {
     
     public void setAge(int age) {
         this.age = age;
-    }
-    
-    public void submitReport() {
-        // Implementation can be added later
     }
 }

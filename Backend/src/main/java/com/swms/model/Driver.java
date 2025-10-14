@@ -11,6 +11,8 @@ public class Driver extends User {
     
     private String vehicleType;
     
+    private String userType;
+    
     // Default constructor
     public Driver() {
         super();
@@ -18,11 +20,12 @@ public class Driver extends User {
     
     // Constructor
     public Driver(String userId, String name, String email, String phone, String password, 
-                 String licenseNumber, String vehicleType) {
+                 String licenseNumber, String vehicleType, String userType) {
         super(userId, name, email, phone, password, java.time.LocalDateTime.now(), 
               java.time.LocalDateTime.now(), true);
         this.licenseNumber = licenseNumber;
         this.vehicleType = vehicleType;
+        this.userType = userType;
     }
     
     // Getters
@@ -34,6 +37,10 @@ public class Driver extends User {
         return vehicleType;
     }
     
+    public String getUserType() {
+        return userType;
+    }
+    
     // Setters
     public void setLicenseNumber(String licenseNumber) {
         this.licenseNumber = licenseNumber;
@@ -41,5 +48,9 @@ public class Driver extends User {
     
     public void setVehicleType(String vehicleType) {
         this.vehicleType = vehicleType;
+    }
+    
+    public void setUserType(String userType) {
+        this.userType = userType;
     }
 }
