@@ -101,6 +101,24 @@ public class AuthController {
         }
     }
 
+    @PostMapping("/register/sensor-manager")
+    public ResponseEntity<ApiResponse<AuthResponse>> registerSensorManager(
+            @Valid @RequestBody SensorManagerRequest request,
+            HttpServletResponse response) {
+        try {
+            AuthResponse authResponse = authService.registerSensorManager(request);
+            
+            // Set JWT in cookie
+            setJwtCookie(response, authResponse.getToken());
+            
+            return ResponseEntity.ok(ApiResponse.success("Sensor Manager registered successfully", authResponse));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(ApiResponse.error(e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(ApiResponse.error("Internal server error during registration"));
+        }
+    }
+
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<AuthResponse>> login(
             @Valid @RequestBody LoginRequest request,
@@ -115,19 +133,6 @@ public class AuthController {
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(ApiResponse.error("Invalid email or password"));
         }
-    }
-
-    @PostMapping("/logout")
-    public ResponseEntity<ApiResponse<String>> logout(HttpServletResponse response) {
-        // Clear JWT cookie
-        Cookie cookie = new Cookie("jwt", null);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(isHttpsEnabled());
-        cookie.setPath("/");
-        cookie.setMaxAge(0);
-        response.addCookie(cookie);
-
-        return ResponseEntity.ok(ApiResponse.success("Logout successful", null));
     }
 
     @GetMapping("/validate")
