@@ -25,17 +25,75 @@ public class AuthController {
     @Value("${cookie.expiration}")
     private int cookieExpiration;
 
-    @PostMapping("/register")
-    public ResponseEntity<ApiResponse<AuthResponse>> register(
+    // Citizen registration
+    @PostMapping("/register/citizen")
+    public ResponseEntity<ApiResponse<AuthResponse>> registerCitizen(
             @Valid @RequestBody CitizenRequest request,
             HttpServletResponse response) {
         try {
-            AuthResponse authResponse = authService.register(request);
+            AuthResponse authResponse = authService.registerCitizen(request);
             
             // Set JWT in cookie
             setJwtCookie(response, authResponse.getToken());
             
             return ResponseEntity.ok(ApiResponse.success("Citizen registered successfully", authResponse));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(ApiResponse.error(e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(ApiResponse.error("Internal server error during registration"));
+        }
+    }
+    
+    // City Authority registration
+    @PostMapping("/register/city-authority")
+    public ResponseEntity<ApiResponse<AuthResponse>> registerCityAuthority(
+            @Valid @RequestBody CityAuthorityRequest request,
+            HttpServletResponse response) {
+        try {
+            AuthResponse authResponse = authService.registerCityAuthority(request);
+            
+            // Set JWT in cookie
+            setJwtCookie(response, authResponse.getToken());
+            
+            return ResponseEntity.ok(ApiResponse.success("City Authority registered successfully", authResponse));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(ApiResponse.error(e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(ApiResponse.error("Internal server error during registration"));
+        }
+    }
+    
+    // Driver registration
+    @PostMapping("/register/driver")
+    public ResponseEntity<ApiResponse<AuthResponse>> registerDriver(
+            @Valid @RequestBody DriverRequest request,
+            HttpServletResponse response) {
+        try {
+            AuthResponse authResponse = authService.registerDriver(request);
+            
+            // Set JWT in cookie
+            setJwtCookie(response, authResponse.getToken());
+            
+            return ResponseEntity.ok(ApiResponse.success("Driver registered successfully", authResponse));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(ApiResponse.error(e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(ApiResponse.error("Internal server error during registration"));
+        }
+    }
+    
+    // Waste Collection Staff registration
+    @PostMapping("/register/waste-collection-staff")
+    public ResponseEntity<ApiResponse<AuthResponse>> registerWasteCollectionStaff(
+            @Valid @RequestBody WasteCollectionStaffRequest request,
+            HttpServletResponse response) {
+        try {
+            AuthResponse authResponse = authService.registerWasteCollectionStaff(request);
+            
+            // Set JWT in cookie
+            setJwtCookie(response, authResponse.getToken());
+            
+            return ResponseEntity.ok(ApiResponse.success("Waste Collection Staff registered successfully", authResponse));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(ApiResponse.error(e.getMessage()));
         } catch (Exception e) {
