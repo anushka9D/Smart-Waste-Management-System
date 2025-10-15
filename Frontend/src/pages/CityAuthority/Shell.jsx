@@ -2,6 +2,7 @@ import React from 'react'
 import { Menu, X, FileText, BarChart3, Settings, LayoutDashboard } from "lucide-react";
 import { useState } from 'react';
 import { Link, NavLink, Outlet } from 'react-router-dom';
+import AuthHeader from '../../components/AuthHeader';
 
 function Shell() {
 
@@ -18,8 +19,10 @@ function Shell() {
 
 
     return (
-        <section className='h-screen flex'>
-
+        <>
+        <AuthHeader/>
+         <section className='min-h-screen flex'>
+           
             {/* side bar */}
             <div className={`relative rounded-r-2xl bg-[#E9FFDB]  h-screen overflow-hidden space-y-6 pt-4
                     transition-[width] duration-300 ease-out 
@@ -103,7 +106,7 @@ function Shell() {
 
             {/* page content */}
 
-            <div className=' h-screen w-full relative'>
+            <div className=' min-h-screen w-full relative'>
 
                 {isOpen &&
                     <div
@@ -121,6 +124,8 @@ function Shell() {
 
 
         </section>
+        </>
+       
 
     )
 }

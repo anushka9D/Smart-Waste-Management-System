@@ -19,10 +19,13 @@ import Analytics from './pages/CityAuthority/Analytics'
 import Settings from './pages/CityAuthority/Settings'
 import Dashboard from './pages/CityAuthority/Dashboard'
 
+
+
 function App() {
   return (
     <AuthProvider>
       <Router>
+
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<Home />} />
