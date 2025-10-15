@@ -1,6 +1,6 @@
-package com.swms.repository;
+package com.swms.repository.citizen;
 
-import com.swms.model.Citizen;
+import com.swms.model.citizen.Citizen;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 

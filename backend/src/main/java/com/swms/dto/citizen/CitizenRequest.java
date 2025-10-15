@@ -1,4 +1,4 @@
-package com.swms.dto;
+package com.swms.dto.citizen;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

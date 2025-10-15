@@ -1,8 +1,8 @@
-package com.swms.service;
+package com.swms.service.citizen;
 
-import com.swms.dto.CitizenRequest;
-import com.swms.model.Citizen;
-import com.swms.repository.CitizenRepository;
+import com.swms.dto.citizen.CitizenRequest;
+import com.swms.model.citizen.Citizen;
+import com.swms.repository.citizen.CitizenRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;

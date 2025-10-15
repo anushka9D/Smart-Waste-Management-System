@@ -1,5 +1,6 @@
-package com.swms.model;
+package com.swms.model.citizen;
 
+import com.swms.model.*;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;

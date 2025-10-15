@@ -1,6 +1,7 @@
 package com.swms.controller;
 
 import com.swms.dto.*;
+import com.swms.dto.citizen.*;
 import com.swms.security.JwtUtil;
 import com.swms.service.AuthService;
 import jakarta.servlet.http.Cookie;
