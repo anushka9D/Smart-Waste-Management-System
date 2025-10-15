@@ -1,8 +1,8 @@
-import { useAuth } from '../context/AuthContext';
-import AuthHeader from '../components/AuthHeader';
-import AuthFooter from '../components/AuthFooter';
+import { useAuth } from '../../context/AuthContext';
+import AuthHeader from '../../components/AuthHeader';
+import AuthFooter from '../../components/AuthFooter';
 import { useState, useEffect } from 'react';
-import { getRoutePreview, getSuitableTrucks, getAvailableDrivers, getAvailableStaff, createRouteWithResources } from '../services/api';
+import { getRoutePreview, getSuitableTrucks, getAvailableDrivers, getAvailableStaff, createRouteWithResources } from '../../services/api';
 import { Link } from 'react-router-dom';
 
 function CityAuthorityDashboard() {
