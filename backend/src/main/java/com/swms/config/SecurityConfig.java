@@ -50,6 +50,10 @@ public class SecurityConfig {
                         .requestMatchers("/api/waste-collection-staff/**").permitAll()
                         .requestMatchers("/api/auth/register/sensor-manager").permitAll()
                         .requestMatchers("/api/sensor-managers/**").permitAll()
+                        .requestMatchers("/api/routes/preview").permitAll()
+                        .requestMatchers("/api/routes/create/**").permitAll()
+                        .requestMatchers("/api/routes/create").permitAll()
+                        .requestMatchers("/api/routes/assigned").permitAll()
                         .anyRequest().authenticated())
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint(jwtAuthenticationEntryPoint))

@@ -19,6 +19,9 @@ public interface TruckRepository extends MongoRepository<Truck, String> {
     // Find available trucks
     List<Truck> findByCurrentStatusAndAssignedDriverIdIsNull(String status);
     
+    // Find trucks by status and minimum capacity
+    List<Truck> findByCurrentStatusAndCapacityGreaterThanEqual(String status, double capacity);
+    
     // Find trucks assigned to a driver
     List<Truck> findByAssignedDriverId(String driverId);
     

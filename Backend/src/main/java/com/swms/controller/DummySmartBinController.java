@@ -1,9 +1,12 @@
 package com.swms.controller;
 
 import com.swms.dto.ApiResponse;
-import com.swms.dto.SmartBinRequest;
-import com.swms.model.SmartBin;
-import com.swms.service.SmartBinService;
+// Changed import from SmartBinRequest to DummySmartBinRequest
+import com.swms.dto.DummySmartBinRequest;
+// Changed import from SmartBin to DummySmartBin
+import com.swms.model.DummySmartBin;
+// Changed import from SmartBinService to DummySmartBinService
+import com.swms.service.DummySmartBinService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,19 +19,23 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api/smartbins")
 @CrossOrigin(originPatterns = "*", maxAge = 3600)
-public class SmartBinController {
+public class DummySmartBinController {
 
-    private final SmartBinService smartBinService;
+    // Changed type from SmartBinService to DummySmartBinService
+    private final DummySmartBinService smartBinService;
 
     @Autowired
-    public SmartBinController(SmartBinService smartBinService) {
+    // Changed parameter type from SmartBinService to DummySmartBinService
+    public DummySmartBinController(DummySmartBinService smartBinService) {
         this.smartBinService = smartBinService;
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse<String>> createSmartBin(@RequestBody SmartBinRequest request) {
+    // Changed parameter type from SmartBinRequest to DummySmartBinRequest
+    public ResponseEntity<ApiResponse<String>> createSmartBin(@RequestBody DummySmartBinRequest request) {
         try {
-            SmartBin smartBin = convertToEntity(request);
+            // Changed method call from convertToEntity to convertToEntity
+            DummySmartBin smartBin = convertToEntity(request);
             String result = smartBinService.saveSmartBin(smartBin);
             return ResponseEntity.ok(ApiResponse.success(result, null));
         } catch (Exception e) {
@@ -37,9 +44,10 @@ public class SmartBinController {
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<SmartBin>>> getAllSmartBins() {
+    public ResponseEntity<ApiResponse<List<DummySmartBin>>> getAllSmartBins() {
         try {
-            List<SmartBin> smartBins = smartBinService.getAllSmartBins();
+            // Changed return type from List<SmartBin> to List<DummySmartBin>
+            List<DummySmartBin> smartBins = smartBinService.getAllSmartBins();
             return ResponseEntity.ok(ApiResponse.success("Smart bins retrieved successfully", smartBins));
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(ApiResponse.error("Failed to retrieve smart bins: " + e.getMessage()));
@@ -47,9 +55,10 @@ public class SmartBinController {
     }
     
     @GetMapping("/{binId}")
-    public ResponseEntity<ApiResponse<SmartBin>> getSmartBinById(@PathVariable String binId) {
+    public ResponseEntity<ApiResponse<DummySmartBin>> getSmartBinById(@PathVariable String binId) {
         try {
-            Optional<SmartBin> smartBin = smartBinService.getSmartBinById(binId);
+            // Changed return type from Optional<SmartBin> to Optional<DummySmartBin>
+            Optional<DummySmartBin> smartBin = smartBinService.getSmartBinById(binId);
             if (smartBin.isPresent()) {
                 return ResponseEntity.ok(ApiResponse.success("Smart bin found", smartBin.get()));
             }
@@ -60,9 +69,10 @@ public class SmartBinController {
     }
     
     @GetMapping("/location/{location}")
-    public ResponseEntity<ApiResponse<List<SmartBin>>> getSmartBinsByLocation(@PathVariable String location) {
+    public ResponseEntity<ApiResponse<List<DummySmartBin>>> getSmartBinsByLocation(@PathVariable String location) {
         try {
-            List<SmartBin> smartBins = smartBinService.getSmartBinsByLocation(location);
+            // Changed return type from List<SmartBin> to List<DummySmartBin>
+            List<DummySmartBin> smartBins = smartBinService.getSmartBinsByLocation(location);
             return ResponseEntity.ok(ApiResponse.success("Smart bins retrieved successfully", smartBins));
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(ApiResponse.error("Failed to retrieve smart bins: " + e.getMessage()));
@@ -70,9 +80,10 @@ public class SmartBinController {
     }
     
     @GetMapping("/status/{status}")
-    public ResponseEntity<ApiResponse<List<SmartBin>>> getSmartBinsByStatus(@PathVariable String status) {
+    public ResponseEntity<ApiResponse<List<DummySmartBin>>> getSmartBinsByStatus(@PathVariable String status) {
         try {
-            List<SmartBin> smartBins = smartBinService.getSmartBinsByStatus(status);
+            // Changed return type from List<SmartBin> to List<DummySmartBin>
+            List<DummySmartBin> smartBins = smartBinService.getSmartBinsByStatus(status);
             return ResponseEntity.ok(ApiResponse.success("Smart bins retrieved successfully", smartBins));
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(ApiResponse.error("Failed to retrieve smart bins: " + e.getMessage()));
@@ -80,9 +91,11 @@ public class SmartBinController {
     }
     
     @PutMapping("/{binId}")
-    public ResponseEntity<ApiResponse<String>> updateSmartBin(@PathVariable String binId, @RequestBody SmartBinRequest request) {
+    // Changed parameter type from SmartBinRequest to DummySmartBinRequest
+    public ResponseEntity<ApiResponse<String>> updateSmartBin(@PathVariable String binId, @RequestBody DummySmartBinRequest request) {
         try {
-            SmartBin smartBin = convertToEntity(request);
+            // Changed method call from convertToEntity to convertToEntity
+            DummySmartBin smartBin = convertToEntity(request);
             String result = smartBinService.updateSmartBin(binId, smartBin);
             return ResponseEntity.ok(ApiResponse.success(result, null));
         } catch (Exception e) {
@@ -101,12 +114,14 @@ public class SmartBinController {
     }
     
     /**
-     * Converts SmartBinRequest DTO to SmartBin entity
+     * Converts DummySmartBinRequest DTO to DummySmartBin entity
      * @param request The DTO to convert
      * @return The corresponding entity
      */
-    private SmartBin convertToEntity(SmartBinRequest request) {
-        SmartBin smartBin = new SmartBin();
+    // Changed parameter type from SmartBinRequest to DummySmartBinRequest
+    // Changed return type from SmartBin to DummySmartBin
+    private DummySmartBin convertToEntity(DummySmartBinRequest request) {
+        DummySmartBin smartBin = new DummySmartBin();
         smartBin.setBinId(request.getBinId());
         smartBin.setLocation(request.getLocation());
         smartBin.setCoordinates(request.getCoordinates());

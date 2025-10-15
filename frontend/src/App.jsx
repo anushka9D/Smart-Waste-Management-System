@@ -11,6 +11,7 @@ import CityAuthorityDashboard from './pages/CityAuthorityDashboard';
 import DriverDashboard from './pages/DriverDashboard';
 import WasteCollectionStaffDashboard from './pages/WasteCollectionStaffDashboard';
 import SensorManagerDashboard from './pages/SensorManagerDashboard';
+import AssignedRoutes from './pages/AssignedRoutes';
 
 function App() {
   return (
@@ -36,6 +37,14 @@ function App() {
             element={
               <PrivateRoute allowedUserTypes={['CITY_AUTHORITY']}>
                 <CityAuthorityDashboard />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/assigned-routes"
+            element={
+              <PrivateRoute allowedUserTypes={['CITY_AUTHORITY']}>
+                <AssignedRoutes />
               </PrivateRoute>
             }
           />

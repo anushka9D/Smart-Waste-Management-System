@@ -57,6 +57,67 @@ public class RouteService {
     }
     
     /**
+     * Assigns specific truck, driver, and staff to a route
+     * @param route The route to assign resources to
+     * @param truckId The truck ID to assign
+     * @param driverId The driver ID to assign
+     * @param staffIds The staff IDs to assign
+     */
+    public void assignSpecificResourcesToRoute(CollectionRoute route, String truckId, String driverId, List<String> staffIds) {
+        // Assign truck
+        if (truckId != null) {
+            Optional<Truck> truckOpt = truckRepository.findById(truckId);
+            if (truckOpt.isPresent()) {
+                Truck truck = truckOpt.get();
+                route.setAssignedTruckId(truck.getTruckId());
+                truck.setCurrentStatus("IN_USE");
+                truck.setAssignedDriverId(driverId); // Link truck to driver
+                truckRepository.save(truck);
+            }
+        }
+        
+        // Assign driver
+        if (driverId != null) {
+            Optional<Driver> driverOpt = driverRepository.findById(driverId);
+            if (driverOpt.isPresent()) {
+                Driver driver = driverOpt.get();
+                route.setAssignedDriverId(driver.getUserId());
+                driver.setAvailability(false);
+                driver.setCurrentRouteId(route.getRouteId());
+                driverRepository.save(driver);
+            }
+        }
+        
+        // Assign staff
+        if (staffIds != null && !staffIds.isEmpty()) {
+            route.setAssignedStaffIds(staffIds);
+            
+            // Update staff availability
+            for (String staffId : staffIds) {
+                Optional<WasteCollectionStaff> staffOpt = wasteCollectionStaffRepository.findById(staffId);
+                if (staffOpt.isPresent()) {
+                    WasteCollectionStaff staff = staffOpt.get();
+                    staff.setAvailability(false);
+                    staff.setCurrentRouteId(route.getRouteId());
+                    wasteCollectionStaffRepository.save(staff);
+                }
+            }
+        }
+        
+        // Update route status
+        route.setStatus("ASSIGNED");
+        route.setUpdatedAt(LocalDateTime.now());
+        collectionRouteRepository.save(route);
+    }
+    
+    /**
+     * Get all assigned routes
+     */
+    public List<CollectionRoute> getAssignedRoutes() {
+        return collectionRouteRepository.findByStatus("ASSIGNED");
+    }
+    
+    /**
      * Get routes assigned to a specific driver
      * @param driverId The driver ID
      * @return List of CollectionRoute entities

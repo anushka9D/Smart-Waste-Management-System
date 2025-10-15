@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 public class RouteOptimizationService {
     
     @Autowired
-    private SmartBinRepository smartBinRepository;
+    private DummySmartBinRepository smartBinRepository;
     
     @Autowired
     private TruckRepository truckRepository;
@@ -33,14 +33,55 @@ public class RouteOptimizationService {
     
     private static final double EARTH_RADIUS = 6371; // Earth radius in kilometers
     
+    // Expose the repositories for access in the controller
+    public DummySmartBinRepository getDummySmartBinRepository() {
+        return smartBinRepository;
+    }
+    
+    public TruckRepository getTruckRepository() {
+        return truckRepository;
+    }
+    
+    public DriverRepository getDriverRepository() {
+        return driverRepository;
+    }
+    
+    public WasteCollectionStaffRepository getWasteCollectionStaffRepository() {
+        return wasteCollectionStaffRepository;
+    }
+    
     /**
      * Fetches bins that need collection (status = 'full')
      * @return List of SmartBin entities that are full (>80% filled)
      */
-    public List<SmartBin> getBinsNeedingCollection() {
+    public List<DummySmartBin> getBinsNeedingCollection() {
         // In a real implementation, this would call the Smart Bin API
         // For now, we'll query the repository directly
         return smartBinRepository.findByStatus("full");
+    }
+    
+    /**
+     * Get all trucks in the system
+     * @return List of all Truck entities
+     */
+    public List<Truck> getAllTrucks() {
+        return truckRepository.findAll();
+    }
+    
+    /**
+     * Get all drivers in the system
+     * @return List of all Driver entities
+     */
+    public List<Driver> getAllDrivers() {
+        return driverRepository.findAll();
+    }
+    
+    /**
+     * Get all waste collection staff in the system
+     * @return List of all WasteCollectionStaff entities
+     */
+    public List<WasteCollectionStaff> getAllStaff() {
+        return wasteCollectionStaffRepository.findAll();
     }
     
     /**
@@ -72,7 +113,7 @@ public class RouteOptimizationService {
      * @param depot Starting location (usually the waste management facility)
      * @return Optimized list of route stops
      */
-    public List<RouteStop> calculateNearestNeighborRoute(List<SmartBin> bins, GPSLocation depot) {
+    public List<RouteStop> calculateNearestNeighborRoute(List<DummySmartBin> bins, GPSLocation depot) {
         List<RouteStop> routeStops = new ArrayList<>();
         
         if (bins.isEmpty()) {
@@ -80,16 +121,16 @@ public class RouteOptimizationService {
         }
         
         // Create a copy of bins to track unvisited bins
-        List<SmartBin> unvisitedBins = new ArrayList<>(bins);
+        List<DummySmartBin> unvisitedBins = new ArrayList<>(bins);
         GPSLocation currentLocation = depot;
         
         // Continue until all bins are visited
         while (!unvisitedBins.isEmpty()) {
-            SmartBin nearestBin = null;
+            DummySmartBin nearestBin = null;
             double minDistance = Double.MAX_VALUE;
             
             // Find the nearest unvisited bin
-            for (SmartBin bin : unvisitedBins) {
+            for (DummySmartBin bin : unvisitedBins) {
                 double distance = calculateDistance(currentLocation, bin.getCoordinates());
                 if (distance < minDistance) {
                     minDistance = distance;
@@ -185,7 +226,7 @@ public class RouteOptimizationService {
      * @param depot Starting location
      * @return Created CollectionRoute entity
      */
-    public CollectionRoute createOptimizedRoute(List<SmartBin> bins, GPSLocation depot) {
+    public CollectionRoute createOptimizedRoute(List<DummySmartBin> bins, GPSLocation depot) {
         // Calculate optimized route using Nearest Neighbor Algorithm
         List<RouteStop> routeStops = calculateNearestNeighborRoute(bins, depot);
         

@@ -1,7 +1,9 @@
 package com.swms.service;
 
-import com.swms.model.SmartBin;
-import com.swms.repository.SmartBinRepository;
+// Changed import from SmartBin to DummySmartBin
+import com.swms.model.DummySmartBin;
+// Changed import from SmartBinRepository to DummySmartBinRepository
+import com.swms.repository.DummySmartBinRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -9,45 +11,52 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class SmartBinService {
+public class DummySmartBinService {
 
     @Autowired
-    private SmartBinRepository smartBinRepository;
+    // Changed type from SmartBinRepository to DummySmartBinRepository
+    private DummySmartBinRepository smartBinRepository;
 
-    public List<SmartBin> getAllSmartBins() {
-        List<SmartBin> smartBins = smartBinRepository.findAll();
+    // Changed return type from List<SmartBin> to List<DummySmartBin>
+    public List<DummySmartBin> getAllSmartBins() {
+        List<DummySmartBin> smartBins = smartBinRepository.findAll();
         // Update status based on current level before returning
         smartBins.forEach(this::updateBinStatus);
         return smartBins;
     }
     
-    public Optional<SmartBin> getSmartBinById(String binId) {
-        Optional<SmartBin> smartBin = smartBinRepository.findById(binId);
+    // Changed return type from Optional<SmartBin> to Optional<DummySmartBin>
+    public Optional<DummySmartBin> getSmartBinById(String binId) {
+        Optional<DummySmartBin> smartBin = smartBinRepository.findById(binId);
         // Update status based on current level before returning
         smartBin.ifPresent(this::updateBinStatus);
         return smartBin;
     }
     
-    public List<SmartBin> getSmartBinsByLocation(String location) {
-        List<SmartBin> smartBins = smartBinRepository.findByLocation(location);
+    // Changed return type from List<SmartBin> to List<DummySmartBin>
+    public List<DummySmartBin> getSmartBinsByLocation(String location) {
+        List<DummySmartBin> smartBins = smartBinRepository.findByLocation(location);
         // Update status based on current level before returning
         smartBins.forEach(this::updateBinStatus);
         return smartBins;
     }
     
-    public List<SmartBin> getSmartBinsByStatus(String status) {
+    // Changed return type from List<SmartBin> to List<DummySmartBin>
+    public List<DummySmartBin> getSmartBinsByStatus(String status) {
         return smartBinRepository.findByStatus(status);
     }
     
-    public String saveSmartBin(SmartBin smartBin) {
+    // Changed parameter type from SmartBin to DummySmartBin
+    public String saveSmartBin(DummySmartBin smartBin) {
         // Calculate and set status based on current level
         updateBinStatus(smartBin);
-        SmartBin savedBin = smartBinRepository.save(smartBin);
+        DummySmartBin savedBin = smartBinRepository.save(smartBin);
         return "Smart bin created with ID: " + savedBin.getBinId();
     }
     
-    public String updateSmartBin(String binId, SmartBin smartBin) {
-        Optional<SmartBin> existingBin = smartBinRepository.findById(binId);
+    // Changed parameter type from SmartBin to DummySmartBin
+    public String updateSmartBin(String binId, DummySmartBin smartBin) {
+        Optional<DummySmartBin> existingBin = smartBinRepository.findById(binId);
         
         if (existingBin.isPresent()) {
             // Calculate and set status based on current level
@@ -73,7 +82,8 @@ public class SmartBinService {
      * Updates the status of a smart bin based on its current fill level
      * @param bin The smart bin to update
      */
-    private void updateBinStatus(SmartBin bin) {
+    // Changed parameter type from SmartBin to DummySmartBin
+    private void updateBinStatus(DummySmartBin bin) {
         double fillPercentage = (bin.getCurrentLevel() / bin.getCapacity()) * 100;
         
         if (fillPercentage > 80) {

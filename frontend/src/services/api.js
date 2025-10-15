@@ -59,4 +59,34 @@ export const validateToken = async (token) => {
   }
 };
 
+// Get route preview
+export const getRoutePreview = async () => {
+  const response = await api.get('/routes/preview');
+  return response.data;
+};
+
+// Get suitable trucks for a route
+export const getSuitableTrucks = async (requiredCapacity) => {
+  const response = await api.get(`/routes/suitable-trucks?requiredCapacity=${requiredCapacity}`);
+  return response.data;
+};
+
+// Get available drivers
+export const getAvailableDrivers = async () => {
+  const response = await api.get('/routes/available-drivers');
+  return response.data;
+};
+
+// Get available staff
+export const getAvailableStaff = async () => {
+  const response = await api.get('/routes/available-staff');
+  return response.data;
+};
+
+// Create route with selected resources
+export const createRouteWithResources = async (routeIndex, resources) => {
+  const response = await api.post(`/routes/create-with-resources/${routeIndex}`, resources);
+  return response.data;
+};
+
 export default api;

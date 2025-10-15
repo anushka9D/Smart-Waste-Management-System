@@ -2,7 +2,8 @@ package com.swms.dto;
 
 import com.swms.model.GPSLocation;
 
-public class SmartBinRequest {
+// Changed class name from SmartBinRequest to DummySmartBinRequest to match filename
+public class DummySmartBinRequest {
     private String binId;
     private String location;
     private GPSLocation coordinates;
@@ -11,7 +12,7 @@ public class SmartBinRequest {
     private String lastCollected; // As string for easier JSON parsing
     
     // Default constructor
-    public SmartBinRequest() {
+    public DummySmartBinRequest() {
     }
     
     // Getters

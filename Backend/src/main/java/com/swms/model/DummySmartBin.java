@@ -6,7 +6,8 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import java.time.LocalDateTime;
 
 @Document(collection = "DummySmartBin")
-public class SmartBin {
+// Changed class name from SmartBin to DummySmartBin to match filename
+public class DummySmartBin {
     
     @Id
     private String binId;
@@ -24,11 +25,11 @@ public class SmartBin {
     private LocalDateTime lastCollected;
     
     // Default constructor
-    public SmartBin() {
+    public DummySmartBin() {
     }
     
     // Constructor with all fields
-    public SmartBin(String binId, String location, GPSLocation coordinates, double currentLevel, 
+    public DummySmartBin(String binId, String location, GPSLocation coordinates, double currentLevel, 
                    double capacity, String status, LocalDateTime lastCollected) {
         this.binId = binId;
         this.location = location;
