@@ -605,34 +605,32 @@ public class RouteController {
     }
     
     /**
-     * Get available drivers
+     * Get all drivers
      */
     @GetMapping("/available-drivers")
     public ResponseEntity<ApiResponse<List<Driver>>> getAvailableDriversEndpoint() {
         try {
-            List<Driver> availableDrivers = routeOptimizationService.getDriverRepository()
-                .findByAvailabilityTrueAndCurrentRouteIdIsNull();
+            List<Driver> allDrivers = routeOptimizationService.getDriverRepository().findAll();
             
-            return ResponseEntity.ok(ApiResponse.success("Available drivers retrieved successfully", availableDrivers));
+            return ResponseEntity.ok(ApiResponse.success("All drivers retrieved successfully", allDrivers));
         } catch (Exception e) {
             return ResponseEntity.internalServerError()
-                .body(ApiResponse.error("Failed to retrieve available drivers: " + e.getMessage()));
+                .body(ApiResponse.error("Failed to retrieve drivers: " + e.getMessage()));
         }
     }
     
     /**
-     * Get available waste collection staff
+     * Get all waste collection staff
      */
     @GetMapping("/available-staff")
     public ResponseEntity<ApiResponse<List<WasteCollectionStaff>>> getAvailableStaffEndpoint() {
         try {
-            List<WasteCollectionStaff> availableStaff = routeOptimizationService.getWasteCollectionStaffRepository()
-                .findByAvailabilityTrueAndCurrentRouteIdIsNull();
+            List<WasteCollectionStaff> allStaff = routeOptimizationService.getWasteCollectionStaffRepository().findAll();
             
-            return ResponseEntity.ok(ApiResponse.success("Available staff retrieved successfully", availableStaff));
+            return ResponseEntity.ok(ApiResponse.success("All staff retrieved successfully", allStaff));
         } catch (Exception e) {
             return ResponseEntity.internalServerError()
-                .body(ApiResponse.error("Failed to retrieve available staff: " + e.getMessage()));
+                .body(ApiResponse.error("Failed to retrieve staff: " + e.getMessage()));
         }
     }
     
