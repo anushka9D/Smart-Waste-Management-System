@@ -1,30 +1,45 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AuthHeader from '../../components/AuthHeader';
 import AuthFooter from '../../components/AuthFooter';
+import { createWasteRequest } from '../../services/api.js';
 
 function ReportBinForm() {
   const [formData, setFormData] = useState({
     category: '',
-    otherCategory: '',
     description: '',
-    binId: '',
-    photo: null,
-    photoPreview: null
+    address: '',
+    latitude: '',
+    longitude: '',
+    binId: ''
   });
+  const [photo, setPhoto] = useState(null);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  useEffect(() => {
+    // Get location data from previous step
+    const savedLocation = localStorage.getItem('selectedLocation');
+    if (savedLocation) {
+      const location = JSON.parse(savedLocation);
+      setFormData(prev => ({
+        ...prev,
+        address: location.address,
+        latitude: location.latitude,
+        longitude: location.longitude
+      }));
+    }
+  }, []);
+
   const categories = [
-    'Overflowing Bin',
-    'Damaged Bin',
-    'Missing Bin',
-    'Illegal Dumping',
-    'Regular Pickup Request',
-    'Other'
+    { value: 'GENERAL_WASTE', displayName: 'General Waste' },
+    { value: 'RECYCLABLE', displayName: 'Recyclable Materials' },
+    { value: 'ORGANIC', displayName: 'Organic Waste' },
+    { value: 'HAZARDOUS', displayName: 'Hazardous Waste' },
+    { value: 'BULKY', displayName: 'Bulky Items' }
   ];
 
-  const handleChange = (e) => {
+  const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
@@ -35,51 +50,59 @@ function ReportBinForm() {
   const handlePhotoChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        alert('File size should be less than 5MB');
+      // Validate file type and size
+      if (!file.type.startsWith('image/')) {
+        alert('Please select an image file');
         return;
       }
-
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setFormData(prev => ({
-          ...prev,
-          photo: file,
-          photoPreview: reader.result
-        }));
-      };
-      reader.readAsDataURL(file);
+      if (file.size > 5 * 1024 * 1024) { // 5MB limit
+        alert('Image size should be less than 5MB');
+        return;
+      }
+      setPhoto(file);
     }
-  };
-
-  const removePhoto = () => {
-    setFormData(prev => ({
-      ...prev,
-      photo: null,
-      photoPreview: null
-    }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
 
-    // Simulate API call
+    if (!formData.category || !formData.description || !formData.address) {
+      alert('Please fill in all required fields');
+      return;
+    }
+
+    setLoading(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // For now, just navigate to confirmation
-      navigate('/citizen/report-confirmation', {
-        state: {
-          requestData: {
-            ...formData,
-            requestId: `REQ-${Date.now()}`,
-            location: JSON.parse(localStorage.getItem('selectedLocation') || '{}'),
-            submittedAt: new Date().toISOString()
+      const submitData = new FormData();
+      submitData.append('category', formData.category);
+      submitData.append('description', formData.description);
+      submitData.append('address', formData.address);
+      submitData.append('latitude', formData.latitude);
+      submitData.append('longitude', formData.longitude);
+      if (formData.binId) {
+        submitData.append('binId', formData.binId);
+      }
+      if (photo) {
+        submitData.append('photo', photo);
+      }
+
+      const response = await createWasteRequest(submitData);
+
+      if (response.success) {
+        // Clear stored location
+        localStorage.removeItem('selectedLocation');
+        // Navigate to confirmation page with data
+        navigate('/citizen/confirmation', {
+          state: {
+            requestData: response.data
           }
-        }
-      });
+        });
+      }
+      else {
+        alert(response.message || 'Failed to submit request');
+      }
     } catch (error) {
+      console.error('Error submitting request:', error);
       alert('Failed to submit request. Please try again.');
     } finally {
       setLoading(false);
@@ -89,68 +112,36 @@ function ReportBinForm() {
   return (
     <div className="min-h-screen flex flex-col">
       <AuthHeader />
-      
+
       <main className="flex-grow bg-gray-50 py-8 px-4">
         <div className="container mx-auto max-w-2xl">
           <div className="bg-white rounded-lg shadow-md p-6">
-            <h1 className="text-2xl font-bold text-gray-800 mb-6">Report Bin Details</h1>
-            
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <h1 className="text-2xl font-bold text-gray-800 mb-6">Submit Waste Disposal Request</h1>
+
+            <form onSubmit={handleSubmit}>
               {/* Category */}
-              <div>
+              <div className="mb-6">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Category *
+                  Waste Category *
                 </label>
                 <select
                   name="category"
                   value={formData.category}
-                  onChange={handleChange}
+                  onChange={handleInputChange}
                   required
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                 >
                   <option value="">Select a category</option>
                   {categories.map(cat => (
-                    <option key={cat} value={cat}>{cat}</option>
+                    <option key={cat.value} value={cat.value}>
+                      {cat.displayName}
+                    </option>
                   ))}
                 </select>
               </div>
 
-              {/* Other Category Input */}
-              {formData.category === 'Other' && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Please specify *
-                  </label>
-                  <input
-                    type="text"
-                    name="otherCategory"
-                    value={formData.otherCategory}
-                    onChange={handleChange}
-                    required
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                    placeholder="Enter category"
-                  />
-                </div>
-              )}
-
-              {/* Description */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Description *
-                </label>
-                <textarea
-                  name="description"
-                  value={formData.description}
-                  onChange={handleChange}
-                  required
-                  rows="4"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  placeholder="Please provide details about the issue..."
-                />
-              </div>
-
-              {/* Bin ID */}
-              <div>
+              {/* Bin ID (Optional) */}
+              <div className="mb-6">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Bin ID (Optional)
                 </label>
@@ -158,58 +149,73 @@ function ReportBinForm() {
                   type="text"
                   name="binId"
                   value={formData.binId}
-                  onChange={handleChange}
+                  onChange={handleInputChange}
+                  placeholder="Enter bin ID if applicable"
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  placeholder="Enter bin identification number if available"
                 />
               </div>
 
+              {/* Description */}
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Description *
+                </label>
+                <textarea
+                  name="description"
+                  value={formData.description}
+                  onChange={handleInputChange}
+                  required
+                  rows="4"
+                  placeholder="Describe the waste disposal issue or request..."
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                />
+              </div>
+
+              {/* Location Display */}
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Selected Location
+                </label>
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <p className="text-sm text-gray-900">{formData.address}</p>
+                  {formData.latitude && formData.longitude && (
+                    <p className="text-xs text-gray-500 mt-1">
+                      Coordinates: {formData.latitude.toFixed(6)}, {formData.longitude.toFixed(6)}
+                    </p>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => navigate('/citizen/report-bin-request')}
+                  className="mt-2 text-sm text-green-600 hover:text-green-800"
+                >
+                  Change Location
+                </button>
+              </div>
+
               {/* Photo Upload */}
-              <div>
+              <div className="mb-6">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Photo Evidence (Optional)
                 </label>
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
-                  {formData.photoPreview ? (
-                    <div className="space-y-2">
-                      <img 
-                        src={formData.photoPreview} 
-                        alt="Preview" 
-                        className="mx-auto max-h-48 rounded-lg"
-                      />
-                      <button
-                        type="button"
-                        onClick={removePhoto}
-                        className="text-red-600 hover:text-red-700 text-sm font-medium"
-                      >
-                        Remove Photo
-                      </button>
-                    </div>
-                  ) : (
-                    <div>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handlePhotoChange}
-                        className="hidden"
-                        id="photo-upload"
-                      />
-                      <label
-                        htmlFor="photo-upload"
-                        className="cursor-pointer text-green-600 hover:text-green-700 font-medium"
-                      >
-                        Click to upload photo
-                      </label>
-                      <p className="text-xs text-gray-500 mt-1">
-                        Maximum file size: 5MB
-                      </p>
-                    </div>
-                  )}
-                </div>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handlePhotoChange}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Upload a photo of the waste issue (Max 5MB, JPG/PNG)
+                </p>
+                {photo && (
+                  <div className="mt-2">
+                    <p className="text-sm text-green-600">Selected: {photo.name}</p>
+                  </div>
+                )}
               </div>
 
               {/* Action Buttons */}
-              <div className="flex justify-between pt-6">
+              <div className="flex justify-between pt-4">
                 <button
                   type="button"
                   onClick={() => navigate('/citizen/report-bin-request')}
@@ -222,14 +228,21 @@ function ReportBinForm() {
                   disabled={loading}
                   className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition disabled:bg-gray-400"
                 >
-                  {loading ? 'Submitting...' : 'Submit Request'}
+                  {loading ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2 inline-block"></div>
+                      Submitting...
+                    </>
+                  ) : (
+                    'Submit Request'
+                  )}
                 </button>
               </div>
             </form>
           </div>
         </div>
       </main>
-      
+
       <AuthFooter />
     </div>
   );

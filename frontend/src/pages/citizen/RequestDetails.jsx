@@ -2,91 +2,77 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import AuthHeader from '../../components/AuthHeader';
 import AuthFooter from '../../components/AuthFooter';
+import { getRequestDetails, getRequestUpdates, cancelRequest } from '../../services/api';
 
 function RequestDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [request, setRequest] = useState(null);
+  const [updates, setUpdates] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Status timeline with colors and icons
+  const statusDisplay = {
+    'SUBMITTED': 'Submitted',
+    'ASSIGNED': 'Assigned',
+    'COLLECTION_SCHEDULED': 'Collection Scheduled',
+    'OUT_FOR_COLLECTION': 'Out for collection',
+    'COLLECTED': 'Collected',
+    'RESOLVED': 'Resolved',
+    'CANCELLED': 'Cancelled'
+  };
+
   const statusTimeline = [
-    { status: 'Submitted', color: 'bg-blue-500', icon: '📝' },
-    { status: 'Assigned', color: 'bg-yellow-500', icon: '👤' },
-    { status: 'Collection Scheduled', color: 'bg-purple-500', icon: '📅' },
-    { status: 'Out for collection', color: 'bg-orange-500', icon: '🚚' },
-    { status: 'Collected', color: 'bg-green-500', icon: '✅' },
-    { status: 'Resolved', color: 'bg-gray-500', icon: '🏁' }
+    { status: 'SUBMITTED', color: 'bg-blue-500', icon: '📝' },
+    { status: 'ASSIGNED', color: 'bg-yellow-500', icon: '👤' },
+    { status: 'COLLECTION_SCHEDULED', color: 'bg-purple-500', icon: '📅' },
+    { status: 'OUT_FOR_COLLECTION', color: 'bg-orange-500', icon: '🚚' },
+    { status: 'COLLECTED', color: 'bg-green-500', icon: '✅' },
+    { status: 'RESOLVED', color: 'bg-gray-500', icon: '🏁' }
   ];
 
   useEffect(() => {
-    // Generate dummy request data
-    const generateDummyRequest = () => {
-      const categories = ['Overflowing Bin', 'Damaged Bin', 'Missing Bin', 'Regular Pickup Request'];
-      const statuses = ['Submitted', 'Assigned', 'Collection Scheduled', 'Out for collection', 'Collected', 'Resolved'];
-      const currentStatus = statuses[Math.floor(Math.random() * statuses.length)];
-      const statusIndex = statuses.indexOf(currentStatus);
-
-      return {
-        id: id || 'REQ-1001',
-        category: categories[Math.floor(Math.random() * categories.length)],
-        description: `Request for ${categories[Math.floor(Math.random() * categories.length)].toLowerCase()} at specified location. The bin has been overflowing for several days and needs immediate attention.`,
-        status: currentStatus,
-        submittedAt: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString(),
-        location: {
-          address: '123 Main Street, Colombo 05',
-          latitude: 6.9271,
-          longitude: 79.8612
-        },
-        binId: Math.random() > 0.5 ? `BIN-${Math.floor(Math.random() * 1000)}` : null,
-        photo: Math.random() > 0.7 ? 'https://via.placeholder.com/400x300?text=Bin+Photo' : null,
-        updates: [
-          {
-            status: 'Submitted',
-            timestamp: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-            note: 'Request submitted successfully'
-          },
-          ...(statusIndex >= 1 ? [{
-            status: 'Assigned',
-            timestamp: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
-            note: 'Assigned to collection team A'
-          }] : []),
-          ...(statusIndex >= 2 ? [{
-            status: 'Collection Scheduled',
-            timestamp: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-            note: 'Scheduled for collection on next business day'
-          }] : []),
-          ...(statusIndex >= 3 ? [{
-            status: 'Out for collection',
-            timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-            note: 'Collection team dispatched to location'
-          }] : []),
-          ...(statusIndex >= 4 ? [{
-            status: 'Collected',
-            timestamp: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-            note: 'Waste successfully collected'
-          }] : []),
-          ...(statusIndex >= 5 ? [{
-            status: 'Resolved',
-            timestamp: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(),
-            note: 'Request completed and resolved'
-          }] : [])
-        ]
-      };
-    };
-
-    // Simulate API call
-    setTimeout(() => {
-      setRequest(generateDummyRequest());
-      setLoading(false);
-    }, 1000);
+    fetchRequestData();
   }, [id]);
 
-  const handleCancelRequest = () => {
+  const fetchRequestData = async () => {
+    try {
+      const [requestResponse, updatesResponse] = await Promise.all([
+        getRequestDetails(id),
+        getRequestUpdates(id)
+      ]);
+
+      if (requestResponse.success) {
+        setRequest(requestResponse.data);
+      } else {
+        console.error('Failed to fetch request details:', requestResponse.message);
+      }
+      
+      if (updatesResponse.success) {
+        setUpdates(updatesResponse.data);
+      } else {
+        console.error('Failed to fetch request updates:', updatesResponse.message);
+      }
+    } catch (error) {
+      console.error('Error fetching request data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCancelRequest = async () => {
     if (window.confirm('Are you sure you want to cancel this request? This action cannot be undone.')) {
-      alert('Request cancellation feature will be implemented with backend integration.');
-      // Navigate back to track requests
-      navigate('/citizen/track-requests');
+      try {
+        const response = await cancelRequest(id);
+        if (response.success) {
+          alert('Request cancelled successfully');
+          navigate('/citizen/track-requests');
+        } else {
+          alert(response.message || 'Failed to cancel request');
+        }
+      } catch (error) {
+        console.error('Error cancelling request:', error);
+        alert('Failed to cancel request');
+      }
     }
   };
 
@@ -116,7 +102,7 @@ function RequestDetails() {
               onClick={() => navigate('/citizen/track-requests')}
               className="mt-4 px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
             >
-              Back to Track Requests
+              Back to Requests
             </button>
           </div>
         </main>
@@ -125,7 +111,7 @@ function RequestDetails() {
     );
   }
 
-  const currentStatusIndex = statusTimeline.findIndex(item => item.status === request.status);
+  const currentStatusIndex = statusTimeline.findIndex(item => item.status === request?.status);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -138,7 +124,7 @@ function RequestDetails() {
             <div className="flex justify-between items-start mb-6">
               <div>
                 <h1 className="text-2xl font-bold text-gray-800">Request Details</h1>
-                <p className="text-gray-600">ID: {request.id}</p>
+                <p className="text-gray-600">ID: {request?.requestId}</p>
               </div>
               <button
                 onClick={() => navigate('/citizen/track-requests')}
@@ -157,11 +143,13 @@ function RequestDetails() {
                   <div className="grid md:grid-cols-2 gap-4 text-sm">
                     <div>
                       <span className="font-medium text-gray-700">Category:</span>
-                      <p className="text-gray-900">{request.category}</p>
+                      <p className="text-gray-900">{request.category?.displayName || request.category}</p>
                     </div>
                     <div>
                       <span className="font-medium text-gray-700">Current Status:</span>
-                      <p className="text-gray-900 font-medium">{request.status}</p>
+                      <p className="text-gray-900 font-medium">
+                        {statusDisplay[request.status] || request.status}
+                      </p>
                     </div>
                     <div>
                       <span className="font-medium text-gray-700">Submitted:</span>
@@ -181,10 +169,12 @@ function RequestDetails() {
                 {/* Location */}
                 <div className="bg-gray-50 rounded-lg p-4">
                   <h2 className="text-lg font-semibold text-gray-800 mb-3">Location</h2>
-                  <p className="text-sm text-gray-900">{request.location.address}</p>
-                  <p className="text-xs text-gray-500 mt-1">
-                    Lat: {request.location.latitude}, Lng: {request.location.longitude}
-                  </p>
+                  <p className="text-sm text-gray-900">{request.address}</p>
+                  {request.coordinates && (
+                    <p className="text-xs text-gray-500 mt-1">
+                      Lat: {request.coordinates.latitude}, Lng: {request.coordinates.longitude}
+                    </p>
+                  )}
                 </div>
 
                 {/* Description */}
@@ -194,11 +184,11 @@ function RequestDetails() {
                 </div>
 
                 {/* Photo */}
-                {request.photo && (
+                {request.photoUrl && (
                   <div className="bg-gray-50 rounded-lg p-4">
                     <h2 className="text-lg font-semibold text-gray-800 mb-3">Photo Evidence</h2>
                     <img 
-                      src={request.photo} 
+                      src={request.photoUrl} 
                       alt="Bin condition" 
                       className="rounded-lg max-w-full h-auto max-h-64"
                     />
@@ -216,31 +206,28 @@ function RequestDetails() {
                     {statusTimeline.map((item, index) => {
                       const isCompleted = index <= currentStatusIndex;
                       const isCurrent = index === currentStatusIndex;
+                      const update = updates.find(u => u.status === item.status);
                       
                       return (
                         <div key={item.status} className="flex items-start space-x-3">
-                          {/* Timeline dot */}
                           <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-white text-sm ${
                             isCompleted ? item.color : 'bg-gray-300'
                           }`}>
                             {isCompleted ? item.icon : index + 1}
                           </div>
                           
-                          {/* Content */}
                           <div className="flex-1">
                             <p className={`font-medium ${
                               isCompleted ? 'text-gray-900' : 'text-gray-400'
                             }`}>
-                              {item.status}
+                              {statusDisplay[item.status]}
                             </p>
                             {isCurrent && (
                               <p className="text-xs text-green-600 font-medium mt-1">Current Status</p>
                             )}
-                            {request.updates.find(update => update.status === item.status) && (
+                            {update && (
                               <p className="text-xs text-gray-500 mt-1">
-                                {new Date(
-                                  request.updates.find(update => update.status === item.status).timestamp
-                                ).toLocaleString()}
+                                {new Date(update.timestamp).toLocaleString()}
                               </p>
                             )}
                           </div>
@@ -254,7 +241,7 @@ function RequestDetails() {
                 <div className="bg-white border border-gray-200 rounded-lg p-4">
                   <h2 className="text-lg font-semibold text-gray-800 mb-3">Actions</h2>
                   
-                  {request.status !== 'Resolved' && request.status !== 'Collected' && (
+                  {request.status !== 'RESOLVED' && request.status !== 'COLLECTED' && request.status !== 'CANCELLED' && (
                     <button
                       onClick={handleCancelRequest}
                       className="w-full px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition text-sm font-medium"

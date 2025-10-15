@@ -5,13 +5,27 @@ import AuthFooter from '../../components/AuthFooter';
 function ReportConfirmation() {
   const location = useLocation();
   const navigate = useNavigate();
-  const requestData = location.state?.requestData || {
-    requestId: `REQ-${Date.now()}`,
-    category: 'Overflowing Bin',
-    description: 'Sample description',
-    location: { address: 'Colombo, Sri Lanka' },
-    submittedAt: new Date().toISOString()
-  };
+  const requestData = location.state?.requestData;
+
+  if (!requestData) {
+  return (
+    <div className="min-h-screen flex flex-col">
+      <AuthHeader />
+      <main className="flex-grow bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-gray-500 text-lg">No request data found.</p>
+          <button
+            onClick={() => navigate('/citizen-dashboard')}
+            className="mt-4 px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
+          >
+            Back to Dashboard
+          </button>
+        </div>
+      </main>
+      <AuthFooter />
+    </div>
+  );
+}
 
   return (
     <div className="min-h-screen flex flex-col">

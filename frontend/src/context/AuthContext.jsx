@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import { validateToken } from '../services/api';
+import { validateToken, logout as apiLogout } from '../services/api';
 
 const AuthContext = createContext(null);
 
@@ -13,7 +13,7 @@ export const AuthProvider = ({ children }) => {
 
   const checkAuth = async () => {
     try {
-      const token = getTokenFromCookie();
+      const token = localStorage.getItem('token');
       if (token) {
         const isValid = await validateToken(token);
         if (isValid) {
@@ -21,35 +21,29 @@ export const AuthProvider = ({ children }) => {
           setUser(userData);
         } else {
           setUser(null);
+          localStorage.removeItem('token');
         }
       }
     } catch (error) {
       console.error('Auth check failed:', error);
       setUser(null);
+      localStorage.removeItem('token');
     } finally {
       setLoading(false);
     }
   };
 
-  const login = (userData) => {
+  const login = (userData, token) => {
     setUser(userData);
+    if (token) {
+      localStorage.setItem('token', token);
+    }
   };
 
   const logout = () => {
     setUser(null);
-    // Clear cookie
-    document.cookie = 'jwt=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-  };
-
-  const getTokenFromCookie = () => {
-    const cookies = document.cookie.split(';');
-    for (let cookie of cookies) {
-      const [name, value] = cookie.trim().split('=');
-      if (name === 'jwt') {
-        return value;
-      }
-    }
-    return null;
+    localStorage.removeItem('token');
+    apiLogout();
   };
 
   const decodeToken = (token) => {

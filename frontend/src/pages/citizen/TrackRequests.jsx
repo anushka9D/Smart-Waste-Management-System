@@ -2,54 +2,60 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AuthHeader from '../../components/AuthHeader';
 import AuthFooter from '../../components/AuthFooter';
+import { getCitizenRequests } from '../../services/api';
 
 function TrackRequests() {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
   const requestsPerPage = 15;
   const navigate = useNavigate();
 
-  // Generate dummy data
-  useEffect(() => {
-    const generateDummyRequests = () => {
-      const categories = ['Overflowing Bin', 'Damaged Bin', 'Missing Bin', 'Regular Pickup Request'];
-      const statuses = ['Submitted', 'Assigned', 'Collection Scheduled', 'Out for collection', 'Collected', 'Resolved'];
-      
-      return Array.from({ length: 45 }, (_, i) => ({
-        id: `REQ-${1000 + i}`,
-        category: categories[Math.floor(Math.random() * categories.length)],
-        description: `Request for ${categories[Math.floor(Math.random() * categories.length)].toLowerCase()}`,
-        status: statuses[Math.floor(Math.random() * statuses.length)],
-        submittedAt: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString(),
-        location: `Location ${i + 1}, Colombo`
-      }));
-    };
+  const statusDisplay = {
+    'SUBMITTED': 'Submitted',
+    'ASSIGNED': 'Assigned', 
+    'COLLECTION_SCHEDULED': 'Collection Scheduled',
+    'OUT_FOR_COLLECTION': 'Out for collection',
+    'COLLECTED': 'Collected',
+    'RESOLVED': 'Resolved',
+    'CANCELLED': 'Cancelled'
+  };
 
-    // Simulate API call
-    setTimeout(() => {
-      setRequests(generateDummyRequests());
+  useEffect(() => {
+    fetchRequests();
+  }, [currentPage]);
+
+  const fetchRequests = async () => {
+    try {
+      const response = await getCitizenRequests(currentPage, requestsPerPage);
+      if (response.success) {
+        setRequests(response.data.content || []);
+        setTotalPages(response.data.totalPages || 1);
+      } else {
+        console.error('Failed to fetch requests:', response.message);
+        setRequests([]);
+      }
+    } catch (error) {
+      console.error('Error fetching requests:', error);
+      setRequests([]);
+    } finally {
       setLoading(false);
-    }, 1000);
-  }, []);
+    }
+  };
 
   const getStatusColor = (status) => {
     const colors = {
-      'Submitted': 'bg-blue-100 text-blue-800',
-      'Assigned': 'bg-yellow-100 text-yellow-800',
-      'Collection Scheduled': 'bg-purple-100 text-purple-800',
-      'Out for collection': 'bg-orange-100 text-orange-800',
-      'Collected': 'bg-green-100 text-green-800',
-      'Resolved': 'bg-gray-100 text-gray-800'
+      'SUBMITTED': 'bg-blue-100 text-blue-800',
+      'ASSIGNED': 'bg-yellow-100 text-yellow-800',
+      'COLLECTION_SCHEDULED': 'bg-purple-100 text-purple-800',
+      'OUT_FOR_COLLECTION': 'bg-orange-100 text-orange-800',
+      'COLLECTED': 'bg-green-100 text-green-800',
+      'RESOLVED': 'bg-gray-100 text-gray-800',
+      'CANCELLED': 'bg-red-100 text-red-800'
     };
     return colors[status] || 'bg-gray-100 text-gray-800';
   };
-
-  // Pagination logic
-  const indexOfLastRequest = currentPage * requestsPerPage;
-  const indexOfFirstRequest = indexOfLastRequest - requestsPerPage;
-  const currentRequests = requests.slice(indexOfFirstRequest, indexOfLastRequest);
-  const totalPages = Math.ceil(requests.length / requestsPerPage);
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
@@ -85,7 +91,7 @@ function TrackRequests() {
               </button>
             </div>
 
-            {currentRequests.length === 0 ? (
+            {requests.length === 0 ? (
               <div className="text-center py-12">
                 <p className="text-gray-500 text-lg">No requests found.</p>
                 <button
@@ -120,17 +126,17 @@ function TrackRequests() {
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
-                      {currentRequests.map((request) => (
-                        <tr key={request.id} className="hover:bg-gray-50">
+                      {requests.map((request) => (
+                        <tr key={request.requestId} className="hover:bg-gray-50">
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                            {request.id}
+                            {request.requestId}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {request.category}
+                            {request.category?.displayName || request.category}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(request.status)}`}>
-                              {request.status}
+                              {statusDisplay[request.status] || request.status}
                             </span>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -138,7 +144,7 @@ function TrackRequests() {
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                             <button
-                              onClick={() => navigate(`/citizen/request-details/${request.id}`)}
+                              onClick={() => navigate(`/citizen/request-details/${request.requestId}`)}
                               className="text-green-600 hover:text-green-900 mr-3"
                             >
                               View Details
@@ -154,8 +160,8 @@ function TrackRequests() {
                 {totalPages > 1 && (
                   <div className="flex justify-center items-center space-x-2 mt-6 pt-6 border-t border-gray-200">
                     <button
-                      onClick={() => paginate(Math.max(1, currentPage - 1))}
-                      disabled={currentPage === 1}
+                      onClick={() => paginate(Math.max(0, currentPage - 1))}
+                      disabled={currentPage === 0}
                       className="px-3 py-1 border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
                     >
                       Previous
@@ -164,11 +170,11 @@ function TrackRequests() {
                     {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                       let pageNumber;
                       if (totalPages <= 5) {
-                        pageNumber = i + 1;
-                      } else if (currentPage <= 3) {
-                        pageNumber = i + 1;
-                      } else if (currentPage >= totalPages - 2) {
-                        pageNumber = totalPages - 4 + i;
+                        pageNumber = i;
+                      } else if (currentPage <= 2) {
+                        pageNumber = i;
+                      } else if (currentPage >= totalPages - 3) {
+                        pageNumber = totalPages - 5 + i;
                       } else {
                         pageNumber = currentPage - 2 + i;
                       }
@@ -183,14 +189,14 @@ function TrackRequests() {
                               : 'border-gray-300 hover:bg-gray-50'
                           }`}
                         >
-                          {pageNumber}
+                          {pageNumber + 1}
                         </button>
                       );
                     })}
 
                     <button
-                      onClick={() => paginate(Math.min(totalPages, currentPage + 1))}
-                      disabled={currentPage === totalPages}
+                      onClick={() => paginate(Math.min(totalPages - 1, currentPage + 1))}
+                      disabled={currentPage === totalPages - 1}
                       className="px-3 py-1 border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
                     >
                       Next
