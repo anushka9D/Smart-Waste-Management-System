@@ -4,15 +4,34 @@ import AuthHeader from '../components/AuthHeader';
 import AuthFooter from '../components/AuthFooter';
 import { AlertCircle, Trash2, MapPin, Clock, RefreshCw, Eye, CheckCircle, Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
 
 const API_BASE_URL = 'http://localhost:8080/api/v1';
 
-const getAuthHeaders = () => {
-  const token = localStorage.getItem('token'); //auth token
-  return {
-    'Content-Type': 'application/json',
-    'Authorization': token ? `Bearer ${token}` : ''
-  };
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+});
+
+const createCustomIcon = (color) => {
+  return new L.Icon({
+    iconUrl: `https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-${color}.png`,
+    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowSize: [41, 41]
+  });
+};
+
+const markerIcons = {
+  RED: createCustomIcon('red'),
+  BLUE: createCustomIcon('blue'),
+  GREEN: createCustomIcon('green')
 };
 
 const api = {
@@ -175,6 +194,69 @@ function SensorManagerDashboard() {
                     <span className="font-semibold">{alerts.length} Alerts</span>
                   </div>
                 )}
+              </div>
+            </div>
+          </div>
+
+          {/* Map View Section */}
+          <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 className="text-xl font-bold text-gray-800 mb-4">Bin Locations Map</h2>
+            <div className="h-96 rounded-lg overflow-hidden border-2 border-gray-200">
+              <MapContainer
+                center={[6.9271, 79.8612]} // Default Colombo
+                zoom={13}
+                style={{ height: '100%', width: '100%' }}
+              >
+                <TileLayer
+                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                />
+                {bins.map((bin) => (
+                  <Marker
+                    key={bin.binId}
+                    position={[bin.coordinates.latitude, bin.coordinates.longitude]}
+                    icon={markerIcons[bin.binColor] || markerIcons.GREEN}
+                  >
+                    <Popup>
+                      <div className="p-2">
+                        <h3 className="font-bold text-lg mb-2">{bin.binId}</h3>
+                        <p className="text-sm text-gray-600 mb-1">
+                          <strong>Location:</strong> {bin.location}
+                        </p>
+                        <p className="text-sm text-gray-600 mb-1">
+                          <strong>Status:</strong> 
+                          <span className={`ml-1 px-2 py-0.5 rounded text-xs ${
+                            bin.status === 'FULL' ? 'bg-red-100 text-red-800' :
+                            bin.status === 'HALF_FULL' ? 'bg-blue-100 text-blue-800' :
+                            'bg-green-100 text-green-800'
+                          }`}>
+                            {bin.status.replace('_', ' ')}
+                          </span>
+                        </p>
+                        <p className="text-sm text-gray-600 mb-1">
+                          <strong>Fill Level:</strong> {((bin.currentLevel / bin.capacity) * 100).toFixed(0)}%
+                        </p>
+                        <p className="text-sm text-gray-600">
+                          <strong>Capacity:</strong> {bin.currentLevel.toFixed(1)} / {bin.capacity} L
+                        </p>
+                      </div>
+                    </Popup>
+                  </Marker>
+                ))}
+              </MapContainer>
+            </div>
+            <div className="mt-4 flex items-center justify-center space-x-6 text-sm">
+              <div className="flex items-center space-x-2">
+                <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                <span>Empty</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                <span>Half Full</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                <span>Full</span>
               </div>
             </div>
           </div>
