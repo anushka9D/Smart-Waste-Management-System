@@ -15,22 +15,29 @@ export const AuthProvider = ({ children }) => {
     try {
       // First check localStorage for token
       let token = localStorage.getItem('token');
+      console.log('Token from localStorage:', token ? 'Present' : 'Missing');
       
       // If not found in localStorage, check cookie
       if (!token) {
         token = getTokenFromCookie();
+        console.log('Token from cookie:', token ? 'Present' : 'Missing');
       }
       
       if (token) {
         const isValid = await validateToken(token);
+        console.log('Token validation result:', isValid);
         if (isValid) {
           const userData = decodeToken(token);
+          console.log('Decoded user data:', userData);
           setUser(userData);
         } else {
+          console.log('Token is invalid, clearing auth state');
           setUser(null);
           // Clear invalid token
           localStorage.removeItem('token');
         }
+      } else {
+        console.log('No token found');
       }
     } catch (error) {
       console.error('Auth check failed:', error);
@@ -43,11 +50,15 @@ export const AuthProvider = ({ children }) => {
   };
 
   const login = (userData) => {
+    console.log('Setting user data:', userData);
     setUser(userData);
   };
 
   const logout = () => {
+    console.log('Logging out user');
     setUser(null);
+    // Clear localStorage
+    localStorage.removeItem('token');
     // Clear cookie
     document.cookie = 'jwt=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
   };

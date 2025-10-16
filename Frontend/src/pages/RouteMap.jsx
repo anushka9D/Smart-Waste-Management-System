@@ -15,6 +15,7 @@ function RouteMap() {
   const [stopsData, setStopsData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [successMessage, setSuccessMessage] = useState(null);
   const [currentStopIndex, setCurrentStopIndex] = useState(0);
   const [navigationStarted, setNavigationStarted] = useState(false);
   const [userLocation, setUserLocation] = useState(null);
@@ -182,32 +183,37 @@ function RouteMap() {
       await markBinAsCollected(binId);
       
       // Update the stop status to COMPLETED
-      setStopsData(prevStops => 
-        prevStops.map(stop => 
-          stop.stopId === stopId ? { ...stop, status: 'COMPLETED', collectionTime: new Date().toISOString() } : stop
-        )
-      );
-      
-      // Check if all stops are completed and update route status if needed
-      const updatedStops = stopsData.map(stop => 
+      const updatedStopsData = stopsData.map(stop => 
         stop.stopId === stopId ? { ...stop, status: 'COMPLETED', collectionTime: new Date().toISOString() } : stop
       );
+      setStopsData(updatedStopsData);
       
-      const allStopsCompleted = updatedStops.every(stop => stop.status === 'COMPLETED');
+      // Check if all stops are completed and update route status if needed
+      const allStopsCompleted = updatedStopsData.every(stop => stop.status === 'COMPLETED');
       if (allStopsCompleted && routeData && routeData.routeId && routeData.status !== 'COMPLETED') {
         try {
+          console.log(`All stops completed for route ${routeData.routeId}. Updating route status to COMPLETED.`);
           await updateRouteStatus(routeData.routeId, 'COMPLETED');
+          console.log(`Route status updated to COMPLETED for route ${routeData.routeId}`);
           // Update local route data
           setRouteData(prevRouteData => ({
             ...prevRouteData,
             status: 'COMPLETED'
           }));
           console.log('Route status updated to COMPLETED');
+          
+          // Show success message
+          setSuccessMessage('Route completed successfully! Redirecting to completed routes...');
+          
+          // Navigate to completed routes page after a short delay
+          setTimeout(() => {
+            navigate('/completed-routes');
+          }, 3000);
         } catch (err) {
           console.error('Failed to update route status:', err);
         }
       }
-      
+
       // Move to the next stop if available
       if (currentStopIndex < sortedStops.length - 1) {
         // Calculate route to next stop
@@ -340,6 +346,14 @@ function RouteMap() {
                     >
                       <span className="text-red-700">&times;</span>
                     </button>
+                  </div>
+                )}
+                
+                {/* Success banner */}
+                {successMessage && (
+                  <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
+                    <strong className="font-bold">Success: </strong>
+                    <span className="block sm:inline">{successMessage}</span>
                   </div>
                 )}
                 

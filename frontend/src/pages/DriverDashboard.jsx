@@ -9,6 +9,7 @@ function DriverDashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [driverDetails, setDriverDetails] = useState(null);
+  const [allRoutes, setAllRoutes] = useState([]); // Store all routes including completed ones
   const [assignedRoutes, setAssignedRoutes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -50,7 +51,13 @@ function DriverDashboard() {
       const routesResponse = await getAuthenticatedDriverRoutes();
       console.log('Routes response:', routesResponse);
       if (routesResponse.success) {
-        setAssignedRoutes(routesResponse.data);
+        // Store all routes
+        setAllRoutes(routesResponse.data || []);
+        
+        // Filter out completed routes from the display
+        const activeRoutes = (routesResponse.data || []).filter(route => route.status !== 'COMPLETED');
+        setAssignedRoutes(activeRoutes);
+        
         // Show success message when refreshing
         if (isRefresh) {
           setSuccessMessage('Data refreshed successfully!');
@@ -86,21 +93,29 @@ function DriverDashboard() {
           <div className="bg-white rounded-lg shadow-md p-8">
             <div className="flex justify-between items-center mb-6">
               <h1 className="text-3xl font-bold text-gray-800">Driver Dashboard</h1>
-              <button 
-                onClick={() => fetchDriverData(true)}
-                disabled={refreshing}
-                className="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg disabled:opacity-50 transition duration-200 ease-in-out flex items-center"
-              >
-                {refreshing ? (
-                  <>
-                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Refreshing...
-                  </>
-                ) : 'Refresh Data'}
-              </button>
+              <div className="flex space-x-2">
+                <button 
+                  onClick={() => navigate('/completed-routes')}
+                  className="bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-lg transition duration-200 ease-in-out"
+                >
+                  Completed Routes
+                </button>
+                <button 
+                  onClick={() => fetchDriverData(true)}
+                  disabled={refreshing}
+                  className="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg disabled:opacity-50 transition duration-200 ease-in-out flex items-center"
+                >
+                  {refreshing ? (
+                    <>
+                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Refreshing...
+                    </>
+                  ) : 'Refresh Data'}
+                </button>
+              </div>
             </div>
             
             {loading ? (
@@ -139,6 +154,22 @@ function DriverDashboard() {
                       </span>
                     </p>
                   </div>
+                </div>
+
+                {/* Completed Routes Summary */}
+                <div className="bg-green-50 border-l-4 border-green-500 p-6 mb-6">
+                  <div className="flex justify-between items-center">
+                    <h2 className="text-xl font-semibold text-green-800">Your Completed Routes</h2>
+                    <button 
+                      onClick={() => navigate('/completed-routes')}
+                      className="bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-lg transition duration-200 ease-in-out"
+                    >
+                      View All Completed Routes
+                    </button>
+                  </div>
+                  <p className="mt-2 text-green-700">
+                    You have completed {allRoutes.filter(route => route.status === 'COMPLETED').length} route(s) so far.
+                  </p>
                 </div>
 
                 {/* Assigned Routes Section */}
@@ -211,6 +242,33 @@ function DriverDashboard() {
                           )}
                         </div>
                       ))}
+                      
+                      {/* Show message if all routes are completed */}
+                      {assignedRoutes.length === 0 && allRoutes.some(route => route.status === 'COMPLETED') && (
+                        <div className="bg-green-50 border border-green-200 p-4 rounded">
+                          <p className="text-green-700">
+                            All your routes have been completed! Great job!
+                          </p>
+                          <button
+                            onClick={() => navigate('/completed-routes')}
+                            className="mt-2 text-green-800 hover:text-green-900 font-medium"
+                          >
+                            View your completed routes
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  ) : allRoutes.some(route => route.status === 'COMPLETED') ? (
+                    <div className="bg-green-50 border border-green-200 p-4 rounded">
+                      <p className="text-green-700">
+                        All your routes have been completed! Great job!
+                      </p>
+                      <button
+                        onClick={() => navigate('/completed-routes')}
+                        className="mt-2 text-green-800 hover:text-green-900 font-medium"
+                      >
+                        View your completed routes
+                      </button>
                     </div>
                   ) : (
                     <div className="bg-yellow-50 border border-yellow-200 p-4 rounded">

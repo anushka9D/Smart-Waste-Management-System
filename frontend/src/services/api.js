@@ -74,7 +74,10 @@ export const login = async (credentials) => {
   
   // If login is successful, store the token in localStorage
   if (response.data.success && response.data.data?.token) {
+    console.log('Storing token in localStorage:', response.data.data.token.substring(0, 20) + '...');
     localStorage.setItem('token', response.data.data.token);
+    // Also store in cookie for backup
+    document.cookie = `jwt=${response.data.data.token}; path=/`;
   }
   
   return response.data;
@@ -129,13 +132,20 @@ export const getAuthenticatedDriverDetails = async () => {
 export const getAuthenticatedDriverRoutes = async () => {
   try {
     const token = localStorage.getItem('token');
+    console.log('Fetching driver routes with token:', token ? 'Present' : 'Missing');
+    
     if (!token) {
       throw new Error('No authentication token found');
     }
     
     const response = await api.get('/routes/assigned/driver');
+    console.log('Driver routes response:', response);
     return response.data;
   } catch (error) {
+    console.error('Error fetching driver routes:', error.response || error);
+    if (error.response && error.response.status === 401) {
+      throw new Error('Unauthorized: Please log in again');
+    }
     throw new Error(error.response?.data?.message || error.message || 'Failed to fetch driver routes');
   }
 };
@@ -195,7 +205,9 @@ export const markBinAsCollected = async (binId) => {
 // Update route status
 export const updateRouteStatus = async (routeId, status) => {
   try {
+    console.log(`Calling updateRouteStatus with routeId: ${routeId}, status: ${status}`);
     const response = await api.put(`/routes/${routeId}/status?status=${status}`);
+    console.log(`Route status updated successfully for routeId: ${routeId}`, response.data);
     return response.data;
   } catch (error) {
     console.error('API Error - updateRouteStatus:', error.response || error);

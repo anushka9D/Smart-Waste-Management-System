@@ -13,6 +13,7 @@ import WasteCollectionStaffDashboard from './pages/WasteCollectionStaffDashboard
 import SensorManagerDashboard from './pages/SensorManagerDashboard';
 import AssignedRoutes from './pages/AssignedRoutes';
 import RouteMap from './pages/RouteMap'; // Add this import
+import CompletedRoutes from './pages/CompletedRoutes'; // Add this import
 
 import Shell from './pages/CityAuthority/Shell'
 import Reports from './pages/CityAuthority/Reports'
@@ -84,6 +85,14 @@ function App() {
             element={
               <PrivateRoute allowedUserTypes={['DRIVER']}>
                 <RouteMap />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/completed-routes"
+            element={
+              <PrivateRoute allowedUserTypes={['DRIVER']}>
+                <CompletedRoutes />
               </PrivateRoute>
             }
           />
