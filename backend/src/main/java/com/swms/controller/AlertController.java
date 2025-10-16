@@ -2,7 +2,6 @@ package com.swms.controller;
 
 import com.swms.dto.AlertDTO;
 import com.swms.service.AlertService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

@@ -299,9 +299,7 @@ const StatCard = ({ title, value, color, active, onClick }) => {
   );
 };
 
-const BinCard = ({ bin, onUpdateLevel, onMarkCollected, onDelete }) => {
-  const [showUpdateModal, setShowUpdateModal] = useState(false);
-  const [newLevel, setNewLevel] = useState('');
+const BinCard = ({ bin, onMarkCollected, onDelete }) => {
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -322,14 +320,6 @@ const BinCard = ({ bin, onUpdateLevel, onMarkCollected, onDelete }) => {
   };
 
   const fillPercentage = (bin.currentLevel / bin.capacity) * 100;
-
-  const handleUpdateLevel = () => {
-    if (newLevel && !isNaN(newLevel)) {
-      onUpdateLevel(bin.binId, parseFloat(newLevel));
-      setShowUpdateModal(false);
-      setNewLevel('');
-    }
-  };
 
   return (
     <>
@@ -382,12 +372,6 @@ const BinCard = ({ bin, onUpdateLevel, onMarkCollected, onDelete }) => {
         </div>
 
         <div className="p-4 bg-gray-50 border-t flex gap-2">
-          <button
-            onClick={() => setShowUpdateModal(true)}
-            className="flex-1 px-3 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition"
-          >
-            Update Level
-          </button>
           {bin.status === 'FULL' && (
             <button
               onClick={() => onMarkCollected(bin.binId)}
@@ -404,49 +388,6 @@ const BinCard = ({ bin, onUpdateLevel, onMarkCollected, onDelete }) => {
           </button>
         </div>
       </div>
-
-      {showUpdateModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-            <h3 className="text-lg font-semibold mb-4">Update Bin Level - {bin.binId}</h3>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Current Level (Liters)
-                </label>
-                <input
-                  type="number"
-                  value={newLevel}
-                  onChange={(e) => setNewLevel(e.target.value)}
-                  placeholder={`Current: ${bin.currentLevel.toFixed(1)} L`}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  min="0"
-                  max="100"
-                  step="0.1"
-                />
-                <p className="text-xs text-gray-500 mt-1">Enter value between 0.0 and 100.0</p>
-              </div>
-              <div className="flex gap-2">
-                <button
-                  onClick={handleUpdateLevel}
-                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-                >
-                  Update
-                </button>
-                <button
-                  onClick={() => {
-                    setShowUpdateModal(false);
-                    setNewLevel('');
-                  }}
-                  className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition"
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </>
   );
 };

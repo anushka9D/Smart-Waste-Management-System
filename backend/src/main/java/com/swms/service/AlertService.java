@@ -4,7 +4,6 @@ import com.swms.dto.AlertDTO;
 import com.swms.model.Alert;
 import com.swms.model.SmartBin;
 import com.swms.repository.AlertRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
