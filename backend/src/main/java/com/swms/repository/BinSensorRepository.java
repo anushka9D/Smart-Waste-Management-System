@@ -13,6 +13,7 @@ public interface BinSensorRepository extends MongoRepository<BinSensor, String> 
     Optional<BinSensor> findBySensorId(String sensorId);
 
     Optional<BinSensor> findByBinId(String binId);
+    List<BinSensor> findAll();
 
     @Query("{ 'type': 'FAULTY' }")
     List<BinSensor> findAllFaultySensors();

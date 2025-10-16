@@ -23,8 +23,8 @@ public class SmartBinService {
     private final BinSensorService binSensorService;
     private final AlertService alertService;
 
-    private static final Double HALF_FULL_THRESHOLD = 50.0;
-    private static final Double FULL_THRESHOLD = 80.0;
+    private static final Double Half_full = 50.0;
+    private static final Double Full = 80.0;
 
     public SmartBinService(SmartBinRepository smartBinRepository, BinSensorService binSensorService, AlertService alertService) {
         this.smartBinRepository = smartBinRepository;
@@ -132,10 +132,8 @@ public class SmartBinService {
 
     @Transactional
     public SmartBinDTO markBinAsCollected(String binId) {
-
         Optional<SmartBin> optionalSmartBin = smartBinRepository.findByBinId(binId);
         if (optionalSmartBin.isEmpty()) {
-            // Bin not found
             return null;
         }
 
@@ -148,6 +146,9 @@ public class SmartBinService {
 
         SmartBin updatedBin = smartBinRepository.save(smartBin);
 
+        // Reset sensor measurement to 0
+        binSensorService.resetSensorMeasurement(binId);
+        
         alertService.resolveAlertForBin(binId);
 
         return mapToDTO(updatedBin, "GREEN");
@@ -176,9 +177,9 @@ public class SmartBinService {
 
     private String calculateBinStatus(Double currentLevel, Double capacity) {
         Double percentage = (currentLevel / capacity) * 100;
-        if (percentage >= FULL_THRESHOLD) {
+        if (percentage >= Full) {
             return "FULL";
-        } else if (percentage >= HALF_FULL_THRESHOLD) {
+        } else if (percentage >= Half_full) {
             return "HALF_FULL";
         } else {
             return "EMPTY";
