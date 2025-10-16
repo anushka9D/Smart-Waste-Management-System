@@ -32,11 +32,12 @@ function ReportBinForm() {
   }, []);
 
   const categories = [
-    { value: 'GENERAL_WASTE', displayName: 'General Waste' },
-    { value: 'RECYCLABLE', displayName: 'Recyclable Materials' },
-    { value: 'ORGANIC', displayName: 'Organic Waste' },
-    { value: 'HAZARDOUS', displayName: 'Hazardous Waste' },
-    { value: 'BULKY', displayName: 'Bulky Items' }
+    { value: 'OVERFLOWING_BIN', displayName: 'Overflowing Bin' },
+    { value: 'DAMAGED_BIN', displayName: 'Damaged Bin' },
+    { value: 'MISSING_BIN', displayName: 'Missing Bin' },
+    { value: 'ILLEGAL_DUMPING', displayName: 'Illegal Dumping' },
+    { value: 'REGULAR_PICKUP_REQUEST', displayName: 'Regular Pickup Request' },
+    { value: 'OTHER', displayName: 'Other' }
   ];
 
   const handleInputChange = (e) => {
@@ -45,6 +46,14 @@ function ReportBinForm() {
       ...prev,
       [name]: value
     }));
+    
+    // Clear custom category description when not "OTHER"
+    if (name === 'category' && value !== 'OTHER') {
+      setFormData(prev => ({
+        ...prev,
+        customCategory: ''
+      }));
+    }
   };
 
   const handlePhotoChange = (e) => {
@@ -82,6 +91,9 @@ function ReportBinForm() {
       if (formData.binId) {
         submitData.append('binId', formData.binId);
       }
+      if (formData.category === 'OTHER' && formData.customCategory) {
+        submitData.append('customCategory', formData.customCategory);
+      }
       if (photo) {
         submitData.append('photo', photo);
       }
@@ -92,7 +104,7 @@ function ReportBinForm() {
         // Clear stored location
         localStorage.removeItem('selectedLocation');
         // Navigate to confirmation page with data
-        navigate('/citizen/confirmation', {
+        navigate('/citizen/report-confirmation', {
           state: {
             requestData: response.data
           }
@@ -122,7 +134,7 @@ function ReportBinForm() {
               {/* Category */}
               <div className="mb-6">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Waste Category *
+                  Waste Category (type of issue) *
                 </label>
                 <select
                   name="category"
@@ -140,6 +152,24 @@ function ReportBinForm() {
                 </select>
               </div>
 
+              {/* Custom Category Description (only when OTHER is selected) */}
+              {formData.category === 'OTHER' && (
+                <div className="mb-6">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Describe Category *
+                  </label>
+                  <input
+                    type="text"
+                    name="customCategory"
+                    value={formData.customCategory || ''}
+                    onChange={handleInputChange}
+                    required
+                    placeholder="Please describe the category"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  />
+                </div>
+              )}
+
               {/* Bin ID (Optional) */}
               <div className="mb-6">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -150,7 +180,7 @@ function ReportBinForm() {
                   name="binId"
                   value={formData.binId}
                   onChange={handleInputChange}
-                  placeholder="Enter bin ID if applicable"
+                  placeholder="Enter bin ID if applicable (Check the sticker pasted on the bin)"
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                 />
               </div>

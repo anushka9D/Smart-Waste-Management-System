@@ -239,7 +239,7 @@ function ReportBinRequest() {
             <div className="mb-6">
               <div 
                 ref={mapRef} 
-                className="w-full h-96 rounded-lg border border-gray-300 relative"
+                className="w-full h-70 rounded-lg border border-gray-300 relative"
               >
                 {mapLoading && (
                   <div className="absolute inset-0 flex items-center justify-center bg-gray-100 rounded-lg">
@@ -250,13 +250,13 @@ function ReportBinRequest() {
                   </div>
                 )}
               </div>
-              <p className="text-sm text-gray-500 mt-2">
+              <p className="text-sm text-gray-500 mt-0">
                 Click on the map or drag the marker to select exact location
               </p>
             </div>
 
             {/* Selected Location Display */}
-            <div className="bg-gray-50 rounded-lg p-4 mb-6">
+            <div className="bg-gray-50 rounded-lg p-4 mb-3">
               <h3 className="font-medium text-gray-700 mb-2">Selected Location:</h3>
               {address ? (
                 <div className="space-y-1">
@@ -276,7 +276,7 @@ function ReportBinRequest() {
             </div>
 
             {/* Action Buttons */}
-            <div className="flex justify-between pt-4">
+            <div className="flex justify-between pt-1">
               <button
                 onClick={() => navigate('/citizen-dashboard')}
                 className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition"

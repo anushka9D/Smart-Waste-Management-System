@@ -14,7 +14,7 @@ function CitizenDashboard() {
       <main className="flex-grow bg-gray-50 py-12 px-4">
         <div className="container mx-auto max-w-4xl">
           <div className="bg-white rounded-lg shadow-md p-8">
-            <h1 className="text-3xl font-bold text-gray-800 mb-6">Citizen Dashboard</h1>
+            <h1 className="text-3xl font-bold text-gray-800 mb-6 text-center">Citizen Dashboard</h1>
             
             <div className="bg-green-50 border-l-4 border-green-500 p-6 mb-6">
               <h2 className="text-xl font-semibold text-green-800 mb-4">
@@ -25,7 +25,6 @@ function CitizenDashboard() {
                 <p><span className="font-medium">Email:</span> {user?.email}</p>
                 <p><span className="font-medium">Phone:</span> {user?.phone}</p>
                 <p><span className="font-medium">User ID:</span> {user?.userId}</p>
-                <p><span className="font-medium">Role:</span> {user?.userType}</p>
               </div>
             </div>
 

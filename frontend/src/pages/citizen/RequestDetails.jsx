@@ -21,6 +21,15 @@ function RequestDetails() {
     'CANCELLED': 'Cancelled'
   };
 
+  const categoryDisplay = {
+    'OVERFLOWING_BIN': 'Overflowing Bin',
+    'DAMAGED_BIN': 'Damaged Bin',
+    'MISSING_BIN': 'Missing Bin',
+    'ILLEGAL_DUMPING': 'Illegal Dumping',
+    'REGULAR_PICKUP_REQUEST': 'Regular Pickup Request',
+    'OTHER': 'Other'
+  };
+
   const statusTimeline = [
     { status: 'SUBMITTED', color: 'bg-blue-500', icon: '📝' },
     { status: 'ASSIGNED', color: 'bg-yellow-500', icon: '👤' },
@@ -41,16 +50,18 @@ function RequestDetails() {
         getRequestUpdates(id)
       ]);
 
-      if (requestResponse.success) {
+      // Handle ApiResponse wrapper structure for request details
+      if (requestResponse && requestResponse.success) {
         setRequest(requestResponse.data);
       } else {
-        console.error('Failed to fetch request details:', requestResponse.message);
+        console.error('Failed to fetch request details:', requestResponse ? requestResponse.message : 'Unknown error');
       }
       
-      if (updatesResponse.success) {
+      // Handle ApiResponse wrapper structure for updates
+      if (updatesResponse && updatesResponse.success) {
         setUpdates(updatesResponse.data);
       } else {
-        console.error('Failed to fetch request updates:', updatesResponse.message);
+        console.error('Failed to fetch request updates:', updatesResponse ? updatesResponse.message : 'Unknown error');
       }
     } catch (error) {
       console.error('Error fetching request data:', error);
@@ -143,7 +154,7 @@ function RequestDetails() {
                   <div className="grid md:grid-cols-2 gap-4 text-sm">
                     <div>
                       <span className="font-medium text-gray-700">Category:</span>
-                      <p className="text-gray-900">{request.category?.displayName || request.category}</p>
+                      <p className="text-gray-900">{categoryDisplay[request.category] || request.category}</p>
                     </div>
                     <div>
                       <span className="font-medium text-gray-700">Current Status:</span>
@@ -154,7 +165,7 @@ function RequestDetails() {
                     <div>
                       <span className="font-medium text-gray-700">Submitted:</span>
                       <p className="text-gray-900">
-                        {new Date(request.submittedAt).toLocaleString()}
+                        {request.submittedAt ? new Date(request.submittedAt).toLocaleString() : 'N/A'}
                       </p>
                     </div>
                     {request.binId && (
@@ -225,7 +236,7 @@ function RequestDetails() {
                             {isCurrent && (
                               <p className="text-xs text-green-600 font-medium mt-1">Current Status</p>
                             )}
-                            {update && (
+                            {update && update.timestamp && (
                               <p className="text-xs text-gray-500 mt-1">
                                 {new Date(update.timestamp).toLocaleString()}
                               </p>

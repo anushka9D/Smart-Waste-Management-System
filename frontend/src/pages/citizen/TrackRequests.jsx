@@ -22,6 +22,15 @@ function TrackRequests() {
     'CANCELLED': 'Cancelled'
   };
 
+  const categoryDisplay = {
+    'OVERFLOWING_BIN': 'Overflowing Bin',
+    'DAMAGED_BIN': 'Damaged Bin',
+    'MISSING_BIN': 'Missing Bin',
+    'ILLEGAL_DUMPING': 'Illegal Dumping',
+    'REGULAR_PICKUP_REQUEST': 'Regular Pickup Request',
+    'OTHER': 'Other'
+  };
+
   useEffect(() => {
     fetchRequests();
   }, [currentPage]);
@@ -29,11 +38,12 @@ function TrackRequests() {
   const fetchRequests = async () => {
     try {
       const response = await getCitizenRequests(currentPage, requestsPerPage);
-      if (response.success) {
+      // Handle ApiResponse wrapper structure
+      if (response && response.success) {
         setRequests(response.data.content || []);
         setTotalPages(response.data.totalPages || 1);
       } else {
-        console.error('Failed to fetch requests:', response.message);
+        console.error('Failed to fetch requests:', response ? response.message : 'Unknown error');
         setRequests([]);
       }
     } catch (error) {
@@ -83,12 +93,6 @@ function TrackRequests() {
           <div className="bg-white rounded-lg shadow-md p-6">
             <div className="flex justify-between items-center mb-6">
               <h1 className="text-2xl font-bold text-gray-800">Track Your Requests</h1>
-              <button
-                onClick={() => navigate('/citizen/report-bin-request')}
-                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-sm"
-              >
-                + New Request
-              </button>
             </div>
 
             {requests.length === 0 ? (
@@ -132,7 +136,7 @@ function TrackRequests() {
                             {request.requestId}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {request.category?.displayName || request.category}
+                            {categoryDisplay[request.category] || request.category}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(request.status)}`}>
@@ -140,7 +144,7 @@ function TrackRequests() {
                             </span>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {new Date(request.submittedAt).toLocaleDateString()}
+                            {request.submittedAt ? new Date(request.submittedAt).toLocaleDateString() : 'N/A'}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                             <button

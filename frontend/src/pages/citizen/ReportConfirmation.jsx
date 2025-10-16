@@ -7,6 +7,15 @@ function ReportConfirmation() {
   const navigate = useNavigate();
   const requestData = location.state?.requestData;
 
+  const categoryDisplay = {
+    'OVERFLOWING_BIN': 'Overflowing Bin',
+    'DAMAGED_BIN': 'Damaged Bin',
+    'MISSING_BIN': 'Missing Bin',
+    'ILLEGAL_DUMPING': 'Illegal Dumping',
+    'REGULAR_PICKUP_REQUEST': 'Regular Pickup Request',
+    'OTHER': 'Other'
+  };
+
   if (!requestData) {
   return (
     <div className="min-h-screen flex flex-col">
@@ -56,12 +65,12 @@ function ReportConfirmation() {
                   <p className="text-gray-900 font-mono">{requestData.requestId}</p>
                 </div>
                 <div>
-                  <span className="font-medium text-gray-700">Category:</span>
-                  <p className="text-gray-900">{requestData.category}</p>
+                  <span className="font-medium text-gray-700">Category (type of issue):</span>
+                  <p className="text-gray-900">{categoryDisplay[requestData.category] || requestData.category}</p>
                 </div>
                 <div>
                   <span className="font-medium text-gray-700">Location:</span>
-                  <p className="text-gray-900">{requestData.location?.address}</p>
+                  <p className="text-gray-900">{requestData.address}</p>
                 </div>
                 <div>
                   <span className="font-medium text-gray-700">Submitted:</span>
