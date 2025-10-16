@@ -800,6 +800,20 @@ public class RouteController {
     }
     
     /**
+     * Get route stops by stop IDs
+     */
+    @PostMapping("/stops/by-ids")
+    public ResponseEntity<ApiResponse<List<RouteStop>>> getStopsByIds(@RequestBody List<String> stopIds) {
+        try {
+            List<RouteStop> stops = routeOptimizationService.getRouteStopRepository().findByStopIdIn(stopIds);
+            return ResponseEntity.ok(ApiResponse.success("Route stops retrieved successfully", stops));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                .body(ApiResponse.error("Failed to retrieve route stops: " + e.getMessage()));
+        }
+    }
+    
+    /**
      * Helper method to extract user ID from authentication
      */
     private String getUserIdFromAuthentication(Authentication authentication) {

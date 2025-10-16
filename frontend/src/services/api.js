@@ -135,6 +135,20 @@ export const getAssignedRouteForDriver = async (driverId) => {
   }
 };
 
+// Get route stops details
+export const getRouteStops = async (stopIds) => {
+  try {
+    const response = await api.post('/routes/stops/by-ids', stopIds);
+    if (response.data.success) {
+      return response.data.data;
+    } else {
+      throw new Error(response.data.message || 'Failed to fetch route stops');
+    }
+  } catch (error) {
+    throw new Error(error.response?.data?.message || error.message || 'Failed to fetch route stops');
+  }
+};
+
 // Validate Token
 export const validateToken = async (token) => {
   try {

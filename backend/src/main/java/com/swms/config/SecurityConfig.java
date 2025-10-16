@@ -56,6 +56,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/routes/assigned").permitAll()
                         .requestMatchers("/api/routes/assigned/driver").authenticated()
                         .requestMatchers("/api/routes/driver/details").authenticated()
+                        .requestMatchers("/api/routes/stops/by-ids").authenticated()
                         .requestMatchers("/api/routes/driver/**").authenticated()
                         .anyRequest().authenticated())
                 .exceptionHandling(ex -> ex

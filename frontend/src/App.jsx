@@ -12,6 +12,7 @@ import DriverDashboard from './pages/DriverDashboard';
 import WasteCollectionStaffDashboard from './pages/WasteCollectionStaffDashboard';
 import SensorManagerDashboard from './pages/SensorManagerDashboard';
 import AssignedRoutes from './pages/AssignedRoutes';
+import RouteMap from './pages/RouteMap'; // Add this import
 
 import Shell from './pages/CityAuthority/Shell'
 import Reports from './pages/CityAuthority/Reports'
@@ -19,13 +20,10 @@ import Analytics from './pages/CityAuthority/Analytics'
 import Settings from './pages/CityAuthority/Settings'
 import Dashboard from './pages/CityAuthority/Dashboard'
 
-
-
 function App() {
   return (
     <AuthProvider>
       <Router>
-
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<Home />} />
@@ -58,7 +56,6 @@ function App() {
               </PrivateRoute>
             }
           >
-
             <Route index element={<CityAuthorityDashboard />} />
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="reports" element={<Reports />} />
@@ -83,6 +80,14 @@ function App() {
             }
           />
           <Route
+            path="/route-map/:routeId"
+            element={
+              <PrivateRoute allowedUserTypes={['DRIVER']}>
+                <RouteMap />
+              </PrivateRoute>
+            }
+          />
+          <Route
             path="/waste-collection-staff-dashboard"
             element={
               <PrivateRoute allowedUserTypes={['WASTE_COLLECTION_STAFF']}>
@@ -99,8 +104,6 @@ function App() {
             }
           />
         </Routes>
-
-
       </Router>
     </AuthProvider>
   );

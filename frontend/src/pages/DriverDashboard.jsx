@@ -2,10 +2,12 @@ import { useAuth } from '../context/AuthContext';
 import AuthHeader from '../components/AuthHeader';
 import AuthFooter from '../components/AuthFooter';
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { getAuthenticatedDriverDetails, getAuthenticatedDriverRoutes } from '../services/api';
 
 function DriverDashboard() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [driverDetails, setDriverDetails] = useState(null);
   const [assignedRoutes, setAssignedRoutes] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -181,6 +183,16 @@ function DriverDashboard() {
                                 <p><span className="font-medium">Estimated Time:</span> {route.estimatedTime ? route.estimatedTime + ' minutes' : 'N/A'}</p>
                                 <p><span className="font-medium">Number of Stops:</span> {route.stopIds ? route.stopIds.length : 'N/A'}</p>
                               </div>
+                              
+                              {/* View on Map Button */}
+                              <button
+                                onClick={() => navigate(`/route-map/${route.routeId || route._id}`, { 
+                                  state: { routeData: route } 
+                                })}
+                                className="mt-4 w-full bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-lg transition duration-200 ease-in-out"
+                              >
+                                View Route on Map
+                              </button>
                             </div>
                           </div>
                           

@@ -50,6 +50,10 @@ public class RouteOptimizationService {
         return wasteCollectionStaffRepository;
     }
     
+    public RouteStopRepository getRouteStopRepository() {
+        return routeStopRepository;
+    }
+    
     /**
      * Fetches bins that need collection (status = 'full')
      * @return List of SmartBin entities that are full (>80% filled)
