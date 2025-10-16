@@ -13,7 +13,14 @@ export const AuthProvider = ({ children }) => {
 
   const checkAuth = async () => {
     try {
-      const token = getTokenFromCookie();
+      // First check localStorage for token
+      let token = localStorage.getItem('token');
+      
+      // If not found in localStorage, check cookie
+      if (!token) {
+        token = getTokenFromCookie();
+      }
+      
       if (token) {
         const isValid = await validateToken(token);
         if (isValid) {
@@ -21,11 +28,15 @@ export const AuthProvider = ({ children }) => {
           setUser(userData);
         } else {
           setUser(null);
+          // Clear invalid token
+          localStorage.removeItem('token');
         }
       }
     } catch (error) {
       console.error('Auth check failed:', error);
       setUser(null);
+      // Clear token on error
+      localStorage.removeItem('token');
     } finally {
       setLoading(false);
     }

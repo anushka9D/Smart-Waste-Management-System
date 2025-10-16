@@ -4,11 +4,25 @@ const API_BASE_URL = 'http://localhost:8080/api';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
-  withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
   },
 });
+
+// Add a request interceptor to automatically add the Authorization header
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token');
+    console.log('API Request:', config.url, 'Token:', token ? 'Present' : 'Missing');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
 
 // Register Citizen
 export const registerCitizen = async (data) => {
@@ -42,21 +56,13 @@ export const registerSensorManager = async (data) => {
 // Login
 export const login = async (credentials) => {
   const response = await api.post('/auth/login', credentials);
-  return response.data;
-};
-
-// Validate Token
-export const validateToken = async (token) => {
-  try {
-    const response = await api.get('/auth/validate', {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    return response.data.data;
-  } catch (error) {
-    return false;
+  
+  // If login is successful, store the token in localStorage
+  if (response.data.success && response.data.data?.token) {
+    localStorage.setItem('token', response.data.data.token);
   }
+  
+  return response.data;
 };
 
 // Get route preview
@@ -87,6 +93,56 @@ export const getAvailableStaff = async () => {
 export const createRouteWithResources = async (routeIndex, resources) => {
   const response = await api.post(`/routes/create-with-resources/${routeIndex}`, resources);
   return response.data;
+};
+
+// Get authenticated driver details
+export const getAuthenticatedDriverDetails = async () => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No authentication token found');
+    }
+    
+    const response = await api.get('/routes/driver/details');
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || error.message || 'Failed to fetch driver details');
+  }
+};
+
+// Get routes assigned to the authenticated driver
+export const getAuthenticatedDriverRoutes = async () => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No authentication token found');
+    }
+    
+    const response = await api.get('/routes/assigned/driver');
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || error.message || 'Failed to fetch driver routes');
+  }
+};
+
+// Get assigned route for a driver
+export const getAssignedRouteForDriver = async (driverId) => {
+  try {
+    const response = await api.get(`/routes/assigned?driverId=${driverId}`);
+    return response.data;
+  } catch (error) {
+    return { success: false, message: error.message };
+  }
+};
+
+// Validate Token
+export const validateToken = async (token) => {
+  try {
+    const response = await api.get('/auth/validate');
+    return response.data.data;
+  } catch (error) {
+    return false;
+  }
 };
 
 export default api;

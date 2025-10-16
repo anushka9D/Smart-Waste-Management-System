@@ -2,12 +2,19 @@ package com.swms.controller;
 
 import com.swms.dto.ApiResponse;
 import com.swms.model.*;
+import com.swms.security.JwtUtil;
 import com.swms.service.RouteOptimizationService;
 import com.swms.service.RouteService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
+import jakarta.servlet.http.HttpServletRequest;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -24,6 +31,9 @@ public class RouteController {
     
     @Autowired
     private RouteService routeService;
+    
+    @Autowired
+    private JwtUtil jwtUtil;
     
     /**
      * CityAuthority creates new route with specific resource assignments
@@ -307,6 +317,91 @@ public class RouteController {
         } catch (Exception e) {
             return ResponseEntity.internalServerError()
                 .body(ApiResponse.error("Failed to retrieve assigned routes: " + e.getMessage()));
+        }
+    }
+    
+    /**
+     * Get assigned routes for the authenticated driver
+     */
+    @GetMapping("/assigned/driver")
+    public ResponseEntity<ApiResponse<List<CollectionRoute>>> getAssignedRoutesForDriver() {
+        try {
+            // Get the authenticated user ID from security context
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            
+            // Get user ID from the JWT token claims
+            String driverId = null;
+            
+            // Check if the principal contains the user details
+            if (authentication.getPrincipal() instanceof org.springframework.security.core.userdetails.User) {
+                org.springframework.security.core.userdetails.User userDetails = 
+                    (org.springframework.security.core.userdetails.User) authentication.getPrincipal();
+                
+                // Get the email from userDetails
+                String email = userDetails.getUsername();
+                
+                // Find the driver by email to get the driver ID
+                Optional<Driver> driverOpt = routeOptimizationService.getDriverRepository().findByEmail(email);
+                if (driverOpt.isPresent()) {
+                    driverId = driverOpt.get().getUserId();
+                }
+            }
+            
+            if (driverId == null) {
+                return ResponseEntity.badRequest()
+                    .body(ApiResponse.error("Unable to determine driver ID"));
+            }
+            
+            List<CollectionRoute> assignedRoutes = routeService.getRoutesByDriverId(driverId);
+            return ResponseEntity.ok(ApiResponse.success("Assigned routes retrieved successfully", assignedRoutes));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                .body(ApiResponse.error("Failed to retrieve assigned routes: " + e.getMessage()));
+        }
+    }
+    
+    /**
+     * Get driver details for the authenticated driver
+     */
+    @GetMapping("/driver/details")
+    public ResponseEntity<ApiResponse<Driver>> getDriverDetails() {
+        try {
+            // Get the authenticated user ID from security context
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            
+            // Get user ID from the JWT token claims
+            String driverId = null;
+            
+            // Check if the principal contains the user details
+            if (authentication.getPrincipal() instanceof org.springframework.security.core.userdetails.User) {
+                org.springframework.security.core.userdetails.User userDetails = 
+                    (org.springframework.security.core.userdetails.User) authentication.getPrincipal();
+                
+                // Get the email from userDetails
+                String email = userDetails.getUsername();
+                
+                // Find the driver by email to get the driver ID
+                Optional<Driver> driverOpt = routeOptimizationService.getDriverRepository().findByEmail(email);
+                if (driverOpt.isPresent()) {
+                    driverId = driverOpt.get().getUserId();
+                }
+            }
+            
+            if (driverId == null) {
+                return ResponseEntity.badRequest()
+                    .body(ApiResponse.error("Unable to determine driver ID"));
+            }
+            
+            Optional<Driver> driverOpt = routeOptimizationService.getDriverRepository().findById(driverId);
+            if (!driverOpt.isPresent()) {
+                return ResponseEntity.badRequest()
+                    .body(ApiResponse.error("Driver not found with ID: " + driverId));
+            }
+            
+            return ResponseEntity.ok(ApiResponse.success("Driver details retrieved successfully", driverOpt.get()));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                .body(ApiResponse.error("Failed to retrieve driver details: " + e.getMessage()));
         }
     }
     
@@ -702,5 +797,58 @@ public class RouteController {
             return ResponseEntity.internalServerError()
                 .body(ApiResponse.error("Failed to create route: " + e.getMessage()));
         }
+    }
+    
+    /**
+     * Helper method to extract user ID from authentication
+     */
+    private String getUserIdFromAuthentication(Authentication authentication) {
+        // Get the JWT token from the request
+        // We need to extract it from the authentication details
+        Object details = authentication.getDetails();
+        if (details instanceof org.springframework.security.web.authentication.WebAuthenticationDetails) {
+            // In our implementation, we store the user ID in the JWT token
+            // Let's get it from the JWT util
+            return extractUserIdFromJwt();
+        }
+        // Fallback to the name if we can't extract from JWT
+        return authentication.getName();
+    }
+    
+    /**
+     * Extract user ID from JWT token in the request
+     */
+    private String extractUserIdFromJwt() {
+        // Get the current request
+        HttpServletRequest request = getCurrentRequest();
+        if (request != null) {
+            String token = extractJwtFromRequest(request);
+            if (token != null) {
+                return jwtUtil.getUserIdFromToken(token);
+            }
+        }
+        return null;
+    }
+    
+    /**
+     * Get current HTTP request
+     */
+    private HttpServletRequest getCurrentRequest() {
+        RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
+        if (requestAttributes instanceof ServletRequestAttributes) {
+            return ((ServletRequestAttributes) requestAttributes).getRequest();
+        }
+        return null;
+    }
+    
+    /**
+     * Extract JWT token from request
+     */
+    private String extractJwtFromRequest(HttpServletRequest request) {
+        String bearerToken = request.getHeader("Authorization");
+        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
+            return bearerToken.substring(7);
+        }
+        return null;
     }
 }
