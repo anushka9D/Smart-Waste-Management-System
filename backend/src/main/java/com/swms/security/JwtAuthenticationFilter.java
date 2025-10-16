@@ -34,17 +34,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (requestPath.startsWith("/api/auth/") ||
                 requestPath.startsWith("/api/citizens/") ||
                 requestPath.startsWith("/api/city-authorities/") ||
-
                 (requestPath.startsWith("/api/drivers/") && !requestPath.startsWith("/api/routes/")) ||
                 (requestPath.startsWith("/api/waste-collection-staff/") && !requestPath.startsWith("/api/routes/")) ||
                 requestPath.startsWith("/api/sensor-managers/")) {
-
-                requestPath.startsWith("/api/drivers/") ||
-                requestPath.startsWith("/api/v1/smartbin/") ||
-                requestPath.startsWith("/api/v1/bin-sensors/") ||
-                requestPath.startsWith("/api/v1/alerts/") ||
-                requestPath.startsWith("/api/waste-collection-staff/")) {
-
             filterChain.doFilter(request, response);
             return;
         }
