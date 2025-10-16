@@ -12,6 +12,7 @@ import DriverDashboard from './pages/DriverDashboard';
 import WasteCollectionStaffDashboard from './pages/WasteCollectionStaffDashboard';
 import SensorManagerDashboard from './pages/SensorManagerDashboard';
 import AssignedRoutes from './pages/AssignedRoutes';
+import AddSmartBin from './pages/AddSmartBin';
 
 function App() {
   return (
@@ -69,6 +70,14 @@ function App() {
             element={
               <PrivateRoute allowedUserTypes={['SENSOR_MANAGER']}>
                 <SensorManagerDashboard />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/add-smart-bin"
+            element={
+              <PrivateRoute allowedUserTypes={['SENSOR_MANAGER']}>
+                <AddSmartBin />
               </PrivateRoute>
             }
           />

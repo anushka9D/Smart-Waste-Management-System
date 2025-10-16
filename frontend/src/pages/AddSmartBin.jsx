@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { useAuth } from '../context/AuthContext';
 import AuthHeader from '../components/AuthHeader';
 import AuthFooter from '../components/AuthFooter';
 import { Plus, MapPin, ArrowLeft } from 'lucide-react';
@@ -8,7 +7,6 @@ import { useNavigate } from 'react-router-dom';
 const API_BASE_URL = 'http://localhost:8080/api/v1';
 
 function AddSmartBin() {
-  const { user } = useAuth();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     location: '',
@@ -79,28 +77,6 @@ function AddSmartBin() {
 
       <main className="flex-grow bg-gray-50 py-12 px-4">
         <div className="container mx-auto max-w-4xl">
-          {/* Back Button */}
-          <button
-            onClick={() => navigate('/smart-bin-monitoring')}
-            className="flex items-center space-x-2 text-gray-600 hover:text-gray-800 mb-6 transition"
-          >
-            <ArrowLeft className="w-5 h-5" />
-            <span>Back to Dashboard</span>
-          </button>
-
-          {/* User Info Card */}
-          <div className="bg-indigo-50 border-l-4 border-indigo-500 p-6 mb-6 rounded-lg">
-            <h2 className="text-xl font-semibold text-indigo-800 mb-4">
-              Welcome, {user?.name}!
-            </h2>
-            
-            <div className="space-y-2 text-gray-700">
-              <p><span className="font-medium">Email:</span> {user?.email}</p>
-              <p><span className="font-medium">Phone:</span> {user?.phone}</p>
-              <p><span className="font-medium">User ID:</span> {user?.userId}</p>
-              <p><span className="font-medium">Role:</span> {user?.userType}</p>
-            </div>
-          </div>
 
           {/* Main Form Card */}
           <div className="bg-white rounded-lg shadow-md p-8">
@@ -239,29 +215,6 @@ function AddSmartBin() {
                   Cancel
                 </button>
               </div>
-            </div>
-          </div>
-
-          {/* Feature Cards */}
-          <div className="grid md:grid-cols-2 gap-6 mt-8">
-            <div className="bg-green-50 p-6 rounded-lg border border-green-200">
-              <h3 className="text-lg font-semibold text-green-800 mb-2">Real-Time Monitoring</h3>
-              <p className="text-gray-600 text-sm">Track bin fill levels in real-time with IoT sensor integration</p>
-            </div>
-
-            <div className="bg-blue-50 p-6 rounded-lg border border-blue-200">
-              <h3 className="text-lg font-semibold text-blue-800 mb-2">Smart Alerts</h3>
-              <p className="text-gray-600 text-sm">Receive automatic notifications when bins reach capacity</p>
-            </div>
-
-            <div className="bg-yellow-50 p-6 rounded-lg border border-yellow-200">
-              <h3 className="text-lg font-semibold text-yellow-800 mb-2">GPS Tracking</h3>
-              <p className="text-gray-600 text-sm">Precise location mapping for efficient collection routes</p>
-            </div>
-
-            <div className="bg-purple-50 p-6 rounded-lg border border-purple-200">
-              <h3 className="text-lg font-semibold text-purple-800 mb-2">Data Analytics</h3>
-              <p className="text-gray-600 text-sm">Generate insights from collection patterns and usage data</p>
             </div>
           </div>
         </div>

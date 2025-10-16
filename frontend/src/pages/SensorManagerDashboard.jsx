@@ -278,7 +278,7 @@ function SensorManagerDashboard() {
                 </button>
               ))}
               <button
-                onClick={() => navigate('/add-bin')}
+                onClick={() => navigate('/add-smart-bin')}
                 className="ml-auto my-2 flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
               >
                 <Plus className="w-4 h-4" />
