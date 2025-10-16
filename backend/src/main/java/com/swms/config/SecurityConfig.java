@@ -54,6 +54,9 @@ public class SecurityConfig {
                         .requestMatchers("/api/routes/create/**").permitAll()
                         .requestMatchers("/api/routes/create").permitAll()
                         .requestMatchers("/api/routes/assigned").permitAll()
+                        .requestMatchers("/api/v1/smartbin/**").permitAll()
+                        .requestMatchers("/api/v1/bin-sensors/**").permitAll()
+                        .requestMatchers("/api/v1/alerts/**").permitAll()
                         .anyRequest().authenticated())
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint(jwtAuthenticationEntryPoint))
