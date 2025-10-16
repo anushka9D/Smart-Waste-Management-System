@@ -169,10 +169,45 @@ public class RouteService {
             stop.setCollectionTime(LocalDateTime.now());
             stop.setUpdatedAt(LocalDateTime.now());
             routeStopRepository.save(stop);
+            
+            // Check if all stops in the route are completed and update route status if needed
+            checkAndCompleteRouteIfAllStopsCompleted(stop);
+            
             return "Route stop marked as completed";
         }
         
         throw new RuntimeException("Route stop not found with ID: " + stopId);
+    }
+    
+    /**
+     * Check if all stops in a route are completed and update route status to COMPLETED if so
+     * @param completedStop The recently completed stop
+     */
+    private void checkAndCompleteRouteIfAllStopsCompleted(RouteStop completedStop) {
+        // Find the route that contains this stop
+        // This is a simplified approach - in a real implementation, you might want to store
+        // the route ID in each stop for easier lookup
+        List<CollectionRoute> allRoutes = collectionRouteRepository.findAll();
+        
+        for (CollectionRoute route : allRoutes) {
+            // Check if this route contains the completed stop
+            if (route.getStopIds() != null && route.getStopIds().contains(completedStop.getStopId())) {
+                // Get all stops for this route
+                List<RouteStop> routeStops = routeStopRepository.findByStopIdIn(route.getStopIds());
+                
+                // Check if all stops are completed
+                boolean allStopsCompleted = routeStops.stream()
+                    .allMatch(stop -> "COMPLETED".equals(stop.getStatus()));
+                
+                // If all stops are completed and route is not already COMPLETED, update route status
+                if (allStopsCompleted && !"COMPLETED".equals(route.getStatus())) {
+                    route.setStatus("COMPLETED");
+                    route.setUpdatedAt(LocalDateTime.now());
+                    collectionRouteRepository.save(route);
+                    break; // Found and updated the route, no need to check others
+                }
+            }
+        }
     }
     
     /**

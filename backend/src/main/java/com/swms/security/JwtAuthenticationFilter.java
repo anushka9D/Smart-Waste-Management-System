@@ -41,6 +41,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
+        // Log the request for debugging
+        logger.info("Processing JWT authentication for: " + request.getMethod() + " " + requestPath);
+
         String token = null;
         String email = null;
 
@@ -48,6 +51,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String authHeader = request.getHeader("Authorization");
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             token = authHeader.substring(7);
+            logger.info("Token found in Authorization header");
         }
 
         // If not in header, try to get from cookie
@@ -57,6 +61,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 for (Cookie cookie : cookies) {
                     if ("jwt".equals(cookie.getName())) {
                         token = cookie.getValue();
+                        logger.info("Token found in cookie");
                         break;
                     }
                 }
@@ -67,6 +72,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (token != null) {
             try {
                 email = jwtUtil.getEmailFromToken(token);
+                logger.info("Email extracted from token: " + email);
             } catch (Exception e) {
                 logger.error("JWT Token validation error: " + e.getMessage());
             }
@@ -74,14 +80,28 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         // Validate token and set authentication
         if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+            try {
+                UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+                logger.info("User details loaded for: " + email + " with authorities: " + userDetails.getAuthorities());
 
-            if (jwtUtil.validateToken(token, userDetails.getUsername())) {
-                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                        userDetails, null, userDetails.getAuthorities());
-                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                if (jwtUtil.validateToken(token, userDetails.getUsername())) {
+                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                            userDetails, null, userDetails.getAuthorities());
+                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
-                SecurityContextHolder.getContext().setAuthentication(authToken);
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                    logger.info("Authentication set for user: " + email);
+                } else {
+                    logger.warn("Token validation failed for user: " + email);
+                }
+            } catch (Exception e) {
+                logger.error("Error loading user details for: " + email, e);
+            }
+        } else {
+            if (email == null) {
+                logger.info("No email found in token");
+            } else {
+                logger.info("Authentication already exists in SecurityContext");
             }
         }
 

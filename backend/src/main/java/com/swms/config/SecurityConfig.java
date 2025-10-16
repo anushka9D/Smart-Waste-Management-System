@@ -58,6 +58,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/routes/driver/details").authenticated()
                         .requestMatchers("/api/routes/stops/by-ids").authenticated()
                         .requestMatchers("/api/routes/driver/**").authenticated()
+                        .requestMatchers("/api/v1/smartbin/*/collect").authenticated()
+                        .requestMatchers("/api/routes/stops/*/complete").authenticated()
                         .anyRequest().authenticated())
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint(jwtAuthenticationEntryPoint))

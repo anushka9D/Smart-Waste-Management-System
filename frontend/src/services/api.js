@@ -13,13 +13,28 @@ const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
-    console.log('API Request:', config.url, 'Token:', token ? 'Present' : 'Missing');
+    console.log('API Request:', config.method?.toUpperCase(), config.url, 'Token:', token ? 'Present' : 'Missing');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+      console.log('Authorization header set:', config.headers.Authorization);
+    } else {
+      console.log('No token found in localStorage');
     }
     return config;
   },
   (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Add a response interceptor to log responses
+api.interceptors.response.use(
+  (response) => {
+    console.log('API Response:', response.config.method?.toUpperCase(), response.config.url, response.status);
+    return response;
+  },
+  (error) => {
+    console.log('API Error:', error.config?.method?.toUpperCase(), error.config?.url, error.response?.status, error.message);
     return Promise.reject(error);
   }
 );
@@ -149,6 +164,48 @@ export const getRouteStops = async (stopIds) => {
   }
 };
 
+// Mark route stop as completed
+export const markRouteStopAsCompleted = async (stopId) => {
+  try {
+    const response = await api.put(`/routes/stops/${stopId}/complete`);
+    return response.data;
+  } catch (error) {
+    console.error('API Error - markRouteStopAsCompleted:', error.response || error);
+    if (error.response && error.response.status === 401) {
+      throw new Error('Unauthorized: Please log in again');
+    }
+    throw new Error(error.response?.data?.message || error.message || 'Failed to mark route stop as completed');
+  }
+};
+
+// Mark bin as collected (emptied)
+export const markBinAsCollected = async (binId) => {
+  try {
+    const response = await api.put(`/v1/smartbin/${binId}/collect`);
+    return response.data;
+  } catch (error) {
+    console.error('API Error - markBinAsCollected:', error.response || error);
+    if (error.response && error.response.status === 401) {
+      throw new Error('Unauthorized: Please log in again');
+    }
+    throw new Error(error.response?.data?.message || error.message || 'Failed to mark bin as collected');
+  }
+};
+
+// Update route status
+export const updateRouteStatus = async (routeId, status) => {
+  try {
+    const response = await api.put(`/routes/${routeId}/status?status=${status}`);
+    return response.data;
+  } catch (error) {
+    console.error('API Error - updateRouteStatus:', error.response || error);
+    if (error.response && error.response.status === 401) {
+      throw new Error('Unauthorized: Please log in again');
+    }
+    throw new Error(error.response?.data?.message || error.message || 'Failed to update route status');
+  }
+};
+
 // Validate Token
 export const validateToken = async (token) => {
   try {
@@ -157,6 +214,18 @@ export const validateToken = async (token) => {
   } catch (error) {
     return false;
   }
+};
+
+// Check if user is authenticated
+export const isAuthenticated = async () => {
+  const token = localStorage.getItem('token');
+  if (!token) {
+    return false;
+  }
+  
+  // Validate token
+  const isValid = await validateToken(token);
+  return !!isValid;
 };
 
 export default api;
