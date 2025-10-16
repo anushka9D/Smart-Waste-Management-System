@@ -32,7 +32,6 @@ public class CitizenService {
         citizen.setPhone(request.getPhone());
         citizen.setPassword(passwordEncoder.encode(request.getPassword()));
         citizen.setUserType("CITIZEN");
-        citizen.setAge(request.getAge());
         citizen.setCreatedAt(LocalDateTime.now());
         citizen.setUpdatedAt(LocalDateTime.now());
         citizen.setEnabled(true);
@@ -66,7 +65,6 @@ public class CitizenService {
             citizen.setName(request.getName());
             citizen.setEmail(request.getEmail());
             citizen.setPhone(request.getPhone());
-            citizen.setAge(request.getAge());
             citizen.setUpdatedAt(LocalDateTime.now());
             
             citizenRepository.save(citizen);

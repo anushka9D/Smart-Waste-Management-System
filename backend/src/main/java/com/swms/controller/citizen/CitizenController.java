@@ -4,7 +4,6 @@ import com.swms.dto.ApiResponse;
 import com.swms.dto.citizen.CitizenRequest;
 import com.swms.model.citizen.Citizen;
 import com.swms.service.citizen.CitizenService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,7 +17,6 @@ public class CitizenController {
 
     private final CitizenService citizenService;
 
-    @Autowired
     public CitizenController(CitizenService citizenService) {
         this.citizenService = citizenService;
     }

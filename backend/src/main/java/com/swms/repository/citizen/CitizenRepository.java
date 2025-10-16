@@ -19,15 +19,6 @@ public interface CitizenRepository extends MongoRepository<Citizen, String> {
     // Check if email exists
     Boolean existsByEmail(String email);
     
-    // Find all citizens by age
-    List<Citizen> findByAge(int age);
-    
     // Find citizens by user type
     List<Citizen> findByUserType(String userType);
-    
-    // Find citizens by age greater than
-    List<Citizen> findByAgeGreaterThan(int age);
-    
-    // Find citizens by age between
-    List<Citizen> findByAgeBetween(int minAge, int maxAge);
 }

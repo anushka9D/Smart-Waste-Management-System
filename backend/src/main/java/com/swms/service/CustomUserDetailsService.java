@@ -45,8 +45,9 @@ public class CustomUserDetailsService implements UserDetailsService {
         // Try to find citizen
         Citizen citizen = citizenRepository.findByEmail(email).orElse(null);
         if (citizen != null) {
+            // Ensure we're using the email field as the username
             return new org.springframework.security.core.userdetails.User(
-                    citizen.getEmail(),
+                    citizen.getEmail(), // username - must be the email
                     citizen.getPassword(),
                     citizen.isEnabled(),
                     true,

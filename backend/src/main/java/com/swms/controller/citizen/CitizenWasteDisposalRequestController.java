@@ -2,8 +2,10 @@ package com.swms.controller.citizen;
 
 import com.swms.dto.ApiResponse;
 import com.swms.dto.citizen.CitizenWasteDisposalMultipartDTO;
+import com.swms.model.citizen.Citizen;
 import com.swms.model.citizen.CitizenWasteDisposalRequest;
 import com.swms.model.citizen.CitizenRequestUpdate;
+import com.swms.repository.citizen.CitizenRepository;
 import com.swms.service.citizen.CitizenWasteDisposalRequestService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +19,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/citizen/waste-disposal-requests")
@@ -25,6 +28,9 @@ public class CitizenWasteDisposalRequestController {
 
     @Autowired
     private CitizenWasteDisposalRequestService requestService;
+    
+    @Autowired
+    private CitizenRepository citizenRepository;
 
     @GetMapping
     public ResponseEntity<ApiResponse<Page<CitizenWasteDisposalRequest>>> getCitizenRequests(
@@ -109,6 +115,15 @@ public class CitizenWasteDisposalRequestController {
         if (userDetails == null) {
             throw new RuntimeException("User not authenticated");
         }
-        return userDetails.getUsername();
+        
+        // Get the citizen by email to retrieve the actual user ID
+        String email = userDetails.getUsername();
+        Optional<Citizen> citizenOpt = citizenRepository.findByEmail(email);
+        if (citizenOpt.isEmpty()) {
+            // Improved error message for debugging
+            throw new RuntimeException("Citizen not found with email: " + email + ". Current user details username: " + userDetails.getUsername());
+        }
+        
+        return citizenOpt.get().getUserId();
     }
 }
