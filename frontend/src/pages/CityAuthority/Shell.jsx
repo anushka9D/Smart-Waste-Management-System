@@ -24,7 +24,7 @@ function Shell() {
          <section className='min-h-screen flex'>
            
             {/* side bar */}
-            <div className={`relative rounded-r-2xl bg-[#E9FFDB]  h-screen overflow-hidden space-y-6 pt-4
+            <div className={`relative rounded-r-2xl bg-[#E9FFDB]  min-h-screen overflow-hidden space-y-6 pt-4
                     transition-[width] duration-300 ease-out 
                     ${isOpen ? 'w-[340px]' : 'w-16'}`}>
 

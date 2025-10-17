@@ -26,8 +26,10 @@ import Map from './pages/CityAuthority/Map';
 import ReportBinRequest from './pages/citizen/ReportBinRequest';
 import ReportBinForm from './pages/citizen/ReportBinForm';
 import ReportConfirmation from './pages/citizen/ReportConfirmation';
-import TrackRequests from './pages/citizen/TrackRequests';
 import RequestDetails from './pages/citizen/RequestDetails';
+import TrackRequests from './pages/citizen/TrackRequests';
+import FeedbackForm from './pages/citizen/FeedbackForm';
+import FeedbackList from './pages/citizen/FeedbackList';
 
 function App() {
   return (
@@ -157,6 +159,22 @@ function App() {
             element={
               <PrivateRoute allowedUserTypes={['CITIZEN']}>
                 <TrackRequests />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/citizen/feedback"
+            element={
+              <PrivateRoute allowedUserTypes={['CITIZEN']}>
+                <FeedbackList />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/citizen/feedback/:requestId"
+            element={
+              <PrivateRoute allowedUserTypes={['CITIZEN']}>
+                <FeedbackForm />
               </PrivateRoute>
             }
           />

@@ -252,6 +252,15 @@ function RequestDetails() {
                 <div className="bg-white border border-gray-200 rounded-lg p-4">
                   <h2 className="text-lg font-semibold text-gray-800 mb-3">Actions</h2>
                   
+                  {request.status === 'RESOLVED' || request.status === 'COLLECTED' ? (
+                    <button
+                      onClick={() => navigate(`/citizen/feedback/${request.requestId}`, { state: { request } })}
+                      className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm font-medium mb-2"
+                    >
+                      Give Feedback
+                    </button>
+                  ) : null}
+                  
                   {request.status !== 'RESOLVED' && request.status !== 'COLLECTED' && request.status !== 'CANCELLED' && (
                     <button
                       onClick={handleCancelRequest}

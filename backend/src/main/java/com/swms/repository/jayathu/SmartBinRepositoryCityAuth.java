@@ -76,7 +76,7 @@ public interface SmartBinRepositoryCityAuth extends MongoRepository<SmartBinCity
 
    
     @Aggregation(pipeline = {
-            "{ $match: { wasteType: 'plastic' } }",
+            "{ $match: { wasteType: 'Plastic' } }",
             "{ $group: { _id: null, totalPlastic: { $sum: '$currentLevel' } } }",
             "{ $project: { _id: 0, totalPlastic: { $ifNull: ['$totalPlastic', 0] } } }"
     })
@@ -84,7 +84,7 @@ public interface SmartBinRepositoryCityAuth extends MongoRepository<SmartBinCity
 
    
     @Aggregation(pipeline = {
-            "{ $match: { wasteType: 'organic' } }",
+            "{ $match: { wasteType: 'Organic' } }",
             "{ $group: { _id: null, totalOrganic: { $sum: '$currentLevel' } } }",
             "{ $project: { _id: 0, totalOrganic: { $ifNull: ['$totalOrganic', 0] } } }"
     })
@@ -92,7 +92,7 @@ public interface SmartBinRepositoryCityAuth extends MongoRepository<SmartBinCity
 
    
     @Aggregation(pipeline = {
-            "{ $match: { wasteType: 'metal' } }",
+            "{ $match: { wasteType: 'Metal' } }",
             "{ $group: { _id: null, totalMetal: { $sum: '$currentLevel' } } }",
             "{ $project: { _id: 0, totalMetal: { $ifNull: ['$totalMetal', 0] } } }"
     })

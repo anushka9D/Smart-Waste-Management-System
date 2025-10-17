@@ -144,16 +144,6 @@ export const getAuthenticatedDriverDetails = async () => {
   }
 };
 
-// Get waste collection staff by ID
-export const getWasteCollectionStaffById = async (staffId) => {
-  try {
-    const response = await api.get(`/waste-collection-staff/${staffId}`);
-    return response.data;
-  } catch (error) {
-    throw new Error(error.response?.data?.message || error.message || 'Failed to fetch staff details');
-  }
-};
-
 // Get routes assigned to the authenticated driver
 export const getAuthenticatedDriverRoutes = async () => {
   try {
@@ -298,6 +288,40 @@ export const getRequestUpdates = async (requestId) => {
 export const cancelRequest = async (requestId) => {
   try {
     const response = await api.put(`/citizen/waste-disposal-requests/${requestId}/cancel`);
+    return response.data;
+  } catch (error) {
+    return error.response ? error.response.data : { success: false, message: 'Network error' };
+  }
+};
+
+// Feedback APIs
+export const submitFeedback = async (feedbackData) => {
+  try {
+    const formData = new FormData();
+    formData.append('requestId', feedbackData.requestId);
+    formData.append('topic', feedbackData.topic);
+    formData.append('rating', feedbackData.rating);
+    if (feedbackData.comment) {
+      formData.append('comment', feedbackData.comment);
+    }
+    if (feedbackData.photo) {
+      formData.append('photo', feedbackData.photo);
+    }
+
+    const response = await api.post('/citizen/feedback', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  } catch (error) {
+    return error.response ? error.response.data : { success: false, message: 'Network error' };
+  }
+};
+
+export const getMyFeedback = async () => {
+  try {
+    const response = await api.get('/citizen/feedback');
     return response.data;
   } catch (error) {
     return error.response ? error.response.data : { success: false, message: 'Network error' };

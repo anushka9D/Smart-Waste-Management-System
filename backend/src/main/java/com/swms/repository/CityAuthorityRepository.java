@@ -9,12 +9,12 @@ import java.util.Optional;
 @Repository
 public interface CityAuthorityRepository extends MongoRepository<CityAuthority, String> {
     
-    // Find city authority by email
+    
     Optional<CityAuthority> findByEmail(String email);
     
-    // Check if email exists
+    
     Boolean existsByEmail(String email);
     
-    // Find city authority by employee ID
+    
     Optional<CityAuthority> findByEmployeeId(String employeeId);
 }

@@ -10,18 +10,18 @@ import java.util.Optional;
 @Repository
 public interface DriverRepository extends MongoRepository<Driver, String> {
     
-    // Find driver by email
+    
     Optional<Driver> findByEmail(String email);
     
-    // Check if email exists
+    
     Boolean existsByEmail(String email);
     
-    // Find driver by license number
+    
     Optional<Driver> findByLicenseNumber(String licenseNumber);
     
-    // Find available drivers
+    
     List<Driver> findByAvailabilityTrueAndCurrentRouteIdIsNull();
     
-    // Find driver by current route ID
+    
     Optional<Driver> findByCurrentRouteId(String routeId);
 }

@@ -26,24 +26,25 @@ public class SmartBinCityAuth {
     private GPSLocation coordinates;
     private Double currentLevel;
     private Double capacity;
-    private String status; 
+    private String status;
     private LocalDateTime lastCollected;
     private LocalDateTime createdAt;
     private LocalDateTime lastUpdated;
-
     private String wasteType;
-
-
-    public String getId(){
-        return binId;    }
-
-    public String getWasteType() {
-        return wasteType;
-    }
 
     public void setWasteType(String wasteType) {
         this.wasteType = wasteType;
     }
+
+    public String getWasteType() {
+        return wasteType;
+    }
+    
+    public String getId() {
+        return binId;
+    }
+
+
 
     public String getLocation() {
         return location;

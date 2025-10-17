@@ -91,7 +91,6 @@ function ReportBinRequest() {
     } catch (error) {
       console.error('Error initializing map:', error);
       setMapLoading(false);
-      alert('Failed to initialize map.');
     }
   };
 
