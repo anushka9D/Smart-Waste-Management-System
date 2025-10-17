@@ -2,16 +2,16 @@ package com.swms.service;
 
 import com.swms.dto.AuthResponse;
 import com.swms.dto.LoginRequest;
-import com.swms.dto.CitizenRequest;
+import com.swms.dto.citizen.CitizenRequest;
 import com.swms.dto.CityAuthorityRequest;
 import com.swms.dto.DriverRequest;
 import com.swms.dto.WasteCollectionStaffRequest;
-import com.swms.model.Citizen;
+import com.swms.model.citizen.Citizen;
 import com.swms.model.CityAuthority;
 import com.swms.model.Driver;
 import com.swms.model.User;
 import com.swms.model.WasteCollectionStaff;
-import com.swms.repository.CitizenRepository;
+import com.swms.repository.citizen.CitizenRepository;
 import com.swms.repository.CityAuthorityRepository;
 import com.swms.repository.DriverRepository;
 import com.swms.repository.WasteCollectionStaffRepository;
@@ -75,7 +75,6 @@ public class AuthService {
         citizen.setPhone(request.getPhone());
         citizen.setPassword(passwordEncoder.encode(request.getPassword()));
         citizen.setUserType("CITIZEN");
-        citizen.setAge(request.getAge());
         citizen.setCreatedAt(LocalDateTime.now());
         citizen.setUpdatedAt(LocalDateTime.now());
         citizen.setEnabled(true);
@@ -87,7 +86,8 @@ public class AuthService {
             savedCitizen.getUserId(), 
             savedCitizen.getName(), 
             savedCitizen.getEmail(),
-            savedCitizen.getUserType()
+            savedCitizen.getUserType(),
+            savedCitizen.getPhone() 
         );
 
         return new AuthResponse(
@@ -132,7 +132,8 @@ public class AuthService {
             savedCityAuthority.getUserId(), 
             savedCityAuthority.getName(), 
             savedCityAuthority.getEmail(),
-            savedCityAuthority.getUserType()
+            savedCityAuthority.getUserType(),
+            savedCityAuthority.getPhone()
         );
 
         return new AuthResponse(
@@ -177,7 +178,8 @@ public class AuthService {
             savedDriver.getUserId(), 
             savedDriver.getName(), 
             savedDriver.getEmail(),
-            savedDriver.getUserType()
+            savedDriver.getUserType(),
+            savedDriver.getPhone()
         );
 
         return new AuthResponse(
@@ -222,7 +224,8 @@ public class AuthService {
             savedStaff.getUserId(), 
             savedStaff.getName(), 
             savedStaff.getEmail(),
-            savedStaff.getUserType()
+            savedStaff.getUserType(),
+            savedStaff.getPhone()
         );
 
         return new AuthResponse(
@@ -267,7 +270,8 @@ public class AuthService {
         savedSensorManager.getUserId(), 
         savedSensorManager.getName(), 
         savedSensorManager.getEmail(),
-        savedSensorManager.getUserType()
+        savedSensorManager.getUserType(),
+        savedSensorManager.getPhone()
     );
 
     return new AuthResponse(
@@ -302,7 +306,8 @@ public class AuthService {
             user.getUserId(), 
             user.getName(), 
             user.getEmail(),
-            userType
+            userType,
+            user.getPhone()
         );
 
         return new AuthResponse(

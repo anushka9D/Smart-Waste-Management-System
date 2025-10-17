@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import { validateToken } from '../services/api';
+import { validateToken, logout as apiLogout } from '../services/api';
 
 const AuthContext = createContext(null);
 
@@ -13,16 +13,7 @@ export const AuthProvider = ({ children }) => {
 
   const checkAuth = async () => {
     try {
-      // First check localStorage for token
-      let token = localStorage.getItem('token');
-      console.log('Token from localStorage:', token ? 'Present' : 'Missing');
-      
-      // If not found in localStorage, check cookie
-      if (!token) {
-        token = getTokenFromCookie();
-        console.log('Token from cookie:', token ? 'Present' : 'Missing');
-      }
-      
+      const token = localStorage.getItem('token');
       if (token) {
         const isValid = await validateToken(token);
         console.log('Token validation result:', isValid);
@@ -52,6 +43,9 @@ export const AuthProvider = ({ children }) => {
   const login = (userData) => {
     console.log('Setting user data:', userData);
     setUser(userData);
+    if (token) {
+      localStorage.setItem('token', token);
+    }
   };
 
   const logout = () => {
@@ -84,7 +78,15 @@ export const AuthProvider = ({ children }) => {
           .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
           .join('')
       );
-      return JSON.parse(jsonPayload);
+      const decoded = JSON.parse(jsonPayload);
+
+      return {
+        userId: decoded.userId,
+        name: decoded.name,
+        email: decoded.sub, // subject is email
+        userType: decoded.userType,
+        phone: decoded.phone // Add phone
+      };
     } catch (error) {
       console.error('Error decoding token:', error);
       return null;
