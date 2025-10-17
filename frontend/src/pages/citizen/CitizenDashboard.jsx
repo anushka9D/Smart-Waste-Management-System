@@ -54,11 +54,13 @@ function CitizenDashboard() {
                 <p className="text-xs text-gray-500 mt-2 italic">Coming soon...</p>
               </div>
 
-              <div className="bg-pink-50 p-6 rounded-lg opacity-60 cursor-not-allowed">
+              <button
+                onClick={() => navigate('/citizen/feedback')}
+                className="bg-pink-50 p-6 rounded-lg hover:bg-pink-100 transition text-left"
+              >
                 <h3 className="text-lg font-semibold text-pink-800 mb-2">Feedback</h3>
                 <p className="text-gray-600 text-sm">Provide feedback on services</p>
-                <p className="text-xs text-gray-500 mt-2 italic">Coming soon...</p>
-              </div>
+              </button>
             </div>
           </div>
         </div>
