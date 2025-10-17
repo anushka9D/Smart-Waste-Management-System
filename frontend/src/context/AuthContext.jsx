@@ -56,7 +56,15 @@ export const AuthProvider = ({ children }) => {
           .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
           .join('')
       );
-      return JSON.parse(jsonPayload);
+      const decoded = JSON.parse(jsonPayload);
+
+      return {
+        userId: decoded.userId,
+        name: decoded.name,
+        email: decoded.sub, // subject is email
+        userType: decoded.userType,
+        phone: decoded.phone // Add phone
+      };
     } catch (error) {
       console.error('Error decoding token:', error);
       return null;

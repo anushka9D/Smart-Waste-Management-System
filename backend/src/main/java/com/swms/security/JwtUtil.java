@@ -23,12 +23,13 @@ public class JwtUtil {
         return Keys.hmacShaKeyFor(secret.getBytes());
     }
 
-    public String generateToken(String userId, String name, String email, String userType) {
+    public String generateToken(String userId, String name, String email, String userType, String phone) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("userId", userId);
         claims.put("name", name);
         claims.put("userType", userType);
-        
+        claims.put("phone", phone);
+
         return Jwts.builder()
                 .claims(claims)
                 .subject(email)
@@ -36,6 +37,11 @@ public class JwtUtil {
                 .expiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(getSigningKey())
                 .compact();
+    }
+
+    // Add method to get phone from token
+    public String getPhoneFromToken(String token) {
+        return getClaimsFromToken(token).get("phone", String.class);
     }
 
     public String getEmailFromToken(String token) {

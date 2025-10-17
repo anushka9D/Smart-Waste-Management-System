@@ -1,10 +1,12 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import AuthHeader from '../../components/AuthHeader';
 import AuthFooter from '../../components/AuthFooter';
+import { useAuth } from '../../context/AuthContext'; // Import auth context
 
 function ReportConfirmation() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { user } = useAuth(); // Get user from auth context
   const requestData = location.state?.requestData;
 
   const categoryDisplay = {
@@ -17,24 +19,24 @@ function ReportConfirmation() {
   };
 
   if (!requestData) {
-  return (
-    <div className="min-h-screen flex flex-col">
-      <AuthHeader />
-      <main className="flex-grow bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-gray-500 text-lg">No request data found.</p>
-          <button
-            onClick={() => navigate('/citizen-dashboard')}
-            className="mt-4 px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
-          >
-            Back to Dashboard
-          </button>
-        </div>
-      </main>
-      <AuthFooter />
-    </div>
-  );
-}
+    return (
+      <div className="min-h-screen flex flex-col">
+        <AuthHeader />
+        <main className="flex-grow bg-gray-50 flex items-center justify-center">
+          <div className="text-center">
+            <p className="text-gray-500 text-lg">No request data found.</p>
+            <button
+              onClick={() => navigate('/citizen-dashboard')}
+              className="mt-4 px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
+            >
+              Back to Dashboard
+            </button>
+          </div>
+        </main>
+        <AuthFooter />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -51,6 +53,21 @@ function ReportConfirmation() {
             </div>
 
             <h1 className="text-3xl font-bold text-gray-800 mb-4">Request Submitted Successfully!</h1>
+            
+            {/* SMS and Email Confirmation Message */}
+            {user && (
+              <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <p className="text-blue-700 text-sm">
+                  📧 Confirmation email sent to <strong>{user.email}</strong>
+                </p>
+                {user.phone && (
+                  <p className="text-blue-700 text-sm mt-1">
+                    📱 SMS notification sent to <strong>{user.phone}</strong>
+                  </p>
+                )}
+              </div>
+            )}
+
             <p className="text-gray-600 mb-8">
               Your waste disposal request has been received and is being processed.
             </p>

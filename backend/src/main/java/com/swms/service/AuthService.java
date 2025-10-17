@@ -86,7 +86,8 @@ public class AuthService {
             savedCitizen.getUserId(), 
             savedCitizen.getName(), 
             savedCitizen.getEmail(),
-            savedCitizen.getUserType()
+            savedCitizen.getUserType(),
+            savedCitizen.getPhone() 
         );
 
         return new AuthResponse(
@@ -131,7 +132,8 @@ public class AuthService {
             savedCityAuthority.getUserId(), 
             savedCityAuthority.getName(), 
             savedCityAuthority.getEmail(),
-            savedCityAuthority.getUserType()
+            savedCityAuthority.getUserType(),
+            savedCityAuthority.getPhone()
         );
 
         return new AuthResponse(
@@ -176,7 +178,8 @@ public class AuthService {
             savedDriver.getUserId(), 
             savedDriver.getName(), 
             savedDriver.getEmail(),
-            savedDriver.getUserType()
+            savedDriver.getUserType(),
+            savedDriver.getPhone()
         );
 
         return new AuthResponse(
@@ -221,7 +224,8 @@ public class AuthService {
             savedStaff.getUserId(), 
             savedStaff.getName(), 
             savedStaff.getEmail(),
-            savedStaff.getUserType()
+            savedStaff.getUserType(),
+            savedStaff.getPhone()
         );
 
         return new AuthResponse(
@@ -266,7 +270,8 @@ public class AuthService {
         savedSensorManager.getUserId(), 
         savedSensorManager.getName(), 
         savedSensorManager.getEmail(),
-        savedSensorManager.getUserType()
+        savedSensorManager.getUserType(),
+        savedSensorManager.getPhone()
     );
 
     return new AuthResponse(
@@ -301,7 +306,8 @@ public class AuthService {
             user.getUserId(), 
             user.getName(), 
             user.getEmail(),
-            userType
+            userType,
+            user.getPhone()
         );
 
         return new AuthResponse(
