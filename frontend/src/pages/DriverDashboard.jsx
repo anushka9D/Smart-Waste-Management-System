@@ -3,7 +3,7 @@ import AuthHeader from '../components/AuthHeader';
 import AuthFooter from '../components/AuthFooter';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getAuthenticatedDriverDetails, getAuthenticatedDriverRoutes } from '../services/api';
+import { getAuthenticatedDriverDetails, getAuthenticatedDriverRoutes, getWasteCollectionStaffById } from '../services/api';
 
 function DriverDashboard() {
   const { user } = useAuth();
@@ -15,6 +15,30 @@ function DriverDashboard() {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
+  const [staffDetails, setStaffDetails] = useState({}); // Store staff details by ID
+
+  // Fetch staff details by ID
+  const fetchStaffDetails = async (staffId) => {
+    try {
+      // If we already have the staff details, return them
+      if (staffDetails[staffId]) {
+        return staffDetails[staffId];
+      }
+      
+      const response = await getWasteCollectionStaffById(staffId);
+      if (response.success) {
+        // Update staff details state
+        setStaffDetails(prev => ({
+          ...prev,
+          [staffId]: response.data
+        }));
+        return response.data;
+      }
+    } catch (err) {
+      console.error(`Error fetching staff details for ID ${staffId}:`, err);
+    }
+    return null;
+  };
 
   // Fetch the driver's details and assigned routes
   const fetchDriverData = async (isRefresh = false) => {
@@ -57,6 +81,13 @@ function DriverDashboard() {
         // Filter out completed routes from the display
         const activeRoutes = (routesResponse.data || []).filter(route => route.status !== 'COMPLETED');
         setAssignedRoutes(activeRoutes);
+        
+        // Fetch staff details for all assigned staff in routes
+        const staffIds = activeRoutes.flatMap(route => route.assignedStaffIds || []);
+        const uniqueStaffIds = [...new Set(staffIds)];
+        
+        // Fetch details for each staff member
+        await Promise.all(uniqueStaffIds.map(fetchStaffDetails));
         
         // Show success message when refreshing
         if (isRefresh) {
@@ -234,7 +265,7 @@ function DriverDashboard() {
                               <div className="flex flex-wrap gap-2">
                                 {route.assignedStaffIds.map((staffId, staffIndex) => (
                                   <span key={staffIndex} className="bg-gray-200 text-gray-800 px-2 py-1 rounded text-xs">
-                                    {staffId}
+                                    {staffDetails[staffId] ? staffDetails[staffId].name : staffId}
                                   </span>
                                 ))}
                               </div>

@@ -22,21 +22,21 @@ public class CollectionRoute {
     
     private List<String> assignedStaffIds;
     
-    private double totalDistance; // in kilometers
+    private double totalDistance; 
     
-    private int estimatedTime; // in minutes
+    private int estimatedTime; 
     
-    private List<String> stopIds; // References to RouteStop entities
+    private List<String> stopIds; 
     
     private LocalDateTime createdAt;
     
     private LocalDateTime updatedAt;
     
-    // Default constructor
+    
     public CollectionRoute() {
     }
     
-    // Constructor with all fields
+
     public CollectionRoute(String routeId, LocalDateTime date, String status, String assignedTruckId,
                           String assignedDriverId, List<String> assignedStaffIds, double totalDistance,
                           int estimatedTime, List<String> stopIds, LocalDateTime createdAt, LocalDateTime updatedAt) {
@@ -53,7 +53,7 @@ public class CollectionRoute {
         this.updatedAt = updatedAt;
     }
     
-    // Getters
+    
     public String getRouteId() {
         return routeId;
     }
@@ -98,7 +98,7 @@ public class CollectionRoute {
         return updatedAt;
     }
     
-    // Setters
+   
     public void setRouteId(String routeId) {
         this.routeId = routeId;
     }

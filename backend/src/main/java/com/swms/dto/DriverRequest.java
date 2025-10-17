@@ -23,11 +23,11 @@ public class DriverRequest {
     @NotBlank(message = "Vehicle type is required")
     private String vehicleType;
 
-    // Default constructor
+    
     public DriverRequest() {
     }
 
-    // Getters
+    
     public String getName() {
         return name;
     }

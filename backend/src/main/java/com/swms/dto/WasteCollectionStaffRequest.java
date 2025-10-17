@@ -23,11 +23,11 @@ public class WasteCollectionStaffRequest {
     @NotBlank(message = "Route area is required")
     private String routeArea;
 
-    // Default constructor
+    
     public WasteCollectionStaffRequest() {
     }
 
-    // Getters
+    
     public String getName() {
         return name;
     }
