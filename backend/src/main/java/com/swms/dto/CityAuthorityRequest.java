@@ -23,11 +23,11 @@ public class CityAuthorityRequest {
     @NotBlank(message = "Department is required")
     private String department;
 
-    // Default constructor
+    
     public CityAuthorityRequest() {
     }
 
-    // Getters
+    
     public String getName() {
         return name;
     }
@@ -52,7 +52,7 @@ public class CityAuthorityRequest {
         return department;
     }
 
-    // Setters
+    
     public void setName(String name) {
         this.name = name;
     }

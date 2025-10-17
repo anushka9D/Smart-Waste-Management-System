@@ -35,18 +35,16 @@ public class RouteController {
     @Autowired
     private JwtUtil jwtUtil;
     
-    /**
-     * CityAuthority creates new route with specific resource assignments
-     */
+    
     @PostMapping("/create")
     public ResponseEntity<ApiResponse<CollectionRoute>> createRoute(@RequestBody Map<String, Object> requestData) {
         try {
-            // Extract resource assignments from request
+            
             String truckId = (String) requestData.get("truckId");
             String driverId = (String) requestData.get("driverId");
             List<String> staffIds = new ArrayList<>();
             
-            // Handle staffIds as either List or String
+            
             Object staffIdsObj = requestData.get("staffIds");
             if (staffIdsObj instanceof List) {
                 staffIds = (List<String>) staffIdsObj;
@@ -54,7 +52,7 @@ public class RouteController {
                 staffIds.add((String) staffIdsObj);
             }
             
-            // Get bins that need collection
+            // Get bins needing collection
             List<SmartBin> bins = routeOptimizationService.getBinsNeedingCollection();
             
             if (bins.isEmpty()) {
@@ -62,14 +60,13 @@ public class RouteController {
                     .body(ApiResponse.error("No bins need collection at this time"));
             }
             
-            // For demo purposes, using a fixed depot location
-            // In a real implementation, this would come from configuration
-            GPSLocation depot = new GPSLocation(40.7128, -74.0060); // New York City coordinates
             
-            // Create optimized route
+            GPSLocation depot = new GPSLocation(40.7128, -74.0060); 
+            
+            
             CollectionRoute route = routeOptimizationService.createOptimizedRoute(bins, depot);
             
-            // Assign specific truck, driver, and staff to the route
+            
             routeService.assignSpecificResourcesToRoute(route, truckId, driverId, staffIds);
             
             return ResponseEntity.ok(ApiResponse.success("Route created successfully", route));
@@ -79,20 +76,18 @@ public class RouteController {
         }
     }
     
-    /**
-     * CityAuthority creates a specific route by route ID with resource assignments
-     */
+   
     @PostMapping("/create/{routeIndex}")
     public ResponseEntity<ApiResponse<CollectionRoute>> createSpecificRoute(
             @PathVariable int routeIndex, 
             @RequestBody Map<String, Object> requestData) {
         try {
-            // Extract resource assignments from request
+            
             String truckId = (String) requestData.get("truckId");
             String driverId = (String) requestData.get("driverId");
             List<String> staffIds = new ArrayList<>();
             
-            // Handle staffIds as either List or String
+            
             Object staffIdsObj = requestData.get("staffIds");
             if (staffIdsObj instanceof List) {
                 staffIds = (List<String>) staffIdsObj;
@@ -100,7 +95,7 @@ public class RouteController {
                 staffIds.add((String) staffIdsObj);
             }
             
-            // Get all smart bins with "FULL" status (case-insensitive)
+            
             List<SmartBin> allBins = routeOptimizationService.getSmartBinRepository().findAll()
                 .stream()
                 .filter(bin -> "FULL".equalsIgnoreCase(bin.getStatus()))
@@ -111,35 +106,35 @@ public class RouteController {
                     .body(ApiResponse.error("No bins need collection at this time"));
             }
             
-            // For demo purposes, using a fixed depot location
-            GPSLocation depot = new GPSLocation(40.7128, -74.0060); // New York City coordinates
+           
+            GPSLocation depot = new GPSLocation(40.7128, -74.0060); 
             
-            // Group bins by proximity to create separate routes for each geographic cluster
+            
             List<List<SmartBin>> routeGroups = groupBinsByProximity(allBins, depot);
             
-            // Filter groups to only include those with at least 2 bins
+            
             List<List<SmartBin>> validRouteGroups = routeGroups.stream()
                 .filter(group -> group.size() >= 2)
                 .collect(Collectors.toList());
             
-            // If no valid groups, use all bins as one group
+           
             if (validRouteGroups.isEmpty()) {
                 validRouteGroups.add(allBins);
             }
             
-            // Check if routeIndex is valid
+            
             if (routeIndex < 0 || routeIndex >= validRouteGroups.size()) {
                 return ResponseEntity.badRequest()
                     .body(ApiResponse.error("Invalid route index. Available routes: 0 to " + (validRouteGroups.size() - 1)));
             }
             
-            // Get the specific group of bins for this route
+            
             List<SmartBin> bins = validRouteGroups.get(routeIndex);
             
-            // Create optimized route
+            
             CollectionRoute route = routeOptimizationService.createOptimizedRoute(bins, depot);
             
-            // Assign specific truck, driver, and staff to the route
+            
             routeService.assignSpecificResourcesToRoute(route, truckId, driverId, staffIds);
             
             return ResponseEntity.ok(ApiResponse.success("Route created successfully", route));
@@ -149,88 +144,85 @@ public class RouteController {
         }
     }
     
-    /**
-     * Get route details for display without storing in database
-     * Shows all routes that can be assigned with full bin details
-     */
+   
     @GetMapping("/preview")
     public ResponseEntity<ApiResponse<Map<String, Object>>> getRoutePreview() {
         try {
-            // Get all smart bins with "FULL" status (case-insensitive)
+            
             List<SmartBin> allBins = routeOptimizationService.getSmartBinRepository().findAll()
                 .stream()
                 .filter(bin -> "FULL".equalsIgnoreCase(bin.getStatus()))
                 .collect(Collectors.toList());
             
-            // Create routes for each group (for display only, not saved to DB)
+            
             List<Map<String, Object>> routesData = new ArrayList<>();
             
-            // Only process bins if there are any that need collection
+           
             if (!allBins.isEmpty()) {
-                // For demo purposes, using a fixed depot location
-                GPSLocation depot = new GPSLocation(40.7128, -74.0060); // New York City coordinates
+               
+                GPSLocation depot = new GPSLocation(40.7128, -74.0060); 
                 
-                // Group bins by proximity to create separate routes for each geographic cluster
+                
                 List<List<SmartBin>> routeGroups = groupBinsByProximity(allBins, depot);
                 
-                // Get ALL resources (not just available ones)
+                
                 List<Truck> allTrucks = getAllTrucks();
                 List<Driver> allDrivers = getAllDrivers();
                 List<WasteCollectionStaff> allStaff = getAllStaff();
                 
-                // Get available resources (excluding already assigned ones)
+                
                 List<Truck> availableTrucks = getAvailableTrucks();
                 List<Driver> availableDrivers = getAvailableDrivers();
                 List<WasteCollectionStaff> availableStaff = getAvailableStaff();
                 
-                // Filter available drivers to only include those with availability = true
+           
                 availableDrivers = availableDrivers.stream()
                     .filter(Driver::isAvailability)
                     .collect(Collectors.toList());
                     
-                // Filter available staff to only include those with availability = true
+                
                 availableStaff = availableStaff.stream()
                     .filter(WasteCollectionStaff::isAvailability)
                     .collect(Collectors.toList());
                 
                 for (List<SmartBin> bins : routeGroups) {
-                    // Skip groups with less than 2 bins
+                    
                     if (bins.size() < 2) {
                         continue;
                     }
                     
-                    // Calculate total capacity
+                 
                     double totalCapacity = bins.stream()
                         .mapToDouble(SmartBin::getCapacity)
                         .sum();
                     
-                    // Create optimized route stops (not saved to DB)
+                   
                     List<RouteStop> routeStops = routeOptimizationService.calculateNearestNeighborRoute(bins, depot);
                     
-                    // Get stop IDs (these would be generated if saved)
+                  
                     List<String> stopIds = new ArrayList<>();
                     for (int i = 0; i < routeStops.size(); i++) {
                         stopIds.add("STOP_" + System.currentTimeMillis() + "_" + i);
                     }
                     
-                    // Get bin IDs for stops
+                    
                     List<String> binIds = routeStops.stream()
                         .map(RouteStop::getBinId)
                         .collect(Collectors.toList());
                     
-                    // Calculate route metrics
+                    
                     Map<String, Object> metrics = routeOptimizationService.calculateTotalRouteMetrics(routeStops, depot);
                     
-                    // Find suitable resources for this route
+                    
                     String suitableTruckId = findSuitableTruck(allTrucks, totalCapacity);
                     String suitableDriverId = findSuitableDriver(allDrivers);
-                    List<String> suitableStaffIds = findSuitableStaff(allStaff, 2); // Up to 2 staff members
+                    List<String> suitableStaffIds = findSuitableStaff(allStaff, 2);
                     
-                    // Prepare route data (not saved to DB)
+                    
                     Map<String, Object> routeData = new HashMap<>();
                     routeData.put("routeId", "ROUTE_" + System.currentTimeMillis() + "_" + routesData.size());
                     routeData.put("date", LocalDateTime.now());
-                    routeData.put("status", "Not assigned"); // Default status
+                    routeData.put("status", "Not assigned"); 
                     routeData.put("assignedTruckId", suitableTruckId);
                     routeData.put("assignedDriverId", suitableDriverId);
                     routeData.put("assignedStaffIds", suitableStaffIds);
@@ -243,40 +235,40 @@ public class RouteController {
                     routesData.add(routeData);
                 }
                 
-                // If no valid routes found, create one route with all bins
+                
                 if (routesData.isEmpty() && !allBins.isEmpty()) {
-                    // Calculate total capacity
+                    
                     double totalCapacity = allBins.stream()
                         .mapToDouble(SmartBin::getCapacity)
                         .sum();
                     
-                    // Create optimized route stops (not saved to DB)
+                   
                     List<RouteStop> routeStops = routeOptimizationService.calculateNearestNeighborRoute(allBins, depot);
                     
-                    // Get stop IDs (these would be generated if saved)
+                    
                     List<String> stopIds = new ArrayList<>();
                     for (int i = 0; i < routeStops.size(); i++) {
                         stopIds.add("STOP_" + System.currentTimeMillis() + "_" + i);
                     }
                     
-                    // Get bin IDs for stops
+                 
                     List<String> binIds = routeStops.stream()
                         .map(RouteStop::getBinId)
                         .collect(Collectors.toList());
                     
-                    // Calculate route metrics
+                   
                     Map<String, Object> metrics = routeOptimizationService.calculateTotalRouteMetrics(routeStops, depot);
                     
-                    // Find suitable resources for this route
+                    
                     String suitableTruckId = findSuitableTruck(allTrucks, totalCapacity);
                     String suitableDriverId = findSuitableDriver(allDrivers);
-                    List<String> suitableStaffIds = findSuitableStaff(allStaff, 2); // Up to 2 staff members
+                    List<String> suitableStaffIds = findSuitableStaff(allStaff, 2); 
                     
-                    // Prepare route data (not saved to DB)
+                   
                     Map<String, Object> routeData = new HashMap<>();
                     routeData.put("routeId", "ROUTE_" + System.currentTimeMillis() + "_" + routesData.size());
                     routeData.put("date", LocalDateTime.now());
-                    routeData.put("status", "Not assigned"); // Default status
+                    routeData.put("status", "Not assigned"); 
                     routeData.put("assignedTruckId", suitableTruckId);
                     routeData.put("assignedDriverId", suitableDriverId);
                     routeData.put("assignedStaffIds", suitableStaffIds);
@@ -290,7 +282,7 @@ public class RouteController {
                 }
             }
             
-            // Prepare response
+            
             Map<String, Object> response = new HashMap<>();
             response.put("routes", routesData);
             response.put("totalRoutes", routesData.size());
@@ -302,21 +294,19 @@ public class RouteController {
         }
     }
     
-    /**
-     * Groups bins by proximity using a simple clustering algorithm
-     */
+   
     private List<List<SmartBin>> groupBinsByProximity(List<SmartBin> bins, GPSLocation depot) {
         List<List<SmartBin>> groups = new ArrayList<>();
         
-        // Simple grouping by distance - bins within 3km of each other are grouped
+        
         final double GROUPING_DISTANCE_KM = 3.0;
         
         for (SmartBin bin : bins) {
             boolean addedToGroup = false;
             
-            // Check if bin can be added to an existing group
+            
             for (List<SmartBin> group : groups) {
-                // Check if bin is close to any bin in the group
+                
                 for (SmartBin groupBin : group) {
                     double distance = calculateDistance(
                         bin.getCoordinates(), groupBin.getCoordinates());
@@ -333,7 +323,7 @@ public class RouteController {
                 }
             }
             
-            // If not added to any group, create a new group
+           
             if (!addedToGroup) {
                 List<SmartBin> newGroup = new ArrayList<>();
                 newGroup.add(bin);
@@ -344,9 +334,7 @@ public class RouteController {
         return groups;
     }
     
-    /**
-     * Calculates distance between two GPS points using Haversine formula
-     */
+    
     private double calculateDistance(GPSLocation point1, GPSLocation point2) {
         double lat1 = Math.toRadians(point1.getLatitude());
         double lon1 = Math.toRadians(point1.getLongitude());
@@ -361,12 +349,10 @@ public class RouteController {
         
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         
-        return 6371 * c; // Earth radius in kilometers
+        return 6371 * c; 
     }
     
-    /**
-     * Driver gets assigned routes
-     */
+   
     @GetMapping("/driver/{driverId}")
     public ResponseEntity<ApiResponse<List<CollectionRoute>>> getRoutesForDriver(@PathVariable String driverId) {
         try {
@@ -378,27 +364,25 @@ public class RouteController {
         }
     }
     
-    /**
-     * Get authenticated driver details
-     */
+    
     @GetMapping("/driver/details")
     public ResponseEntity<ApiResponse<Driver>> getAuthenticatedDriverDetails() {
         try {
-            // Get the authenticated user
+            
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             if (authentication == null) {
                 return ResponseEntity.status(401)
                     .body(ApiResponse.error("Unauthorized: No authentication found"));
             }
             
-            // Extract user ID from JWT token
+            
             String userId = extractUserIdFromJwt();
             if (userId == null) {
                 return ResponseEntity.status(401)
                     .body(ApiResponse.error("Unauthorized: Unable to extract user ID from token"));
             }
             
-            // Get driver details
+          
             Optional<Driver> driverOpt = routeOptimizationService.getDriverRepository().findById(userId);
             if (driverOpt.isEmpty()) {
                 return ResponseEntity.status(404)
@@ -425,14 +409,14 @@ public class RouteController {
                     .body(ApiResponse.error("Unauthorized: No authentication found"));
             }
             
-            // Extract user ID from JWT token
+           
             String userId = extractUserIdFromJwt();
             if (userId == null) {
                 return ResponseEntity.status(401)
                     .body(ApiResponse.error("Unauthorized: Unable to extract user ID from token"));
             }
             
-            // Get routes assigned to this driver
+           
             List<CollectionRoute> routes = routeService.getRoutesByDriverId(userId);
             return ResponseEntity.ok(ApiResponse.success("Routes retrieved successfully", routes));
         } catch (Exception e) {
@@ -528,7 +512,7 @@ public class RouteController {
             List<Truck> suitableTrucks = routeOptimizationService.getTruckRepository()
                 .findByCurrentStatusAndCapacityGreaterThanEqual("NOT_IN_USE", requiredCapacity);
             
-            // If no trucks found with "NOT_IN_USE", try "AVAILABLE"
+            
             if (suitableTrucks.isEmpty()) {
                 suitableTrucks = routeOptimizationService.getTruckRepository()
                     .findByCurrentStatusAndCapacityGreaterThanEqual("AVAILABLE", requiredCapacity);
@@ -579,12 +563,12 @@ public class RouteController {
             @PathVariable int routeIndex,
             @RequestBody Map<String, Object> requestData) {
         try {
-            // Extract resource assignments from request
+            
             String truckId = (String) requestData.get("truckId");
             String driverId = (String) requestData.get("driverId");
             List<String> staffIds = new ArrayList<>();
             
-            // Handle staffIds as either List or String
+            
             Object staffIdsObj = requestData.get("staffIds");
             if (staffIdsObj instanceof List) {
                 staffIds = (List<String>) staffIdsObj;
@@ -592,7 +576,7 @@ public class RouteController {
                 staffIds.add((String) staffIdsObj);
             }
             
-            // Get all smart bins with "FULL" status (case-insensitive)
+        
             List<SmartBin> allBins = routeOptimizationService.getSmartBinRepository().findAll()
                 .stream()
                 .filter(bin -> "FULL".equalsIgnoreCase(bin.getStatus()))
@@ -603,35 +587,35 @@ public class RouteController {
                     .body(ApiResponse.error("No bins need collection at this time"));
             }
             
-            // For demo purposes, using a fixed depot location
-            GPSLocation depot = new GPSLocation(40.7128, -74.0060); // New York City coordinates
+           
+            GPSLocation depot = new GPSLocation(40.7128, -74.0060); 
             
-            // Group bins by proximity to create separate routes for each geographic cluster
+            
             List<List<SmartBin>> routeGroups = groupBinsByProximity(allBins, depot);
             
-            // Filter groups to only include those with at least 2 bins
+            
             List<List<SmartBin>> validRouteGroups = routeGroups.stream()
                 .filter(group -> group.size() >= 2)
                 .collect(Collectors.toList());
             
-            // If no valid groups, use all bins as one group
+           
             if (validRouteGroups.isEmpty()) {
                 validRouteGroups.add(allBins);
             }
             
-            // Check if routeIndex is valid
+            
             if (routeIndex < 0 || routeIndex >= validRouteGroups.size()) {
                 return ResponseEntity.badRequest()
                     .body(ApiResponse.error("Invalid route index. Available routes: 0 to " + (validRouteGroups.size() - 1)));
             }
             
-            // Get the specific group of bins for this route
+           
             List<SmartBin> bins = validRouteGroups.get(routeIndex);
             
-            // Create optimized route
+            
             CollectionRoute route = routeOptimizationService.createOptimizedRoute(bins, depot);
             
-            // Assign specific truck, driver, and staff to the route
+            
             routeService.assignSpecificResourcesToRoute(route, truckId, driverId, staffIds);
             
             return ResponseEntity.ok(ApiResponse.success("Route created successfully", route));
@@ -659,23 +643,19 @@ public class RouteController {
      * Helper method to extract user ID from authentication
      */
     private String getUserIdFromAuthentication(Authentication authentication) {
-        // Get the JWT token from the request
-        // We need to extract it from the authentication details
+        
         Object details = authentication.getDetails();
         if (details instanceof org.springframework.security.web.authentication.WebAuthenticationDetails) {
-            // In our implementation, we store the user ID in the JWT token
-            // Let's get it from the JWT util
+            
             return extractUserIdFromJwt();
         }
-        // Fallback to the name if we can't extract from JWT
+        
         return authentication.getName();
     }
     
-    /**
-     * Extract user ID from JWT token in the request
-     */
+    
     private String extractUserIdFromJwt() {
-        // Get the current request
+      
         HttpServletRequest request = getCurrentRequest();
         if (request != null) {
             String token = extractJwtFromRequest(request);
@@ -686,9 +666,7 @@ public class RouteController {
         return null;
     }
     
-    /**
-     * Get current HTTP request
-     */
+    
     private HttpServletRequest getCurrentRequest() {
         RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
         if (requestAttributes instanceof ServletRequestAttributes) {
@@ -697,9 +675,7 @@ public class RouteController {
         return null;
     }
     
-    /**
-     * Extract JWT token from request
-     */
+   
     private String extractJwtFromRequest(HttpServletRequest request) {
         String bearerToken = request.getHeader("Authorization");
         if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
@@ -708,7 +684,7 @@ public class RouteController {
         return null;
     }
     
-    // Helper methods for resource selection
+    
     private List<Truck> getAllTrucks() {
         return routeOptimizationService.getTruckRepository().findAll();
     }
@@ -751,7 +727,7 @@ public class RouteController {
         return drivers.stream()
             .filter(driver -> driver.isAvailability() && driver.getCurrentRouteId() == null)
             .findFirst()
-            .map(Driver::getUserId)  // Changed from getDriverId() to getUserId()
+            .map(Driver::getUserId)  
             .orElse(null);
     }
     
@@ -759,7 +735,7 @@ public class RouteController {
         return staff.stream()
             .filter(member -> member.isAvailability() && member.getCurrentRouteId() == null)
             .limit(maxCount)
-            .map(WasteCollectionStaff::getUserId)  // Changed from getStaffId() to getUserId()
+            .map(WasteCollectionStaff::getUserId)  
             .collect(Collectors.toList());
     }
 }

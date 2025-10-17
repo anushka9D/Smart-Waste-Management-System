@@ -31,9 +31,9 @@ public class RouteOptimizationService {
     @Autowired
     private RouteStopRepository routeStopRepository;
     
-    private static final double EARTH_RADIUS = 6371; // Earth radius in kilometers
+    private static final double EARTH_RADIUS = 6371; 
     
-    // Expose the repositories for access in the controller
+    
     public SmartBinRepository getSmartBinRepository() {
         return smartBinRepository;
     }
