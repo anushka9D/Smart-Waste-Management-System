@@ -53,7 +53,7 @@ public class SensorSimulationService {
         // bin already at 100 or above, not increment
         if (currentMeasurement >= 100.0) {
             if (currentMeasurement > 100.0) {
-                // Cap at 100 if somehow exceeded
+                
                 sensor.setMeasurement(100.0);
                 sensor.setLastReading(LocalDateTime.now());
                 sensor.setColor("RED");
@@ -63,7 +63,7 @@ public class SensorSimulationService {
             return; // stop and not increment
         }
         
-        // random increment between Min_increment and Max_increment
+        // random increment value
         Double increment = Min_increment + (random.nextDouble() * (Max_increment - Min_increment));
         
         // calculate new measurement and doesn't exceed 100.0
@@ -75,7 +75,7 @@ public class SensorSimulationService {
         sensor.setColor(determineSensorColor(newMeasurement));
         binSensorRepository.save(sensor);
         
-        // update corresponding SmartBin
+        // update SmartBin
         updateSmartBinFromSensor(sensor.getBinId(), newMeasurement);
     }
 
@@ -83,7 +83,6 @@ public class SensorSimulationService {
         smartBinRepository.findByBinId(binId).ifPresent(smartBin -> {
             String previousStatus = smartBin.getStatus();
             
-            // ensure currentLevel doesn't exceed 100.0
             Double cappedLevel = Math.min(newLevel, 100.0);
             
             smartBin.setCurrentLevel(cappedLevel);
@@ -94,7 +93,7 @@ public class SensorSimulationService {
             
             smartBinRepository.save(smartBin);
             
-            // handle alerts
+            // alerts
             handleBinStatusChangeAlerts(smartBin, previousStatus, newStatus);
         });
     }
