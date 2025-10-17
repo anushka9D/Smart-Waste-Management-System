@@ -72,7 +72,6 @@ public class SecurityConfig {
                                                 .requestMatchers("/api/v1/smartbin/*/collect").authenticated()
                                                 .requestMatchers("/api/routes/stops/*/complete").authenticated()
 
-
                                                 .requestMatchers("/api/v1/smartbin/**").permitAll()
                                                 .requestMatchers("/api/v1/bin-sensors/**").permitAll()
                                                 .requestMatchers("/api/v1/alerts/**").permitAll()

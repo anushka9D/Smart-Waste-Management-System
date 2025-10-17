@@ -22,10 +22,10 @@ function Map() {
 
   // Waste type colors for markers
   const wasteTypeColors = {
-    'plastic': '#3b82f6', // blue
-    'organic': '#10b981', // green
-    'metal': '#f59e0b',   // amber
-    'default': '#6b7280'  // gray
+    'Plastic': '#3b82f6', // blue
+    'Organic': '#10b981', // green
+    'Metal': '#f59e0b',   // amber
+    'Default': '#6b7280'  // gray
   };
 
   // Waste type icons
@@ -142,9 +142,9 @@ function Map() {
               className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="all">All Waste Types</option>
-              <option value="plastic">Plastic</option>
-              <option value="organic">Organic</option>
-              <option value="metal">Metal</option>
+              <option value="Plastic">Plastic</option>
+              <option value="Organic">Organic</option>
+              <option value="Metal">Metal</option>
             </select>
           </div>
         </div>
