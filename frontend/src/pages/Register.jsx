@@ -22,7 +22,6 @@ function Register() {
     confirmPassword: '',
     // Citizen specific
     userType: '',
-    age: '',
     // City Authority specific
     employeeId: '',
     department: '',
@@ -72,7 +71,6 @@ function Register() {
             email: dataToSend.email,
             phone: dataToSend.phone,
             password: dataToSend.password,
-            age: parseInt(dataToSend.age),
           });
           break;
 
@@ -275,18 +273,6 @@ function Register() {
         {/* User type specific fields */}
         {userType === 'CITIZEN' && (
           <>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Age</label>
-              <input
-                type="number"
-                name="age"
-                value={formData.age}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                placeholder="Enter your age"
-              />
-            </div>
           </>
         )}
 
