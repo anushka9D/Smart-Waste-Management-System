@@ -57,6 +57,67 @@ public class RouteService {
     }
     
     /**
+     * Assigns specific truck, driver, and staff to a route
+     * @param route The route to assign resources to
+     * @param truckId The truck ID to assign
+     * @param driverId The driver ID to assign
+     * @param staffIds The staff IDs to assign
+     */
+    public void assignSpecificResourcesToRoute(CollectionRoute route, String truckId, String driverId, List<String> staffIds) {
+        // Assign truck
+        if (truckId != null) {
+            Optional<Truck> truckOpt = truckRepository.findById(truckId);
+            if (truckOpt.isPresent()) {
+                Truck truck = truckOpt.get();
+                route.setAssignedTruckId(truck.getTruckId());
+                truck.setCurrentStatus("IN_USE");
+                truck.setAssignedDriverId(driverId); // Link truck to driver
+                truckRepository.save(truck);
+            }
+        }
+        
+        // Assign driver
+        if (driverId != null) {
+            Optional<Driver> driverOpt = driverRepository.findById(driverId);
+            if (driverOpt.isPresent()) {
+                Driver driver = driverOpt.get();
+                route.setAssignedDriverId(driver.getUserId());
+                driver.setAvailability(false);
+                driver.setCurrentRouteId(route.getRouteId());
+                driverRepository.save(driver);
+            }
+        }
+        
+        // Assign staff
+        if (staffIds != null && !staffIds.isEmpty()) {
+            route.setAssignedStaffIds(staffIds);
+            
+            // Update staff availability
+            for (String staffId : staffIds) {
+                Optional<WasteCollectionStaff> staffOpt = wasteCollectionStaffRepository.findById(staffId);
+                if (staffOpt.isPresent()) {
+                    WasteCollectionStaff staff = staffOpt.get();
+                    staff.setAvailability(false);
+                    staff.setCurrentRouteId(route.getRouteId());
+                    wasteCollectionStaffRepository.save(staff);
+                }
+            }
+        }
+        
+        // Update route status
+        route.setStatus("ASSIGNED");
+        route.setUpdatedAt(LocalDateTime.now());
+        collectionRouteRepository.save(route);
+    }
+    
+    /**
+     * Get all assigned routes
+     */
+    public List<CollectionRoute> getAssignedRoutes() {
+        return collectionRouteRepository.findByStatus("ASSIGNED");
+    }
+    
+    /**
      * Get routes assigned to a specific driver
      * @param driverId The driver ID
      * @return List of CollectionRoute entities
@@ -85,13 +146,80 @@ public class RouteService {
         
         if (routeOpt.isPresent()) {
             CollectionRoute route = routeOpt.get();
+            String oldStatus = route.getStatus();
             route.setStatus(status);
             route.setUpdatedAt(LocalDateTime.now());
             collectionRouteRepository.save(route);
+            
+            System.out.println("Route status updated: " + routeId + " from " + oldStatus + " to " + status);
+            
+            // If route status is changed to COMPLETED, update resource availability
+            if ("COMPLETED".equals(status) && !"COMPLETED".equals(oldStatus)) {
+                System.out.println("Updating resource availability for completed route: " + routeId);
+                updateResourceAvailabilityForCompletedRoute(route);
+            }
+            
             return "Route status updated successfully";
         }
         
         throw new RuntimeException("Route not found with ID: " + routeId);
+    }
+    
+    /**
+     * Update resource availability when a route is completed
+     * @param route The completed route
+     */
+    private void updateResourceAvailabilityForCompletedRoute(CollectionRoute route) {
+        System.out.println("Updating resource availability for route: " + route.getRouteId());
+        
+        // Update driver availability
+        if (route.getAssignedDriverId() != null) {
+            System.out.println("Updating driver availability: " + route.getAssignedDriverId());
+            Optional<Driver> driverOpt = driverRepository.findById(route.getAssignedDriverId());
+            if (driverOpt.isPresent()) {
+                Driver driver = driverOpt.get();
+                driver.setAvailability(true); // Make driver available
+                driver.setCurrentRouteId(null); // Clear current route
+                driverRepository.save(driver);
+                System.out.println("Driver availability updated: " + driver.getUserId() + " - Available: " + driver.isAvailability());
+            } else {
+                System.out.println("Driver not found: " + route.getAssignedDriverId());
+            }
+        }
+        
+        // Update staff availability
+        if (route.getAssignedStaffIds() != null && !route.getAssignedStaffIds().isEmpty()) {
+            System.out.println("Updating staff availability: " + route.getAssignedStaffIds());
+            for (String staffId : route.getAssignedStaffIds()) {
+                Optional<WasteCollectionStaff> staffOpt = wasteCollectionStaffRepository.findById(staffId);
+                if (staffOpt.isPresent()) {
+                    WasteCollectionStaff staff = staffOpt.get();
+                    staff.setAvailability(true); // Make staff available
+                    staff.setCurrentRouteId(null); // Clear current route
+                    wasteCollectionStaffRepository.save(staff);
+                    System.out.println("Staff availability updated: " + staff.getUserId() + " - Available: " + staff.isAvailability());
+                } else {
+                    System.out.println("Staff not found: " + staffId);
+                }
+            }
+        }
+        
+        // Update truck status
+        if (route.getAssignedTruckId() != null) {
+            System.out.println("Updating truck status: " + route.getAssignedTruckId());
+            Optional<Truck> truckOpt = truckRepository.findById(route.getAssignedTruckId());
+            if (truckOpt.isPresent()) {
+                Truck truck = truckOpt.get();
+                truck.setCurrentStatus("NOT_IN_USE"); // Set truck status to NOT_IN_USE
+                truck.setAssignedDriverId(null); // Clear assigned driver
+                truckRepository.save(truck);
+                // Log after save to ensure we see the updated status
+                Truck updatedTruck = truckRepository.findById(route.getAssignedTruckId()).orElse(truck);
+                System.out.println("Truck status updated: " + updatedTruck.getTruckId() + " - Status: " + updatedTruck.getCurrentStatus());
+            } else {
+                System.out.println("Truck not found: " + route.getAssignedTruckId());
+            }
+        }
     }
     
     /**
@@ -108,10 +236,56 @@ public class RouteService {
             stop.setCollectionTime(LocalDateTime.now());
             stop.setUpdatedAt(LocalDateTime.now());
             routeStopRepository.save(stop);
+            
+            // Check if all stops in the route are completed and update route status if needed
+            checkAndCompleteRouteIfAllStopsCompleted(stop);
+            
             return "Route stop marked as completed";
         }
         
         throw new RuntimeException("Route stop not found with ID: " + stopId);
+    }
+    
+    /**
+     * Check if all stops in a route are completed and update route status to COMPLETED if so
+     * @param completedStop The recently completed stop
+     */
+    private void checkAndCompleteRouteIfAllStopsCompleted(RouteStop completedStop) {
+        System.out.println("Checking if route should be completed for stop: " + completedStop.getStopId());
+        
+        // Find the route that contains this stop
+        // This is a simplified approach - in a real implementation, you might want to store
+        // the route ID in each stop for easier lookup
+        List<CollectionRoute> allRoutes = collectionRouteRepository.findAll();
+        
+        for (CollectionRoute route : allRoutes) {
+            // Check if this route contains the completed stop
+            if (route.getStopIds() != null && route.getStopIds().contains(completedStop.getStopId())) {
+                System.out.println("Found route containing stop: " + route.getRouteId());
+                
+                // Get all stops for this route
+                List<RouteStop> routeStops = routeStopRepository.findByStopIdIn(route.getStopIds());
+                
+                // Check if all stops are completed
+                boolean allStopsCompleted = routeStops.stream()
+                    .allMatch(stop -> "COMPLETED".equals(stop.getStatus()));
+                
+                System.out.println("All stops completed: " + allStopsCompleted + " for route: " + route.getRouteId());
+                
+                // If all stops are completed and route is not already COMPLETED, update route status
+                if (allStopsCompleted && !"COMPLETED".equals(route.getStatus())) {
+                    System.out.println("Updating route status to COMPLETED: " + route.getRouteId());
+                    route.setStatus("COMPLETED");
+                    route.setUpdatedAt(LocalDateTime.now());
+                    collectionRouteRepository.save(route);
+                    
+                    // Update resource availability for completed route
+                    updateResourceAvailabilityForCompletedRoute(route);
+                    
+                    break; // Found and updated the route, no need to check others
+                }
+            }
+        }
     }
     
     /**

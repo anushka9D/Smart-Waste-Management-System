@@ -7,10 +7,19 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import CitizenDashboard from './pages/citizen/CitizenDashboard';
-import CityAuthorityDashboard from './pages/CityAuthorityDashboard';
+import CityAuthorityDashboard from './pages/CityAuthority/CityAuthorityDashboard';
 import DriverDashboard from './pages/DriverDashboard';
 import WasteCollectionStaffDashboard from './pages/WasteCollectionStaffDashboard';
 import SensorManagerDashboard from './pages/SensorManagerDashboard';
+import AssignedRoutes from './pages/AssignedRoutes';
+import RouteMap from './pages/RouteMap'; // Add this import
+import CompletedRoutes from './pages/CompletedRoutes'; // Add this import
+
+import Shell from './pages/CityAuthority/Shell'
+import Reports from './pages/CityAuthority/Reports'
+import Analytics from './pages/CityAuthority/Analytics'
+import Settings from './pages/CityAuthority/Settings'
+import Dashboard from './pages/CityAuthority/Dashboard'
 
 // Citizen Report Pages
 import ReportBinRequest from './pages/citizen/ReportBinRequest';
@@ -38,11 +47,35 @@ function App() {
               </PrivateRoute>
             }
           />
-          <Route
+          {/* <Route
             path="/city-authority-dashboard"
             element={
               <PrivateRoute allowedUserTypes={['CITY_AUTHORITY']}>
                 <CityAuthorityDashboard />
+              </PrivateRoute>
+            }
+          /> */}
+
+          <Route
+            path="/city-authority-dashboard"
+            element={
+              <PrivateRoute allowedUserTypes={["CITY_AUTHORITY"]}>
+                <Shell />
+              </PrivateRoute>
+            }
+          >
+            <Route index element={<CityAuthorityDashboard />} />
+            <Route path="dashboard" element={<Dashboard />} />
+            <Route path="reports" element={<Reports />} />
+            <Route path="analytics" element={<Analytics />} />
+            <Route path="settings" element={<Settings />} />
+          </Route>
+
+          <Route
+            path="/assigned-routes"
+            element={
+              <PrivateRoute allowedUserTypes={['CITY_AUTHORITY']}>
+                <AssignedRoutes />
               </PrivateRoute>
             }
           />
@@ -51,6 +84,22 @@ function App() {
             element={
               <PrivateRoute allowedUserTypes={['DRIVER']}>
                 <DriverDashboard />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/route-map/:routeId"
+            element={
+              <PrivateRoute allowedUserTypes={['DRIVER']}>
+                <RouteMap />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/completed-routes"
+            element={
+              <PrivateRoute allowedUserTypes={['DRIVER']}>
+                <CompletedRoutes />
               </PrivateRoute>
             }
           />

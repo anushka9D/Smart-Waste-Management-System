@@ -1,4 +1,4 @@
-package com.swms.model;
+package com.swms.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,17 +9,11 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class GPSLocation {
+public class CreateSmartBinRequest {
+    private String location;
     private Double latitude;
     private Double longitude;
-
-    public void setLongitude(Double longitude) {
-        this.longitude = longitude;
-    }
-
-    public void setLatitude(Double latitude) {
-        this.latitude = latitude;
-    }
+    private Double capacity;
 
     public Double getLatitude() {
         return latitude;
@@ -27,5 +21,13 @@ public class GPSLocation {
 
     public Double getLongitude() {
         return longitude;
+    }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public Double getCapacity() {
+        return capacity;
     }
 }

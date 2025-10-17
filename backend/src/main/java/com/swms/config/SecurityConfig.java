@@ -58,6 +58,22 @@ public class SecurityConfig {
                         .requestMatchers("/api/citizen/**").authenticated()
 
                         // All other endpoints require authentication
+                        .requestMatchers("/api/routes/preview").permitAll()
+                        .requestMatchers("/api/routes/create/**").permitAll()
+                        .requestMatchers("/api/routes/create").permitAll()
+                        .requestMatchers("/api/routes/assigned").permitAll()
+
+                        .requestMatchers("/api/routes/assigned/driver").authenticated()
+                        .requestMatchers("/api/routes/driver/details").authenticated()
+                        .requestMatchers("/api/routes/stops/by-ids").authenticated()
+                        .requestMatchers("/api/routes/driver/**").authenticated()
+                        .requestMatchers("/api/v1/smartbin/*/collect").authenticated()
+                        .requestMatchers("/api/routes/stops/*/complete").authenticated()
+
+                        .requestMatchers("/api/v1/smartbin/**").permitAll()
+                        .requestMatchers("/api/v1/bin-sensors/**").permitAll()
+                        .requestMatchers("/api/v1/alerts/**").permitAll()
+
                         .anyRequest().authenticated())
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint(jwtAuthenticationEntryPoint))

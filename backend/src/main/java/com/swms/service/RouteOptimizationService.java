@@ -33,6 +33,27 @@ public class RouteOptimizationService {
     
     private static final double EARTH_RADIUS = 6371; // Earth radius in kilometers
     
+    // Expose the repositories for access in the controller
+    public SmartBinRepository getSmartBinRepository() {
+        return smartBinRepository;
+    }
+    
+    public TruckRepository getTruckRepository() {
+        return truckRepository;
+    }
+    
+    public DriverRepository getDriverRepository() {
+        return driverRepository;
+    }
+    
+    public WasteCollectionStaffRepository getWasteCollectionStaffRepository() {
+        return wasteCollectionStaffRepository;
+    }
+    
+    public RouteStopRepository getRouteStopRepository() {
+        return routeStopRepository;
+    }
+    
     /**
      * Fetches bins that need collection (status = 'full')
      * @return List of SmartBin entities that are full (>80% filled)
@@ -40,7 +61,31 @@ public class RouteOptimizationService {
     public List<SmartBin> getBinsNeedingCollection() {
         // In a real implementation, this would call the Smart Bin API
         // For now, we'll query the repository directly
-        return smartBinRepository.findByStatus("full");
+        return smartBinRepository.findByStatus("FULL");
+    }
+    
+    /**
+     * Get all trucks in the system
+     * @return List of all Truck entities
+     */
+    public List<Truck> getAllTrucks() {
+        return truckRepository.findAll();
+    }
+    
+    /**
+     * Get all drivers in the system
+     * @return List of all Driver entities
+     */
+    public List<Driver> getAllDrivers() {
+        return driverRepository.findAll();
+    }
+    
+    /**
+     * Get all waste collection staff in the system
+     * @return List of all WasteCollectionStaff entities
+     */
+    public List<WasteCollectionStaff> getAllStaff() {
+        return wasteCollectionStaffRepository.findAll();
     }
     
     /**
@@ -157,57 +202,76 @@ public class RouteOptimizationService {
             return metrics;
         }
         
-        GPSLocation currentLocation = depot;
-        
-        // Calculate distance between each consecutive stop
-        for (RouteStop stop : route) {
-            double distance = calculateDistance(currentLocation, stop.getCoordinates());
-            totalDistance += distance;
-            currentLocation = stop.getCoordinates();
+        // Calculate distance from depot to first stop
+        GPSLocation previousLocation = depot;
+        if (!route.isEmpty()) {
+            RouteStop firstStop = route.get(0);
+            totalDistance += calculateDistance(depot, firstStop.getCoordinates());
+            previousLocation = firstStop.getCoordinates();
         }
         
-        // Add distance back to depot
-        double returnDistance = calculateDistance(currentLocation, depot);
-        totalDistance += returnDistance;
+        // Calculate distances between consecutive stops
+        for (int i = 1; i < route.size(); i++) {
+            RouteStop currentStop = route.get(i);
+            totalDistance += calculateDistance(previousLocation, currentStop.getCoordinates());
+            previousLocation = currentStop.getCoordinates();
+        }
         
-        // Estimate time (assuming 30 km/h average speed and 5 minutes per stop)
-        estimatedTime = (int) (totalDistance / 30 * 60) + (route.size() * 5);
+        // Estimate time (assuming 30 minutes per stop + 30 km/h average speed)
+        estimatedTime = route.size() * 30 + (int) (totalDistance / 30 * 60);
         
         Map<String, Object> metrics = new HashMap<>();
-        metrics.put("totalDistance", totalDistance);
+        metrics.put("totalDistance", Math.round(totalDistance * 100.0) / 100.0); // Round to 2 decimal places
         metrics.put("estimatedTime", estimatedTime);
+        
         return metrics;
     }
     
     /**
-     * Creates a new collection route with optimized stops
+     * Creates an optimized collection route for a set of bins
      * @param bins List of SmartBin entities to collect
      * @param depot Starting location
-     * @return Created CollectionRoute entity
+     * @return CollectionRoute entity
      */
     public CollectionRoute createOptimizedRoute(List<SmartBin> bins, GPSLocation depot) {
-        // Calculate optimized route using Nearest Neighbor Algorithm
+        // Create route stops using nearest neighbor algorithm
         List<RouteStop> routeStops = calculateNearestNeighborRoute(bins, depot);
-        
-        // Save route stops to database
-        List<RouteStop> savedStops = routeStopRepository.saveAll(routeStops);
-        List<String> stopIds = savedStops.stream()
-                .map(RouteStop::getStopId)
-                .collect(Collectors.toList());
         
         // Calculate route metrics
         Map<String, Object> metrics = calculateTotalRouteMetrics(routeStops, depot);
         
-        // Create collection route
+        // Create the collection route
         CollectionRoute route = new CollectionRoute();
+        route.setRouteId("ROUTE-" + System.currentTimeMillis());
         route.setDate(LocalDateTime.now());
-        route.setStatus("PLANNED");
-        route.setStopIds(stopIds);
+        route.setStatus("PENDING");
         route.setTotalDistance((Double) metrics.get("totalDistance"));
         route.setEstimatedTime((Integer) metrics.get("estimatedTime"));
         route.setCreatedAt(LocalDateTime.now());
         route.setUpdatedAt(LocalDateTime.now());
         
-        return collectionRouteRepository.save(route);
+        // Save route stops to database
+        for (RouteStop stop : routeStops) {
+            stop.setStopId("STOP-" + System.currentTimeMillis() + "-" + routeStops.indexOf(stop)); // Set stop ID
+            routeStopRepository.save(stop);
+        }
+        
+        // Get stop IDs for the route
+        List<String> stopIds = routeStops.stream()
+            .map(RouteStop::getStopId)
+            .collect(Collectors.toList());
+        route.setStopIds(stopIds);
+        
+        // Get bin IDs for the route
+        List<String> binIds = routeStops.stream()
+            .map(RouteStop::getBinId)
+            .collect(Collectors.toList());
+        
+        // Calculate total capacity
+        double totalCapacity = bins.stream()
+            .mapToDouble(SmartBin::getCapacity)
+            .sum();
+        
+        return route;
     }
 }

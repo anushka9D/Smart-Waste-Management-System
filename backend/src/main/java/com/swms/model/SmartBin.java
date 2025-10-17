@@ -1,99 +1,94 @@
 package com.swms.model;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
 
-@Document(collection = "DummySmartBin")
+@Document(collection = "smart_bins")
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class SmartBin {
-    
     @Id
+    @Indexed(unique = true)
     private String binId;
-    
     private String location;
-    
     private GPSLocation coordinates;
-    
-    private double currentLevel;
-    
-    private double capacity;
-    
-    private String status;
-    
+    private Double currentLevel;
+    private Double capacity;
+    private String status; // empty, half_full, full
     private LocalDateTime lastCollected;
-    
-    // Default constructor
-    public SmartBin() {
-    }
-    
-    // Constructor with all fields
-    public SmartBin(String binId, String location, GPSLocation coordinates, double currentLevel, 
-                   double capacity, String status, LocalDateTime lastCollected) {
-        this.binId = binId;
-        this.location = location;
-        this.coordinates = coordinates;
-        this.currentLevel = currentLevel;
-        this.capacity = capacity;
-        this.status = status;
-        this.lastCollected = lastCollected;
-    }
-    
-    // Getters
-    public String getBinId() {
-        return binId;
-    }
-    
+    private LocalDateTime createdAt;
+    private LocalDateTime lastUpdated;
+
     public String getLocation() {
         return location;
     }
-    
-    public GPSLocation getCoordinates() {
-        return coordinates;
+
+    public String getBinId() {
+        return binId;
     }
-    
-    public double getCurrentLevel() {
-        return currentLevel;
-    }
-    
-    public double getCapacity() {
-        return capacity;
-    }
-    
+
     public String getStatus() {
         return status;
     }
-    
+
     public LocalDateTime getLastCollected() {
         return lastCollected;
     }
-    
-    // Setters
-    public void setBinId(String binId) {
-        this.binId = binId;
+
+    public Double getCapacity() {
+        return capacity;
     }
-    
-    public void setLocation(String location) {
-        this.location = location;
+
+    public Double getCurrentLevel() {
+        return currentLevel;
     }
-    
-    public void setCoordinates(GPSLocation coordinates) {
-        this.coordinates = coordinates;
+
+    public GPSLocation getCoordinates() {
+        return coordinates;
     }
-    
-    public void setCurrentLevel(double currentLevel) {
-        this.currentLevel = currentLevel;
+
+    public void setLastCollected(LocalDateTime lastCollected) {
+        this.lastCollected = lastCollected;
     }
-    
-    public void setCapacity(double capacity) {
-        this.capacity = capacity;
+
+    public void setLastUpdated(LocalDateTime lastUpdated) {
+        this.lastUpdated = lastUpdated;
     }
-    
+
     public void setStatus(String status) {
         this.status = status;
     }
-    
-    public void setLastCollected(LocalDateTime lastCollected) {
-        this.lastCollected = lastCollected;
+
+    public void setCurrentLevel(Double currentLevel) {
+        this.currentLevel = currentLevel;
+    }
+
+    public void setBinId(String binId) {
+        this.binId = binId;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
+    }
+
+    public void setCoordinates(GPSLocation coordinates) {
+        this.coordinates = coordinates;
+    }
+
+    public void setCapacity(Double capacity) {
+        this.capacity = capacity;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 }
