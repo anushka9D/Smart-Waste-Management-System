@@ -1,9 +1,10 @@
-package com.swms.service;
+package com.swms.service.anushka;
 
 import com.swms.model.BinSensor;
 import com.swms.model.SmartBin;
 import com.swms.repository.BinSensorRepository;
 import com.swms.repository.SmartBinRepository;
+
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

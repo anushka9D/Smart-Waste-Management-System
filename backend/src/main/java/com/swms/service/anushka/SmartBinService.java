@@ -1,4 +1,4 @@
-package com.swms.service;
+package com.swms.service.anushka;
 
 import com.swms.dto.CreateSmartBinRequest;
 import com.swms.dto.GPSLocationDTO;
@@ -7,13 +7,13 @@ import com.swms.dto.UpdateBinLevelRequest;
 import com.swms.model.GPSLocation;
 import com.swms.model.SmartBin;
 import com.swms.repository.SmartBinRepository;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service

@@ -1,11 +1,12 @@
-package com.swms.controller;
+package com.swms.controller.anushka;
 
-import com.swms.service.BinSensorService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.swms.service.anushka.BinSensorService;
 
 @RestController
 @RequestMapping("/api/v1/bin-sensors")

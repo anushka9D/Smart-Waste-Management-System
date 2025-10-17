@@ -1,4 +1,4 @@
-package com.swms.service;
+package com.swms.service.anushka;
 
 import com.swms.model.BinSensor;
 import com.swms.repository.BinSensorRepository;

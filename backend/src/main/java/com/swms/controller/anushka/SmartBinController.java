@@ -1,8 +1,8 @@
-package com.swms.controller;
+package com.swms.controller.anushka;
 
 import com.swms.dto.*;
+import com.swms.service.anushka.SmartBinService;
 
-import com.swms.service.SmartBinService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

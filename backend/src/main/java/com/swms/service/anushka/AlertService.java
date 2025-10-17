@@ -1,4 +1,4 @@
-package com.swms.service;
+package com.swms.service.anushka;
 
 import com.swms.dto.AlertDTO;
 import com.swms.model.Alert;
