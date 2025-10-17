@@ -144,6 +144,16 @@ export const getAuthenticatedDriverDetails = async () => {
   }
 };
 
+// Get waste collection staff by ID
+export const getWasteCollectionStaffById = async (staffId) => {
+  try {
+    const response = await api.get(`/waste-collection-staff/${staffId}`);
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || error.message || 'Failed to fetch staff details');
+  }
+};
+
 // Get routes assigned to the authenticated driver
 export const getAuthenticatedDriverRoutes = async () => {
   try {

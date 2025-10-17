@@ -72,6 +72,7 @@ public class SecurityConfig {
                                                 .requestMatchers("/api/v1/smartbin/*/collect").authenticated()
                                                 .requestMatchers("/api/routes/stops/*/complete").authenticated()
 
+
                                                 .requestMatchers("/api/v1/smartbin/**").permitAll()
                                                 .requestMatchers("/api/v1/bin-sensors/**").permitAll()
                                                 .requestMatchers("/api/v1/alerts/**").permitAll()
@@ -80,6 +81,21 @@ public class SecurityConfig {
                                                 .requestMatchers("/api/bins/**").permitAll()
                                                 .requestMatchers("/api/analytics/**").permitAll()
                                                 .requestMatchers("/api/map/bins/**").permitAll()
+
+                        .requestMatchers("/api/v1/smartbin/**").permitAll()
+                        .requestMatchers("/api/v1/bin-sensors/**").permitAll()
+                        .requestMatchers("/api/v1/alerts/**").permitAll()
+
+                        .requestMatchers("/api/bins/**").permitAll()
+                        .requestMatchers("/api/analytics/**").permitAll()
+                        .requestMatchers("/api/map/bins/**").permitAll()
+
+                        .anyRequest().authenticated())
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint(jwtAuthenticationEntryPoint))
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+
 
                                                 .anyRequest().authenticated())
                                 .exceptionHandling(ex -> ex
