@@ -32,11 +32,19 @@ public class CloudinaryService {
      */
     public String uploadImage(MultipartFile file) throws IOException {
         validateFile(file);
-        return uploadFileData(file.getBytes());
+        return uploadFileData(file.getBytes(), "citizen_waste_disposal_requests");
     }
     
-    private String uploadFileData(byte[] fileData) throws IOException {
-        Map<String, Object> uploadOptions = createUploadOptions();
+    /**
+     * Uploads a MultipartFile to Cloudinary with a specific folder
+     */
+    public String uploadImage(MultipartFile file, String folder) throws IOException {
+        validateFile(file);
+        return uploadFileData(file.getBytes(), folder);
+    }
+    
+    private String uploadFileData(byte[] fileData, String folder) throws IOException {
+        Map<String, Object> uploadOptions = createUploadOptions(folder);
         Map<String, Object> uploadResult = performCloudinaryUpload(fileData, uploadOptions);
         return extractSecureUrl(uploadResult);
     }
@@ -65,9 +73,9 @@ public class CloudinaryService {
         }
     }
     
-    private Map<String, Object> createUploadOptions() {
+    private Map<String, Object> createUploadOptions(String folder) {
         Map<String, Object> options = new HashMap<>();
-        options.put("folder", "citizen_waste_disposal_requests");
+        options.put("folder", folder);
         options.put("resource_type", "image");
         return options;
     }
