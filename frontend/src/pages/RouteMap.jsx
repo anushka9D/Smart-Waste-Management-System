@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { getRouteStops, markRouteStopAsCompleted, markBinAsCollected, isAuthenticated, updateRouteStatus } from '../services/api';
+import { getRouteStops, markRouteStopAsCompleted, markBinAsCollected, updateRouteStatus } from '../services/api';
 import AuthHeader from '../components/AuthHeader';
 import AuthFooter from '../components/AuthFooter';
 import 'leaflet/dist/leaflet.css';
