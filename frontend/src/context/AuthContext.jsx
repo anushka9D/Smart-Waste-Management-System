@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import { validateToken } from '../services/api';
+import { validateToken, logout as apiLogout } from '../services/api';
 
 const AuthContext = createContext(null);
 
@@ -13,24 +13,22 @@ export const AuthProvider = ({ children }) => {
 
   const checkAuth = async () => {
     try {
-      // First check localStorage for token
-      let token = localStorage.getItem('token');
-      
-      // If not found in localStorage, check cookie
-      if (!token) {
-        token = getTokenFromCookie();
-      }
-      
+      const token = localStorage.getItem('token');
       if (token) {
         const isValid = await validateToken(token);
+        console.log('Token validation result:', isValid);
         if (isValid) {
           const userData = decodeToken(token);
+          console.log('Decoded user data:', userData);
           setUser(userData);
         } else {
+          console.log('Token is invalid, clearing auth state');
           setUser(null);
           // Clear invalid token
           localStorage.removeItem('token');
         }
+      } else {
+        console.log('No token found');
       }
     } catch (error) {
       console.error('Auth check failed:', error);
@@ -43,11 +41,18 @@ export const AuthProvider = ({ children }) => {
   };
 
   const login = (userData) => {
+    console.log('Setting user data:', userData);
     setUser(userData);
+    if (userData && userData.token) {
+      localStorage.setItem('token', userData.token);
+    }
   };
 
   const logout = () => {
+    console.log('Logging out user');
     setUser(null);
+    // Clear localStorage
+    localStorage.removeItem('token');
     // Clear cookie
     document.cookie = 'jwt=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
   };
@@ -73,7 +78,15 @@ export const AuthProvider = ({ children }) => {
           .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
           .join('')
       );
-      return JSON.parse(jsonPayload);
+      const decoded = JSON.parse(jsonPayload);
+
+      return {
+        userId: decoded.userId,
+        name: decoded.name,
+        email: decoded.sub, // subject is email
+        userType: decoded.userType,
+        phone: decoded.phone // Add phone
+      };
     } catch (error) {
       console.error('Error decoding token:', error);
       return null;

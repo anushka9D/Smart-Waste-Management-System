@@ -22,7 +22,6 @@ import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
-// @EnableMethodSecurity
 public class SecurityConfig {
 
     @Autowired
@@ -37,19 +36,28 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
+                        // Public endpoints - authentication
                         .requestMatchers("/api/auth/register/citizen").permitAll()
                         .requestMatchers("/api/auth/register/city-authority").permitAll()
                         .requestMatchers("/api/auth/register/driver").permitAll()
                         .requestMatchers("/api/auth/register/waste-collection-staff").permitAll()
+                        .requestMatchers("/api/auth/register/sensor-manager").permitAll()
                         .requestMatchers("/api/auth/login").permitAll()
                         .requestMatchers("/api/auth/validate").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
+
+                        // Public endpoints - user management (for testing)
                         .requestMatchers("/api/citizens/**").permitAll()
                         .requestMatchers("/api/city-authorities/**").permitAll()
                         .requestMatchers("/api/drivers/**").permitAll()
                         .requestMatchers("/api/waste-collection-staff/**").permitAll()
-                        .requestMatchers("/api/auth/register/sensor-manager").permitAll()
                         .requestMatchers("/api/sensor-managers/**").permitAll()
+
+                        // Citizen waste disposal endpoints - require authentication
+                        .requestMatchers("/api/citizen/waste-disposal-requests/**").authenticated()
+                        .requestMatchers("/api/citizen/**").authenticated()
+
+                        // All other endpoints require authentication
                         .requestMatchers("/api/routes/preview").permitAll()
                         .requestMatchers("/api/routes/create/**").permitAll()
                         .requestMatchers("/api/routes/create").permitAll()
@@ -90,9 +98,22 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(Arrays.asList("*"));
+        // Use specific origins instead of patterns for better security
+        configuration.setAllowedOrigins(Arrays.asList(
+                "http://localhost:3000",
+                "http://localhost:5173"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
-        configuration.setAllowedHeaders(Arrays.asList("*"));
+        configuration.setAllowedHeaders(Arrays.asList(
+                "Authorization",
+                "Content-Type",
+                "X-Requested-With",
+                "Accept",
+                "Origin",
+                "Access-Control-Request-Method",
+                "Access-Control-Request-Headers"));
+        configuration.setExposedHeaders(Arrays.asList(
+                "Authorization",
+                "Content-Disposition"));
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);
 

@@ -41,40 +41,59 @@ api.interceptors.response.use(
 
 // Register Citizen
 export const registerCitizen = async (data) => {
-  const response = await api.post('/auth/register/citizen', data);
-  return response.data;
+  try {
+    const response = await api.post('/auth/register/citizen', data);
+    return response.data;
+  } catch (error) {
+    return error.response ? error.response.data : { success: false, message: 'Network error' };
+  }
 };
 
-// Register City Authority
 export const registerCityAuthority = async (data) => {
-  const response = await api.post('/auth/register/city-authority', data);
-  return response.data;
+  try {
+    const response = await api.post('/auth/register/city-authority', data);
+    return response.data;
+  } catch (error) {
+    return error.response ? error.response.data : { success: false, message: 'Network error' };
+  }
 };
 
-// Register Driver
 export const registerDriver = async (data) => {
-  const response = await api.post('/auth/register/driver', data);
-  return response.data;
+  try {
+    const response = await api.post('/auth/register/driver', data);
+    return response.data;
+  } catch (error) {
+    return error.response ? error.response.data : { success: false, message: 'Network error' };
+  }
 };
 
-// Register Waste Collection Staff
 export const registerWasteCollectionStaff = async (data) => {
-  const response = await api.post('/auth/register/waste-collection-staff', data);
-  return response.data;
+  try {
+    const response = await api.post('/auth/register/waste-collection-staff', data);
+    return response.data;
+  } catch (error) {
+    return error.response ? error.response.data : { success: false, message: 'Network error' };
+  }
 };
 
 export const registerSensorManager = async (data) => {
-  const response = await api.post('/auth/register/sensor-manager', data);
-  return response.data;
+  try {
+    const response = await api.post('/auth/register/sensor-manager', data);
+    return response.data;
+  } catch (error) {
+    return error.response ? error.response.data : { success: false, message: 'Network error' };
+  }
 };
 
-// Login
 export const login = async (credentials) => {
   const response = await api.post('/auth/login', credentials);
   
   // If login is successful, store the token in localStorage
   if (response.data.success && response.data.data?.token) {
+    console.log('Storing token in localStorage:', response.data.data.token.substring(0, 20) + '...');
     localStorage.setItem('token', response.data.data.token);
+    // Also store in cookie for backup
+    document.cookie = `jwt=${response.data.data.token}; path=/`;
   }
   
   return response.data;
@@ -129,13 +148,20 @@ export const getAuthenticatedDriverDetails = async () => {
 export const getAuthenticatedDriverRoutes = async () => {
   try {
     const token = localStorage.getItem('token');
+    console.log('Fetching driver routes with token:', token ? 'Present' : 'Missing');
+    
     if (!token) {
       throw new Error('No authentication token found');
     }
     
     const response = await api.get('/routes/assigned/driver');
+    console.log('Driver routes response:', response);
     return response.data;
   } catch (error) {
+    console.error('Error fetching driver routes:', error.response || error);
+    if (error.response && error.response.status === 401) {
+      throw new Error('Unauthorized: Please log in again');
+    }
     throw new Error(error.response?.data?.message || error.message || 'Failed to fetch driver routes');
   }
 };
@@ -195,7 +221,9 @@ export const markBinAsCollected = async (binId) => {
 // Update route status
 export const updateRouteStatus = async (routeId, status) => {
   try {
+    console.log(`Calling updateRouteStatus with routeId: ${routeId}, status: ${status}`);
     const response = await api.put(`/routes/${routeId}/status?status=${status}`);
+    console.log(`Route status updated successfully for routeId: ${routeId}`, response.data);
     return response.data;
   } catch (error) {
     console.error('API Error - updateRouteStatus:', error.response || error);
@@ -216,16 +244,59 @@ export const validateToken = async (token) => {
   }
 };
 
-// Check if user is authenticated
-export const isAuthenticated = async () => {
-  const token = localStorage.getItem('token');
-  if (!token) {
-    return false;
+// Waste Disposal APIs
+export const createWasteRequest = async (formData) => {
+  try {
+    const response = await api.post('/citizen/waste-disposal-requests', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  } catch (error) {
+    return error.response ? error.response.data : { success: false, message: 'Network error' };
   }
-  
-  // Validate token
-  const isValid = await validateToken(token);
-  return !!isValid;
+};
+
+export const getCitizenRequests = async (page = 0, size = 15) => {
+  try {
+    const response = await api.get(`/citizen/waste-disposal-requests?page=${page}&size=${size}`);
+    return response.data;
+  } catch (error) {
+    return error.response ? error.response.data : { success: false, message: 'Network error' };
+  }
+};
+
+export const getRequestDetails = async (requestId) => {
+  try {
+    const response = await api.get(`/citizen/waste-disposal-requests/${requestId}`);
+    return response.data;
+  } catch (error) {
+    return error.response ? error.response.data : { success: false, message: 'Network error' };
+  }
+};
+
+export const getRequestUpdates = async (requestId) => {
+  try {
+    const response = await api.get(`/citizen/waste-disposal-requests/${requestId}/updates`);
+    return response.data;
+  } catch (error) {
+    return error.response ? error.response.data : { success: false, message: 'Network error' };
+  }
+};
+
+export const cancelRequest = async (requestId) => {
+  try {
+    const response = await api.put(`/citizen/waste-disposal-requests/${requestId}/cancel`);
+    return response.data;
+  } catch (error) {
+    return error.response ? error.response.data : { success: false, message: 'Network error' };
+  }
+};
+
+// Logout
+export const logout = () => {
+  localStorage.removeItem('token');
 };
 
 export default api;

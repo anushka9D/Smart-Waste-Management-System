@@ -1,11 +1,11 @@
 package com.swms.service;
 
-import com.swms.model.Citizen;
+import com.swms.model.citizen.Citizen;
 import com.swms.model.CityAuthority;
 import com.swms.model.Driver;
 import com.swms.model.User;
 import com.swms.model.WasteCollectionStaff;
-import com.swms.repository.CitizenRepository;
+import com.swms.repository.citizen.CitizenRepository;
 import com.swms.repository.CityAuthorityRepository;
 import com.swms.repository.DriverRepository;
 import com.swms.repository.WasteCollectionStaffRepository;
@@ -45,8 +45,9 @@ public class CustomUserDetailsService implements UserDetailsService {
         // Try to find citizen
         Citizen citizen = citizenRepository.findByEmail(email).orElse(null);
         if (citizen != null) {
+            // Ensure we're using the email field as the username
             return new org.springframework.security.core.userdetails.User(
-                    citizen.getEmail(),
+                    citizen.getEmail(), // username - must be the email
                     citizen.getPassword(),
                     citizen.isEnabled(),
                     true,

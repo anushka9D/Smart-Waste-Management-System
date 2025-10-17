@@ -1,10 +1,9 @@
-package com.swms.controller;
+package com.swms.controller.citizen;
 
 import com.swms.dto.ApiResponse;
-import com.swms.dto.CitizenRequest;
-import com.swms.model.Citizen;
-import com.swms.service.CitizenService;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.swms.dto.citizen.CitizenRequest;
+import com.swms.model.citizen.Citizen;
+import com.swms.service.citizen.CitizenService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,7 +17,6 @@ public class CitizenController {
 
     private final CitizenService citizenService;
 
-    @Autowired
     public CitizenController(CitizenService citizenService) {
         this.citizenService = citizenService;
     }

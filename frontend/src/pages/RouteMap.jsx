@@ -1,8 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { getRouteStops, markRouteStopAsCompleted, markBinAsCollected, isAuthenticated, updateRouteStatus } from '../services/api';
+import { getRouteStops, markRouteStopAsCompleted, markBinAsCollected, updateRouteStatus } from '../services/api';
 import AuthHeader from '../components/AuthHeader';
 import AuthFooter from '../components/AuthFooter';
+import 'leaflet/dist/leaflet.css';
+import L from 'leaflet'; // Import Leaflet directly to use L.divIcon
+import { MapContainer, TileLayer, Marker, Popup, Polyline, CircleMarker } from 'react-leaflet';
 
 function RouteMap() {
   const location = useLocation();
@@ -12,8 +15,23 @@ function RouteMap() {
   const [stopsData, setStopsData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [successMessage, setSuccessMessage] = useState(null);
   const [currentStopIndex, setCurrentStopIndex] = useState(0);
   const [navigationStarted, setNavigationStarted] = useState(false);
+  const [userLocation, setUserLocation] = useState(null);
+  const [currentRoutePath, setCurrentRoutePath] = useState([]);
+  const watchIdRef = useRef(null);
+  const [usingFallbackLocation, setUsingFallbackLocation] = useState(false);
+
+  // Set hardcoded location when component mounts
+  useEffect(() => {
+    setTimeout(() => {
+      const hardcodedDriverLocation = [7.1583154,80.0369623]; // Latitude, Longitude
+      setUserLocation(hardcodedDriverLocation);
+      setUsingFallbackLocation(true);
+      console.log('Using hardcoded driver location:', hardcodedDriverLocation);
+    }, 100); // Small delay to ensure it's properly set
+  }, []); // Empty dependency array means this runs only once
 
   useEffect(() => {
     // Check if user is authenticated
@@ -25,7 +43,23 @@ function RouteMap() {
       }
     };
     
+    // Try to get user's current location on component mount
+    const getUserLocation = () => {
+      // Always use hardcoded driver location as initial location
+      const hardcodedDriverLocation = [7.1583154,80.0369623]; // Latitude, Longitude
+      setUserLocation(hardcodedDriverLocation);
+      setUsingFallbackLocation(true); // Always mark as fallback since it's hardcoded
+      console.log('Using hardcoded driver location on mount:', hardcodedDriverLocation);
+      
+      // Don't try to get real location - always use hardcoded location
+      // This ensures consistency with the specified coordinates
+    };
+    
     checkAuth();
+    // Set the location after a small delay to ensure it's properly set
+    setTimeout(() => {
+      getUserLocation();
+    }, 100);
     
     // Get route data from location state or fetch it
     if (location.state?.routeData) {
@@ -40,6 +74,13 @@ function RouteMap() {
       setError('No route data provided');
       setLoading(false);
     }
+    
+    // Cleanup function to clear geolocation watch
+    return () => {
+      if (watchIdRef.current !== null) {
+        navigator.geolocation.clearWatch(watchIdRef.current);
+      }
+    };
   }, [location.state, routeId, navigate]);
 
   const fetchStopsData = async (stopIds) => {
@@ -48,6 +89,13 @@ function RouteMap() {
       // Fetch the actual stop data from the backend
       const response = await getRouteStops(stopIds);
       setStopsData(response);
+      
+      // Always use hardcoded driver location after a small delay
+      setTimeout(() => {
+        const hardcodedDriverLocation = [7.1583154,80.0369623]; // Latitude, Longitude
+        setUserLocation(hardcodedDriverLocation);
+        setUsingFallbackLocation(true);
+      }, 100);
     } catch (err) {
       setError('Failed to fetch stops data: ' + err.message);
       console.error('Error fetching stops data:', err);
@@ -63,9 +111,61 @@ function RouteMap() {
   const startNavigation = () => {
     setNavigationStarted(true);
     setCurrentStopIndex(0);
+    setUsingFallbackLocation(true); // Always mark as fallback since we're using hardcoded location
+    
+    // Hardcoded driver location (Sri Lanka area as requested)
+    const hardcodedDriverLocation = [7.1583154,80.0369623]; // Latitude, Longitude
+    
+    // Set the hardcoded location as user location
+    setUserLocation(hardcodedDriverLocation);
+    console.log('Using hardcoded driver location:', hardcodedDriverLocation);
+    
+    // Calculate route from hardcoded location to first stop
+    const stops = stopsData.slice().sort((a, b) => a.sequenceOrder - b.sequenceOrder);
+    if (stops.length > 0 && stops[0].coordinates) {
+      calculateRoute(hardcodedDriverLocation, [
+        stops[0].coordinates.latitude,
+        stops[0].coordinates.longitude
+      ]);
+    }
+    
+    // Don't try to get real location - always use hardcoded location
+    // This ensures consistency with the specified coordinates
+  };
+
+  const calculateRoute = async (startPoint, endPoint) => {
+    try {
+      // Use OSRM API to get route points that follow roads
+      const response = await fetch(
+        `https://router.project-osrm.org/route/v1/driving/${startPoint[1]},${startPoint[0]};${endPoint[1]},${endPoint[0]}?overview=full&geometries=geojson`
+      );
+      
+      if (!response.ok) {
+        throw new Error(`OSRM API request failed with status ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      if (data.code === 'Ok' && data.routes && data.routes.length > 0) {
+        // Extract coordinates from the route geometry
+        const routeCoordinates = data.routes[0].geometry.coordinates.map(coord => [coord[1], coord[0]]);
+        setCurrentRoutePath(routeCoordinates);
+      } else {
+        // Fallback to direct line if routing fails
+        console.warn('OSRM routing failed, falling back to direct line');
+        setCurrentRoutePath([startPoint, endPoint]);
+      }
+    } catch (error) {
+      console.error('Error calculating route:', error);
+      // Fallback to direct line if API request fails
+      setCurrentRoutePath([startPoint, endPoint]);
+    }
   };
 
   const markBinAsCollectedHandler = async () => {
+    const sortedStops = stopsData.slice().sort((a, b) => a.sequenceOrder - b.sequenceOrder);
+    const currentStop = sortedStops.length > 0 ? sortedStops[currentStopIndex] : null;
+    
     if (!currentStop) return;
     
     try {
@@ -83,35 +183,61 @@ function RouteMap() {
       await markBinAsCollected(binId);
       
       // Update the stop status to COMPLETED
-      setStopsData(prevStops => 
-        prevStops.map(stop => 
-          stop.stopId === stopId ? { ...stop, status: 'COMPLETED', collectionTime: new Date().toISOString() } : stop
-        )
-      );
-      
-      // Check if all stops are completed and update route status if needed
-      const updatedStops = stopsData.map(stop => 
+      const updatedStopsData = stopsData.map(stop => 
         stop.stopId === stopId ? { ...stop, status: 'COMPLETED', collectionTime: new Date().toISOString() } : stop
       );
+      setStopsData(updatedStopsData);
       
-      const allStopsCompleted = updatedStops.every(stop => stop.status === 'COMPLETED');
+      // Check if all stops are completed and update route status if needed
+      const allStopsCompleted = updatedStopsData.every(stop => stop.status === 'COMPLETED');
       if (allStopsCompleted && routeData && routeData.routeId && routeData.status !== 'COMPLETED') {
         try {
+          console.log(`All stops completed for route ${routeData.routeId}. Updating route status to COMPLETED.`);
           await updateRouteStatus(routeData.routeId, 'COMPLETED');
+          console.log(`Route status updated to COMPLETED for route ${routeData.routeId}`);
           // Update local route data
           setRouteData(prevRouteData => ({
             ...prevRouteData,
             status: 'COMPLETED'
           }));
           console.log('Route status updated to COMPLETED');
+          
+          // Show success message
+          setSuccessMessage('Route completed successfully! Redirecting to completed routes...');
+          
+          // Navigate to completed routes page after a short delay
+          setTimeout(() => {
+            navigate('/completed-routes');
+          }, 3000);
         } catch (err) {
           console.error('Failed to update route status:', err);
         }
       }
-      
+
       // Move to the next stop if available
       if (currentStopIndex < sortedStops.length - 1) {
-        setCurrentStopIndex(prevIndex => prevIndex + 1);
+        // Calculate route to next stop
+        const nextIndex = currentStopIndex + 1;
+        const nextStop = sortedStops[nextIndex];
+        if (nextStop.coordinates) {
+          // Get current user location or use the previous stop location as fallback
+          let fromLocation = userLocation;
+          if (!fromLocation && currentStop.coordinates) {
+            fromLocation = [
+              currentStop.coordinates.latitude,
+              currentStop.coordinates.longitude
+            ];
+          }
+          
+          // If we still don't have a location, use the next stop's location as a fallback
+          if (fromLocation) {
+            calculateRoute(fromLocation, [
+              nextStop.coordinates.latitude,
+              nextStop.coordinates.longitude
+            ]);
+          }
+          setCurrentStopIndex(nextIndex);
+        }
       }
       
       // Show a success message (in a real app, you might use a toast notification)
@@ -182,8 +308,14 @@ function RouteMap() {
   }
 
   // Get current stop data
-  const sortedStops = stopsData.sort((a, b) => a.sequenceOrder - b.sequenceOrder);
-  const currentStop = sortedStops.length > 0 && navigationStarted ? sortedStops[currentStopIndex] : null;
+  const sortedStops = stopsData.slice().sort((a, b) => a.sequenceOrder - b.sequenceOrder);
+  const currentStop = sortedStops.length > 0 ? sortedStops[currentStopIndex] : null;
+
+  // Create a polyline for the route path
+  const routePath = sortedStops.map(stop => [
+    stop.coordinates.latitude,
+    stop.coordinates.longitude
+  ]);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -214,6 +346,14 @@ function RouteMap() {
                     >
                       <span className="text-red-700">&times;</span>
                     </button>
+                  </div>
+                )}
+                
+                {/* Success banner */}
+                {successMessage && (
+                  <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
+                    <strong className="font-bold">Success: </strong>
+                    <span className="block sm:inline">{successMessage}</span>
                   </div>
                 )}
                 
@@ -260,6 +400,11 @@ function RouteMap() {
                       <div className="bg-blue-100 text-blue-800 px-4 py-2 rounded-lg">
                         <span className="font-medium">Next Stop:</span> {currentStop ? `#${currentStop.sequenceOrder} - ${currentStop.binId}` : 'No more stops'}
                       </div>
+                      {usingFallbackLocation && (
+                        <div className="bg-yellow-100 text-yellow-800 px-4 py-2 rounded-lg">
+                          <span className="font-medium">Note:</span> Using fixed location (7.1583154,80.0369623) as starting point
+                        </div>
+                      )}
                       {currentStop && currentStop.status !== 'COMPLETED' && (
                         <button
                           onClick={markBinAsCollectedHandler}
@@ -277,56 +422,89 @@ function RouteMap() {
             <div className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-800 mb-4">Route Map</h2>
               
-              {/* Map Container with Route Visualization */}
-              <div className="bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg h-96 flex items-center justify-center relative">
-                {navigationStarted && stopsData.length > 0 && currentStop && (
-                  <div className="absolute inset-0">
-                    {/* Simplified route visualization */}
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="relative w-full h-full">
-                        {/* Blue line showing the route to the current stop */}
-                        <div className="absolute top-1/2 left-1/4 w-1/2 h-1 bg-blue-500 transform -translate-y-1/2"></div>
-                        
-                        {/* Depot marker */}
-                        <div className="absolute top-1/2 left-1/4 transform -translate-x-1/2 -translate-y-1/2">
-                          <div className="w-6 h-6 bg-gray-800 rounded-full flex items-center justify-center">
-                            <span className="text-white text-xs font-bold">D</span>
-                          </div>
-                          <div className="text-xs text-center mt-1">Depot</div>
+              {/* Map Container with Real Map */}
+              <div className="bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg h-96">
+                <MapContainer
+                  key={userLocation ? `${userLocation[0]}-${userLocation[1]}` : 'default'}
+                  center={userLocation || [7.0434, 80.0341]}
+                  zoom={13}
+                  style={{ height: '100%', width: '100%' }}
+                  scrollWheelZoom={false}
+                >
+                  <TileLayer
+                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  />
+                  
+                  {/* Draw the route path */}
+                  {navigationStarted && currentRoutePath.length > 1 && (
+                    <Polyline
+                      positions={currentRoutePath}
+                      color="#3b82f6"
+                      weight={5}
+                      opacity={0.7}
+                    />
+                  )}
+                  
+                  {/* Add markers for each stop */}
+                  {sortedStops.map((stop) => (
+                    <Marker
+                      key={stop.stopId}
+                      position={[stop.coordinates.latitude, stop.coordinates.longitude]}
+                      icon={
+                        stop.status === 'COMPLETED' 
+                          ? L.divIcon({
+                              html: `<div class="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center"><span class="text-white text-xs font-bold">${stop.sequenceOrder}</span></div>`,
+                              className: '',
+                              iconSize: [25, 25],
+                              iconAnchor: [12, 25]
+                            })
+                          : stop.stopId === currentStop?.stopId 
+                            ? L.divIcon({
+                                html: `<div class="w-6 h-6 bg-red-500 rounded-full flex items-center justify-center animate-pulse"><span class="text-white text-xs font-bold">${stop.sequenceOrder}</span></div>`,
+                                className: '',
+                                iconSize: [25, 25],
+                                iconAnchor: [12, 25]
+                              })
+                            : L.divIcon({
+                                html: `<div class="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center"><span class="text-white text-xs font-bold">${stop.sequenceOrder}</span></div>`,
+                                className: '',
+                                iconSize: [25, 25],
+                                iconAnchor: [12, 25]
+                              })
+                      }
+                    >
+                      <Popup>
+                        <div className="p-2">
+                          <h3 className="font-bold text-lg">{stop.binId}</h3>
+                          <p>Sequence: {stop.sequenceOrder}</p>
+                          <p>Status: {stop.status}</p>
+                          <p>Coordinates: {stop.coordinates.latitude}, {stop.coordinates.longitude}</p>
                         </div>
-                        
-                        {/* Current stop marker */}
-                        <div 
-                          className="absolute top-1/2 left-3/4 transform -translate-x-1/2 -translate-y-1/2"
-                          style={{
-                            left: `${75}%`,
-                            top: `${50}%`
-                          }}
-                        >
-                          <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center animate-pulse">
-                            <span className="text-white text-xs font-bold">{currentStop.sequenceOrder}</span>
-                          </div>
-                          <div className="text-xs text-center mt-1 font-medium">
-                            {currentStop.binId}
-                          </div>
+                      </Popup>
+                    </Marker>
+                  ))}
+                  
+                  {/* Show user's current location */}
+                  {userLocation && (
+                    <CircleMarker
+                      center={userLocation}
+                      radius={usingFallbackLocation ? 8 : 10}
+                      color={usingFallbackLocation ? "orange" : "red"}
+                      fillColor={usingFallbackLocation ? "orange" : "red"}
+                      fillOpacity={0.7}
+                      weight={usingFallbackLocation ? 1 : 2}
+                    >
+                      <Popup>
+                        <div className="p-2">
+                          <h3 className="font-bold text-lg">Your Location</h3>
+                          <p>Fixed starting point (7.1583154,80.0369623)</p>
+                          <p>Coordinates: {userLocation[0].toFixed(6)}, {userLocation[1].toFixed(6)}</p>
                         </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-                
-                {!navigationStarted && (
-                  <div className="text-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mx-auto text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
-                    </svg>
-                    <p className="mt-2 text-gray-500">Interactive map would be displayed here</p>
-                    <p className="text-sm text-gray-400">Showing {stopsData.length} stops along the route</p>
-                    {navigationStarted && (
-                      <p className="text-sm text-blue-500 mt-2">Navigation started. Current stop: {currentStop ? `#${currentStop.sequenceOrder}` : 'N/A'}</p>
-                    )}
-                  </div>
-                )}
+                      </Popup>
+                    </CircleMarker>
+                  )}
+                </MapContainer>
               </div>
             </div>
 

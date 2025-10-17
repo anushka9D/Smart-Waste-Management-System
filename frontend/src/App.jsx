@@ -6,19 +6,27 @@ import PrivateRoute from './utils/PrivateRoute';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
-import CitizenDashboard from './pages/CitizenDashboard';
+import CitizenDashboard from './pages/citizen/CitizenDashboard';
 import CityAuthorityDashboard from './pages/CityAuthority/CityAuthorityDashboard';
 import DriverDashboard from './pages/DriverDashboard';
 import WasteCollectionStaffDashboard from './pages/WasteCollectionStaffDashboard';
 import SensorManagerDashboard from './pages/SensorManagerDashboard';
 import AssignedRoutes from './pages/AssignedRoutes';
 import RouteMap from './pages/RouteMap'; // Add this import
+import CompletedRoutes from './pages/CompletedRoutes'; // Add this import
 
 import Shell from './pages/CityAuthority/Shell'
 import Reports from './pages/CityAuthority/Reports'
 import Analytics from './pages/CityAuthority/Analytics'
 import Settings from './pages/CityAuthority/Settings'
 import Dashboard from './pages/CityAuthority/Dashboard'
+
+// Citizen Report Pages
+import ReportBinRequest from './pages/citizen/ReportBinRequest';
+import ReportBinForm from './pages/citizen/ReportBinForm';
+import ReportConfirmation from './pages/citizen/ReportConfirmation';
+import TrackRequests from './pages/citizen/TrackRequests';
+import RequestDetails from './pages/citizen/RequestDetails';
 
 function App() {
   return (
@@ -30,7 +38,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
 
-          {/* Protected Routes */}
+          {/* Protected Routes - Dashboards */}
           <Route
             path="/citizen-dashboard"
             element={
@@ -88,6 +96,14 @@ function App() {
             }
           />
           <Route
+            path="/completed-routes"
+            element={
+              <PrivateRoute allowedUserTypes={['DRIVER']}>
+                <CompletedRoutes />
+              </PrivateRoute>
+            }
+          />
+          <Route
             path="/waste-collection-staff-dashboard"
             element={
               <PrivateRoute allowedUserTypes={['WASTE_COLLECTION_STAFF']}>
@@ -100,6 +116,47 @@ function App() {
             element={
               <PrivateRoute allowedUserTypes={['SENSOR_MANAGER']}>
                 <SensorManagerDashboard />
+              </PrivateRoute>
+            }
+          />
+
+          <Route
+            path="/citizen/report-bin-request"
+            element={
+              <PrivateRoute allowedUserTypes={['CITIZEN']}>
+                <ReportBinRequest />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/citizen/report-bin-form"
+            element={
+              <PrivateRoute allowedUserTypes={['CITIZEN']}>
+                <ReportBinForm />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/citizen/report-confirmation"
+            element={
+              <PrivateRoute allowedUserTypes={['CITIZEN']}>
+                <ReportConfirmation />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/citizen/track-requests"
+            element={
+              <PrivateRoute allowedUserTypes={['CITIZEN']}>
+                <TrackRequests />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/citizen/request-details/:id"
+            element={
+              <PrivateRoute allowedUserTypes={['CITIZEN']}>
+                <RequestDetails />
               </PrivateRoute>
             }
           />
