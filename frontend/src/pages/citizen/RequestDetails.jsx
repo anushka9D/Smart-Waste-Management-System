@@ -50,14 +50,12 @@ function RequestDetails() {
         getRequestUpdates(id)
       ]);
 
-      // Handle ApiResponse wrapper structure for request details
       if (requestResponse && requestResponse.success) {
         setRequest(requestResponse.data);
       } else {
         console.error('Failed to fetch request details:', requestResponse ? requestResponse.message : 'Unknown error');
       }
       
-      // Handle ApiResponse wrapper structure for updates
       if (updatesResponse && updatesResponse.success) {
         setUpdates(updatesResponse.data);
       } else {

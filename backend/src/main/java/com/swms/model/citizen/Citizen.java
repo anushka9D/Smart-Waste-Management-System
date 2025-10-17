@@ -7,16 +7,14 @@ import java.time.LocalDateTime;
 
 @Document(collection = "citizens")
 public class Citizen extends User {
-    
+
     // Default constructor
     public Citizen() {
         super();
     }
-    
+
     // Constructor
-    public Citizen(String userId, String name, String email, String phone, String password, 
-                   String userType) {
-        super(userId, name, email, phone, password, userType, LocalDateTime.now(), 
-              LocalDateTime.now(), true);
+    public Citizen(String userId, String name, String email, String phone, String password, String userType) {
+            super(userId, name, email, phone, password, userType, LocalDateTime.now(), LocalDateTime.now(), true);
     }
 }

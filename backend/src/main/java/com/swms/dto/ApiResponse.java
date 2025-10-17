@@ -12,7 +12,6 @@ public class ApiResponse<T> {
     public ApiResponse() {
     }
 
-    // Constructor with all fields
     public ApiResponse(boolean success, String message, T data, LocalDateTime timestamp) {
         this.success = success;
         this.message = message;

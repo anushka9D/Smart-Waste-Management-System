@@ -1,12 +1,12 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import AuthHeader from '../../components/AuthHeader';
 import AuthFooter from '../../components/AuthFooter';
-import { useAuth } from '../../context/AuthContext'; // Import auth context
+import { useAuth } from '../../context/AuthContext';
 
 function ReportConfirmation() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user } = useAuth(); // Get user from auth context
+  const { user } = useAuth();
   const requestData = location.state?.requestData;
 
   const categoryDisplay = {

@@ -125,11 +125,9 @@ public class CitizenWasteDisposalRequestController {
             throw new RuntimeException("User not authenticated");
         }
 
-        // Extract token from SecurityContext
         String token = null;
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if (principal instanceof UserDetails) {
-            // Try to get token from Authorization header
             HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes())
                     .getRequest();
             String authHeader = request.getHeader("Authorization");
@@ -142,10 +140,9 @@ public class CitizenWasteDisposalRequestController {
             throw new RuntimeException("JWT token not found");
         }
 
-        // First try to get userId from token claims
+        // Get userId from token claims
         String userId = jwtUtil.getUserIdFromToken(token);
         if (userId != null && !userId.isEmpty()) {
-            // Validate that userId exists in database
             Optional<Citizen> citizenOpt = citizenRepository.findById(userId);
             if (citizenOpt.isPresent()) {
                 return userId;
@@ -154,15 +151,12 @@ public class CitizenWasteDisposalRequestController {
 
         // Fallback to email if userId not found or invalid
         String email = jwtUtil.getEmailFromToken(token);
-        // Check if email looks like a UUID (which would indicate an error)
         if (email != null && email.contains("-") && email.length() == 36) {
-            // This seems to be a UUID, try to find citizen by userId instead
             Optional<Citizen> citizenOpt = citizenRepository.findById(email);
             if (citizenOpt.isPresent()) {
                 return email;
             }
         } else {
-            // Normal email case
             Optional<Citizen> citizenOpt = citizenRepository.findByEmail(email);
             if (citizenOpt.isEmpty()) {
                 throw new RuntimeException("Citizen not found with email: " + email);
@@ -172,5 +166,4 @@ public class CitizenWasteDisposalRequestController {
 
         throw new RuntimeException("Citizen not found with id: " + userId + " or email: " + email);
     }
-
 }

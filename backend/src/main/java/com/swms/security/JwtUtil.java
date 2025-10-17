@@ -39,7 +39,6 @@ public class JwtUtil {
                 .compact();
     }
 
-    // Add method to get phone from token
     public String getPhoneFromToken(String token) {
         return getClaimsFromToken(token).get("phone", String.class);
     }

@@ -38,7 +38,6 @@ function TrackRequests() {
   const fetchRequests = async () => {
     try {
       const response = await getCitizenRequests(currentPage, requestsPerPage);
-      // Handle ApiResponse wrapper structure
       if (response && response.success) {
         setRequests(response.data.content || []);
         setTotalPages(response.data.totalPages || 1);

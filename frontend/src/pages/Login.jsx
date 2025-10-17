@@ -30,7 +30,6 @@ function Login() {
       console.log('Login response:', response);
 
       if (response.success) {
-        // The token is already stored in localStorage by the login API function
         const userData = response.data;
         console.log('User data:', userData);
         login(userData);

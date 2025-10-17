@@ -21,7 +21,6 @@ public class CitizenRequest {
     public CitizenRequest() {
     }
 
-    // Getters
     public String getName() {
         return name;
     }
