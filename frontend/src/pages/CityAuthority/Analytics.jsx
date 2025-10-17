@@ -65,6 +65,11 @@ function Analytics() {
       // Calculate total bins
       const totalBins = binStatusResponse.data?.reduce((sum, status) => sum + (status.count || 0), 0) || 0;
       
+      console.log("plastic",plasticResponse.data);
+      console.log("organic",organicResponse.data);
+      console.log("metal",metalResponse.data);
+      console.log(binStatusData);
+
       setSummaryData({
         totalWaste: totalWasteResponse.data?.totalWaste || 0,
         plasticWaste: plasticResponse.data || 0,
@@ -113,8 +118,8 @@ function Analytics() {
         processStatusChartData(statusChartData);
         
         
-        const wasteValue = selectedWasteType === 'plastic' ? (plasticResponse.data || 0) : 
-                          selectedWasteType === 'organic' ? (organicResponse.data || 0) : 
+        const wasteValue = selectedWasteType === 'Plastic' ? (plasticResponse.data || 0) : 
+                          selectedWasteType === 'Organic' ? (organicResponse.data || 0) : 
                           (metalResponse.data || 0);
         
         const wasteTypeData = [{

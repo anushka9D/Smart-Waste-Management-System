@@ -1,8 +1,8 @@
-package com.swms.controller;
+package com.swms.controller.anushka;
 
 import com.swms.dto.AlertDTO;
-import com.swms.service.AlertService;
-import lombok.RequiredArgsConstructor;
+import com.swms.service.anushka.AlertService;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

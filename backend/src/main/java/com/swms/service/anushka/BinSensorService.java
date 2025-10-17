@@ -1,8 +1,7 @@
-package com.swms.service;
+package com.swms.service.anushka;
 
 import com.swms.model.BinSensor;
 import com.swms.repository.BinSensorRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -59,6 +58,19 @@ public class BinSensorService {
         sensor.setColor("GRAY");
         binSensorRepository.save(sensor);
 
+    }
+
+    @Transactional
+    public void resetSensorMeasurement(String binId) {
+        BinSensor sensor = binSensorRepository.findByBinId(binId)
+                .orElseThrow(() -> new RuntimeException("Sensor not found for bin: " + binId));
+
+        sensor.setMeasurement(0.0);
+        sensor.setLastReading(LocalDateTime.now());
+        sensor.setType("WORKING");
+        sensor.setColor("GREEN");
+
+        binSensorRepository.save(sensor);
     }
 
     private String determineSensorColor(Double measurement) {

@@ -405,17 +405,7 @@ function Reports() {
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">Report Type</label>
                         <div className="flex space-x-4">
-                            <label className="inline-flex items-center">
-                                <input
-                                    type="radio"
-                                    className="form-radio"
-                                    name="reportType"
-                                    value="detailed"
-                                    checked={reportType === 'detailed'}
-                                    onChange={(e) => setReportType(e.target.value)}
-                                />
-                                <span className="ml-2">Detailed Report</span>
-                            </label>
+                           
                             <label className="inline-flex items-center">
                                 <input
                                     type="radio"

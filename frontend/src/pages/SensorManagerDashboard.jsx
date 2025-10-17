@@ -4,15 +4,34 @@ import AuthHeader from '../components/AuthHeader';
 import AuthFooter from '../components/AuthFooter';
 import { AlertCircle, Trash2, MapPin, Clock, RefreshCw, Eye, CheckCircle, Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
 
 const API_BASE_URL = 'http://localhost:8080/api/v1';
 
-const getAuthHeaders = () => {
-  const token = localStorage.getItem('token'); //auth token
-  return {
-    'Content-Type': 'application/json',
-    'Authorization': token ? `Bearer ${token}` : ''
-  };
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+});
+
+const createCustomIcon = (color) => {
+  return new L.Icon({
+    iconUrl: `https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-${color}.png`,
+    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowSize: [41, 41]
+  });
+};
+
+const markerIcons = {
+  RED: createCustomIcon('red'),
+  BLUE: createCustomIcon('blue'),
+  GREEN: createCustomIcon('green')
 };
 
 const api = {
@@ -41,7 +60,7 @@ const api = {
     return response.json();
   },
   markAsCollected: async (binId) => {
-    const response = await fetch(`${API_BASE_URL}/smartbin/${binId}/collect`, {
+    const response = await fetch(`${API_BASE_URL}/smartbin/${binId}/collected`, {
       method: 'PUT'
     });
     return response.json();
@@ -179,6 +198,69 @@ function SensorManagerDashboard() {
             </div>
           </div>
 
+          {/* Map View Section */}
+          <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 className="text-xl font-bold text-gray-800 mb-4">Bin Locations Map</h2>
+            <div className="h-96 rounded-lg overflow-hidden border-2 border-gray-200">
+              <MapContainer
+                center={[6.9271, 79.8612]} // Default Colombo
+                zoom={13}
+                style={{ height: '100%', width: '100%' }}
+              >
+                <TileLayer
+                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                />
+                {bins.map((bin) => (
+                  <Marker
+                    key={bin.binId}
+                    position={[bin.coordinates.latitude, bin.coordinates.longitude]}
+                    icon={markerIcons[bin.binColor] || markerIcons.GREEN}
+                  >
+                    <Popup>
+                      <div className="p-2">
+                        <h3 className="font-bold text-lg mb-2">{bin.binId}</h3>
+                        <p className="text-sm text-gray-600 mb-1">
+                          <strong>Location:</strong> {bin.location}
+                        </p>
+                        <p className="text-sm text-gray-600 mb-1">
+                          <strong>Status:</strong> 
+                          <span className={`ml-1 px-2 py-0.5 rounded text-xs ${
+                            bin.status === 'FULL' ? 'bg-red-100 text-red-800' :
+                            bin.status === 'HALF_FULL' ? 'bg-blue-100 text-blue-800' :
+                            'bg-green-100 text-green-800'
+                          }`}>
+                            {bin.status.replace('_', ' ')}
+                          </span>
+                        </p>
+                        <p className="text-sm text-gray-600 mb-1">
+                          <strong>Fill Level:</strong> {((bin.currentLevel / bin.capacity) * 100).toFixed(0)}%
+                        </p>
+                        <p className="text-sm text-gray-600">
+                          <strong>Capacity:</strong> {bin.currentLevel.toFixed(1)} / {bin.capacity} L
+                        </p>
+                      </div>
+                    </Popup>
+                  </Marker>
+                ))}
+              </MapContainer>
+            </div>
+            <div className="mt-4 flex items-center justify-center space-x-6 text-sm">
+              <div className="flex items-center space-x-2">
+                <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                <span>Empty</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                <span>Half Full</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                <span>Full</span>
+              </div>
+            </div>
+          </div>
+
           {/* Navigation Tabs */}
           <div className="bg-white rounded-t-lg shadow-sm">
             <div className="flex space-x-8 px-6">
@@ -196,7 +278,7 @@ function SensorManagerDashboard() {
                 </button>
               ))}
               <button
-                onClick={() => navigate('/add-bin')}
+                onClick={() => navigate('/add-smart-bin')}
                 className="ml-auto my-2 flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
               >
                 <Plus className="w-4 h-4" />
@@ -299,9 +381,7 @@ const StatCard = ({ title, value, color, active, onClick }) => {
   );
 };
 
-const BinCard = ({ bin, onUpdateLevel, onMarkCollected, onDelete }) => {
-  const [showUpdateModal, setShowUpdateModal] = useState(false);
-  const [newLevel, setNewLevel] = useState('');
+const BinCard = ({ bin, onMarkCollected, onDelete }) => {
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -322,14 +402,6 @@ const BinCard = ({ bin, onUpdateLevel, onMarkCollected, onDelete }) => {
   };
 
   const fillPercentage = (bin.currentLevel / bin.capacity) * 100;
-
-  const handleUpdateLevel = () => {
-    if (newLevel && !isNaN(newLevel)) {
-      onUpdateLevel(bin.binId, parseFloat(newLevel));
-      setShowUpdateModal(false);
-      setNewLevel('');
-    }
-  };
 
   return (
     <>
@@ -382,12 +454,6 @@ const BinCard = ({ bin, onUpdateLevel, onMarkCollected, onDelete }) => {
         </div>
 
         <div className="p-4 bg-gray-50 border-t flex gap-2">
-          <button
-            onClick={() => setShowUpdateModal(true)}
-            className="flex-1 px-3 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition"
-          >
-            Update Level
-          </button>
           {bin.status === 'FULL' && (
             <button
               onClick={() => onMarkCollected(bin.binId)}
@@ -404,49 +470,6 @@ const BinCard = ({ bin, onUpdateLevel, onMarkCollected, onDelete }) => {
           </button>
         </div>
       </div>
-
-      {showUpdateModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-            <h3 className="text-lg font-semibold mb-4">Update Bin Level - {bin.binId}</h3>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Current Level (Liters)
-                </label>
-                <input
-                  type="number"
-                  value={newLevel}
-                  onChange={(e) => setNewLevel(e.target.value)}
-                  placeholder={`Current: ${bin.currentLevel.toFixed(1)} L`}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  min="0"
-                  max="100"
-                  step="0.1"
-                />
-                <p className="text-xs text-gray-500 mt-1">Enter value between 0.0 and 100.0</p>
-              </div>
-              <div className="flex gap-2">
-                <button
-                  onClick={handleUpdateLevel}
-                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-                >
-                  Update
-                </button>
-                <button
-                  onClick={() => {
-                    setShowUpdateModal(false);
-                    setNewLevel('');
-                  }}
-                  className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition"
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </>
   );
 };
