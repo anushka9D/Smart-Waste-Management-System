@@ -1,5 +1,5 @@
 import React from 'react'
-import { Menu, X, FileText, BarChart3, Settings, LayoutDashboard } from "lucide-react";
+import { Menu, X, FileText, BarChart3, Settings, LayoutDashboard,MapPin  } from "lucide-react";
 import { useState } from 'react';
 import { Link, NavLink, Outlet } from 'react-router-dom';
 import AuthHeader from '../../components/AuthHeader';
@@ -45,7 +45,7 @@ function Shell() {
                             </p>
                         </div>
 
-                        {/* right icon slot  */}
+                     
                         <div className="justify-self-end cursor-pointer">
                             {isOpen ? <X /> : <Menu className='text-green-800' />}
                         </div>
@@ -58,7 +58,7 @@ function Shell() {
                 </div>
 
 
-                {/* side bar links */}
+               
                 {isOpen && (
                     <nav className="px-2 space-y-1">
                         <NavLink
@@ -92,10 +92,10 @@ function Shell() {
                         </NavLink>
 
                         <NavLink
-                            to="/city-authority-dashboard/settings"
+                            to="/city-authority-dashboard/map"
                             className={({ isActive }) => `${item} ${isActive ? active : ""}`}
                         >
-                            <Settings /> <span>Settings</span>
+                            <MapPin /> <span>Map</span>
                         </NavLink>
                     </nav>
 
