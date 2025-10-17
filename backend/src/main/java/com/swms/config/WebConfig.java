@@ -13,18 +13,16 @@ public class WebConfig implements WebMvcConfigurer {
                 .allowedOriginPatterns("*")
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH")
                 .allowedHeaders(
-                    "Authorization",
-                    "Content-Type", 
-                    "X-Requested-With",
-                    "Accept",
-                    "Origin",
-                    "Access-Control-Request-Method",
-                    "Access-Control-Request-Headers"
-                )
+                        "Authorization",
+                        "Content-Type",
+                        "X-Requested-With",
+                        "Accept",
+                        "Origin",
+                        "Access-Control-Request-Method",
+                        "Access-Control-Request-Headers")
                 .exposedHeaders(
-                    "Authorization",
-                    "Content-Disposition"
-                )
+                        "Authorization",
+                        "Content-Disposition")
                 .allowCredentials(true)
                 .maxAge(3600);
     }

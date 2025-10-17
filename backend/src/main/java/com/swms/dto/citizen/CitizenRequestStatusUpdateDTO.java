@@ -10,7 +10,6 @@ public class CitizenRequestStatusUpdateDTO {
     
     private String note;
     
-    // Getters and setters
     public CitizenRequestStatus getStatus() { return status; }
     public void setStatus(CitizenRequestStatus status) { this.status = status; }
     

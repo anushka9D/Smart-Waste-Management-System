@@ -9,7 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Data
 public class CitizenWasteDisposalMultipartDTO {
     @NotNull(message = "Category is required")
-    private CitizenRequestCategory category; // Changed from String to enum
+    private CitizenRequestCategory category;
     
     private String binId;
     
@@ -27,7 +27,6 @@ public class CitizenWasteDisposalMultipartDTO {
     
     private MultipartFile photo;
     
-    // Explicit getters (in case Lombok is not working)
     public CitizenRequestCategory getCategory() {
         return category;
     }

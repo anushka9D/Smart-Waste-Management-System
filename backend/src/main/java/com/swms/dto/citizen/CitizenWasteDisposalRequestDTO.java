@@ -10,12 +10,12 @@ public class CitizenWasteDisposalRequestDTO {
     @NotNull(message = "Category is required")
     private CitizenRequestCategory category;
     
-    private String customCategory; // Only required when category is OTHER
+    private String customCategory;
     
     @NotBlank(message = "Description is required")
     private String description;
     
-    private String binId; // Optional
+    private String binId;
     
     @NotNull(message = "Location coordinates are required")
     private GPSLocation coordinates;
@@ -23,9 +23,8 @@ public class CitizenWasteDisposalRequestDTO {
     @NotBlank(message = "Address is required")
     private String address;
     
-    private String photoBase64; // Base64 encoded image
+    private String photoBase64;
     
-    // Getters and setters
     public CitizenRequestCategory getCategory() { return category; }
     public void setCategory(CitizenRequestCategory category) { this.category = category; }
     

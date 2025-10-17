@@ -18,7 +18,6 @@ function ReportBinForm() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Get location data from previous step
     const savedLocation = localStorage.getItem('selectedLocation');
     if (savedLocation) {
       const location = JSON.parse(savedLocation);
@@ -101,9 +100,7 @@ function ReportBinForm() {
       const response = await createWasteRequest(submitData);
 
       if (response.success) {
-        // Clear stored location
         localStorage.removeItem('selectedLocation');
-        // Navigate to confirmation page with data
         navigate('/citizen/report-confirmation', {
           state: {
             requestData: response.data

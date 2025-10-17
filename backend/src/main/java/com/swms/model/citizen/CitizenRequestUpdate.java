@@ -14,7 +14,7 @@ public class CitizenRequestUpdate {
     private CitizenRequestStatus status;
     private String note;
     private LocalDateTime timestamp;
-    private String updatedBy; // Could be system, citizen, or staff
+    private String updatedBy;
     
     // Default constructor
     public CitizenRequestUpdate() {

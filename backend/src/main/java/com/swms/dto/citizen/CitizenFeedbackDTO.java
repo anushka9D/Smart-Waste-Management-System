@@ -41,7 +41,6 @@ public class CitizenFeedbackDTO {
         this.submittedAt = submittedAt;
     }
 
-    // Getters and Setters
     public String getId() {
         return id;
     }

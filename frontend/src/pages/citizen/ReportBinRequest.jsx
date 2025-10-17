@@ -20,19 +20,16 @@ function ReportBinRequest() {
   }, []);
 
   const loadOpenStreetMap = () => {
-    // Check if OpenStreetMap is already loaded
     if (window.L) {
       initializeMap();
       return;
     }
 
-    // Load Leaflet CSS
     const link = document.createElement('link');
     link.rel = 'stylesheet';
     link.href = 'https://unpkg.com/leaflet@1.7.1/dist/leaflet.css';
     document.head.appendChild(link);
 
-    // Load Leaflet JS
     const script = document.createElement('script');
     script.src = 'https://unpkg.com/leaflet@1.7.1/dist/leaflet.js';
     script.onload = initializeMap;
@@ -56,12 +53,10 @@ function ReportBinRequest() {
 
       const map = window.L.map(mapRef.current).setView([defaultLat, defaultLng], 13);
 
-      // Add OpenStreetMap tiles
       window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap contributors'
       }).addTo(map);
 
-      // Add default marker
       const marker = window.L.marker([defaultLat, defaultLng], {
         draggable: true
       }).addTo(map);
@@ -69,7 +64,6 @@ function ReportBinRequest() {
       markerRef.current = marker;
       mapInstanceRef.current = map;
 
-      // Set initial location
       setLocation({ latitude: defaultLat, longitude: defaultLng });
       reverseGeocode(defaultLat, defaultLng);
 
@@ -179,7 +173,6 @@ function ReportBinRequest() {
       return;
     }
 
-    // Save location to localStorage or context for the next step
     localStorage.setItem('selectedLocation', JSON.stringify({
       latitude: location.latitude,
       longitude: location.longitude,

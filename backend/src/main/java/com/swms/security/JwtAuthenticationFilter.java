@@ -47,13 +47,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String token = null;
         String email = null;
 
-        // Try to get token from Authorization header
+        // Get token from Authorization header
         String authHeader = request.getHeader("Authorization");
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             token = authHeader.substring(7).trim();
         }
 
-        // If not in header, try to get from cookie
+        // If not, get from cookie
         if (token == null) {
             Cookie[] cookies = request.getCookies();
             if (cookies != null) {
@@ -83,11 +83,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 UserDetails userDetails = userDetailsService.loadUserByUsername(email);
                 logger.info("User details loaded for: " + email + " with authorities: " + userDetails.getAuthorities());
 
-            // Fix: Use the email from token for validation instead of userDetails.getUsername()
-            if (jwtUtil.validateToken(token, email)) {
-                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                        userDetails, null, userDetails.getAuthorities());
-                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                if (jwtUtil.validateToken(token, email)) {
+                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                            userDetails, null, userDetails.getAuthorities());
+                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
                     SecurityContextHolder.getContext().setAuthentication(authToken);
                     logger.info("Authentication set for user: " + email);
