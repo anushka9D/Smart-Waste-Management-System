@@ -69,7 +69,7 @@ public class SmartBinController {
         return ResponseEntity.ok(updatedBin);
     }
 
-    @PutMapping("/{binId}/collect")
+    @PutMapping("/{binId}/collected")
     public ResponseEntity<SmartBinDTO> markBinAsCollected(@PathVariable String binId) {
 
         SmartBinDTO collectedBin = smartBinService.markBinAsCollected(binId);

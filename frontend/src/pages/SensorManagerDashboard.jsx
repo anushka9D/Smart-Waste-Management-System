@@ -60,7 +60,7 @@ const api = {
     return response.json();
   },
   markAsCollected: async (binId) => {
-    const response = await fetch(`${API_BASE_URL}/smartbin/${binId}/collect`, {
+    const response = await fetch(`${API_BASE_URL}/smartbin/${binId}/collected`, {
       method: 'PUT'
     });
     return response.json();
