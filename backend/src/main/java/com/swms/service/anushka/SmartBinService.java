@@ -1,4 +1,4 @@
-package com.swms.service;
+package com.swms.service.anushka;
 
 import com.swms.dto.CreateSmartBinRequest;
 import com.swms.dto.GPSLocationDTO;
@@ -7,13 +7,13 @@ import com.swms.dto.UpdateBinLevelRequest;
 import com.swms.model.GPSLocation;
 import com.swms.model.SmartBin;
 import com.swms.repository.SmartBinRepository;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -23,8 +23,8 @@ public class SmartBinService {
     private final BinSensorService binSensorService;
     private final AlertService alertService;
 
-    private static final Double HALF_FULL_THRESHOLD = 50.0;
-    private static final Double FULL_THRESHOLD = 80.0;
+    private static final Double Half_full = 50.0;
+    private static final Double Full = 80.0;
 
     public SmartBinService(SmartBinRepository smartBinRepository, BinSensorService binSensorService, AlertService alertService) {
         this.smartBinRepository = smartBinRepository;
@@ -47,6 +47,7 @@ public class SmartBinService {
         smartBin.setCoordinates(coordinates);
         smartBin.setCurrentLevel(0.0);
         smartBin.setCapacity(request.getCapacity());
+        smartBin.setWasteType(request.getWasteType());
         smartBin.setStatus("EMPTY");
         smartBin.setLastCollected(LocalDateTime.now());
         smartBin.setCreatedAt(LocalDateTime.now());
@@ -132,10 +133,8 @@ public class SmartBinService {
 
     @Transactional
     public SmartBinDTO markBinAsCollected(String binId) {
-
         Optional<SmartBin> optionalSmartBin = smartBinRepository.findByBinId(binId);
         if (optionalSmartBin.isEmpty()) {
-            // Bin not found
             return null;
         }
 
@@ -148,6 +147,9 @@ public class SmartBinService {
 
         SmartBin updatedBin = smartBinRepository.save(smartBin);
 
+        // Reset sensor measurement to 0
+        binSensorService.resetSensorMeasurement(binId);
+        
         alertService.resolveAlertForBin(binId);
 
         return mapToDTO(updatedBin, "GREEN");
@@ -176,9 +178,9 @@ public class SmartBinService {
 
     private String calculateBinStatus(Double currentLevel, Double capacity) {
         Double percentage = (currentLevel / capacity) * 100;
-        if (percentage >= FULL_THRESHOLD) {
+        if (percentage >= Full) {
             return "FULL";
-        } else if (percentage >= HALF_FULL_THRESHOLD) {
+        } else if (percentage >= Half_full) {
             return "HALF_FULL";
         } else {
             return "EMPTY";
@@ -211,7 +213,8 @@ public class SmartBinService {
     }
 
     private String generateBinId() {
-        return "BIN-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+    int randomNum = (int) (Math.random() * 1000); // number 0 to 999
+    return "B" + String.format("%03d", randomNum);
     }
 
     private SmartBinDTO mapToDTO(SmartBin smartBin, String color) {
@@ -227,6 +230,7 @@ public class SmartBinService {
         smartBinDTO.setCoordinates(coordinatesDTO);
         smartBinDTO.setCurrentLevel(smartBin.getCurrentLevel());
         smartBinDTO.setCapacity(smartBin.getCapacity());
+        smartBinDTO.setWasteType(smartBin.getWasteType());
         smartBinDTO.setStatus(smartBin.getStatus());
         smartBinDTO.setLastCollected(smartBin.getLastCollected());
         smartBinDTO.setBinColor(color);

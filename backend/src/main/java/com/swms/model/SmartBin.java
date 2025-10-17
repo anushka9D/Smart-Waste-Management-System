@@ -23,6 +23,7 @@ public class SmartBin {
     private GPSLocation coordinates;
     private Double currentLevel;
     private Double capacity;
+    private String wasteType;
     private String status; // empty, half_full, full
     private LocalDateTime lastCollected;
     private LocalDateTime createdAt;
@@ -46,6 +47,10 @@ public class SmartBin {
 
     public Double getCapacity() {
         return capacity;
+    }
+
+    public String getWasteType() {
+    return wasteType;
     }
 
     public Double getCurrentLevel() {
@@ -86,6 +91,10 @@ public class SmartBin {
 
     public void setCapacity(Double capacity) {
         this.capacity = capacity;
+    }
+
+    public void setWasteType(String wasteType) {
+    this.wasteType = wasteType;
     }
 
     public void setCreatedAt(LocalDateTime createdAt) {

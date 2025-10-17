@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { useAuth } from '../context/AuthContext';
 import AuthHeader from '../components/AuthHeader';
 import AuthFooter from '../components/AuthFooter';
 import { Plus, MapPin, ArrowLeft } from 'lucide-react';
@@ -8,13 +7,13 @@ import { useNavigate } from 'react-router-dom';
 const API_BASE_URL = 'http://localhost:8080/api/v1';
 
 function AddSmartBin() {
-  const { user } = useAuth();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     location: '',
     latitude: '',
     longitude: '',
-    capacity: '100'
+    capacity: '100',
+    wasteType: ''
   });
   const [notification, setNotification] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -25,29 +24,36 @@ function AddSmartBin() {
   };
 
   const handleSubmit = async () => {
-    if (!formData.location || !formData.latitude || !formData.longitude || !formData.capacity) {
+    if (!formData.location || !formData.latitude || !formData.longitude || !formData.capacity || !formData.wasteType) {
       showNotification('Please fill in all required fields', 'error');
       return;
     }
 
     setLoading(true);
     try {
-      const response = await fetch(`${API_BASE_URL}/smart-bins`, {
+      const response = await fetch(`${API_BASE_URL}/smartbin`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           location: formData.location,
           latitude: parseFloat(formData.latitude),
           longitude: parseFloat(formData.longitude),
-          capacity: parseFloat(formData.capacity)
+          capacity: 100.0,
+          wasteType: formData.wasteType
         })
       });
 
       if (response.ok) {
         showNotification('Smart bin created successfully!');
-        setTimeout(() => {
-          navigate('/smart-bin-monitoring');
-        }, 1500);
+
+        setFormData({
+          location: '',
+          latitude: '',
+          longitude: '',
+          capacity: '100',
+          wasteType: ''
+        });
+
       } else {
         showNotification('Failed to create smart bin', 'error');
       }
@@ -79,28 +85,6 @@ function AddSmartBin() {
 
       <main className="flex-grow bg-gray-50 py-12 px-4">
         <div className="container mx-auto max-w-4xl">
-          {/* Back Button */}
-          <button
-            onClick={() => navigate('/smart-bin-monitoring')}
-            className="flex items-center space-x-2 text-gray-600 hover:text-gray-800 mb-6 transition"
-          >
-            <ArrowLeft className="w-5 h-5" />
-            <span>Back to Dashboard</span>
-          </button>
-
-          {/* User Info Card */}
-          <div className="bg-indigo-50 border-l-4 border-indigo-500 p-6 mb-6 rounded-lg">
-            <h2 className="text-xl font-semibold text-indigo-800 mb-4">
-              Welcome, {user?.name}!
-            </h2>
-            
-            <div className="space-y-2 text-gray-700">
-              <p><span className="font-medium">Email:</span> {user?.email}</p>
-              <p><span className="font-medium">Phone:</span> {user?.phone}</p>
-              <p><span className="font-medium">User ID:</span> {user?.userId}</p>
-              <p><span className="font-medium">Role:</span> {user?.userType}</p>
-            </div>
-          </div>
 
           {/* Main Form Card */}
           <div className="bg-white rounded-lg shadow-md p-8">
@@ -175,13 +159,27 @@ function AddSmartBin() {
                 <input
                   type="number"
                   value={formData.capacity}
-                  onChange={(e) => handleInputChange('capacity', e.target.value)}
-                  placeholder="100"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  min="10"
-                  max="500"
+                  disabled
+                  className="w-full px-4 py-3 bg-gray-100 border border-gray-300 rounded-lg"
                 />
-                <p className="text-xs text-gray-500 mt-1">Bin capacity in liters (10-500)</p>
+                <p className="text-xs text-gray-500 mt-1">Capacity is fixed at 100.0 liters</p>
+              </div>
+
+              {/* Waste Type Selector */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Waste Type <span className="text-red-500">*</span>
+                </label>
+                <select
+                  value={formData.wasteType}
+                  onChange={(e) => handleInputChange('wasteType', e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                >
+                  <option value="Plastic">Plastic</option>
+                  <option value="Organic">Organic</option>
+                  <option value="Metal">Metal</option>
+                </select>
+                <p className="text-xs text-gray-500 mt-1">Select the type of waste this bin is intended for.</p>
               </div>
 
               {/* Information Box */}
@@ -239,29 +237,6 @@ function AddSmartBin() {
                   Cancel
                 </button>
               </div>
-            </div>
-          </div>
-
-          {/* Feature Cards */}
-          <div className="grid md:grid-cols-2 gap-6 mt-8">
-            <div className="bg-green-50 p-6 rounded-lg border border-green-200">
-              <h3 className="text-lg font-semibold text-green-800 mb-2">Real-Time Monitoring</h3>
-              <p className="text-gray-600 text-sm">Track bin fill levels in real-time with IoT sensor integration</p>
-            </div>
-
-            <div className="bg-blue-50 p-6 rounded-lg border border-blue-200">
-              <h3 className="text-lg font-semibold text-blue-800 mb-2">Smart Alerts</h3>
-              <p className="text-gray-600 text-sm">Receive automatic notifications when bins reach capacity</p>
-            </div>
-
-            <div className="bg-yellow-50 p-6 rounded-lg border border-yellow-200">
-              <h3 className="text-lg font-semibold text-yellow-800 mb-2">GPS Tracking</h3>
-              <p className="text-gray-600 text-sm">Precise location mapping for efficient collection routes</p>
-            </div>
-
-            <div className="bg-purple-50 p-6 rounded-lg border border-purple-200">
-              <h3 className="text-lg font-semibold text-purple-800 mb-2">Data Analytics</h3>
-              <p className="text-gray-600 text-sm">Generate insights from collection patterns and usage data</p>
             </div>
           </div>
         </div>

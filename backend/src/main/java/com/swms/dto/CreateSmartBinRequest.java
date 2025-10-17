@@ -14,6 +14,7 @@ public class CreateSmartBinRequest {
     private Double latitude;
     private Double longitude;
     private Double capacity;
+    private String wasteType;
 
     public Double getLatitude() {
         return latitude;
@@ -29,5 +30,9 @@ public class CreateSmartBinRequest {
 
     public Double getCapacity() {
         return capacity;
+    }
+
+    public String getWasteType() {
+        return wasteType;
     }
 }

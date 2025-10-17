@@ -8,7 +8,7 @@ public class SmartBinRequest {
     private GPSLocation coordinates;
     private double currentLevel;
     private double capacity;
-    private String lastCollected; // As string for easier JSON parsing
+    private String lastCollected;
     
     // Default constructor
     public SmartBinRequest() {

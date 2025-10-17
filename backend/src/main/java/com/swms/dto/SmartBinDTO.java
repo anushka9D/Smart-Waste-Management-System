@@ -17,6 +17,7 @@ public class SmartBinDTO {
     private GPSLocationDTO coordinates;
     private Double currentLevel;
     private Double capacity;
+    private String wasteType;
     private String status;
     private LocalDateTime lastCollected;
     private String binColor;
@@ -35,6 +36,10 @@ public class SmartBinDTO {
 
     public void setCapacity(Double capacity) {
         this.capacity = capacity;
+    }
+
+    public void setWasteType(String wasteType) {
+        this.wasteType = wasteType;
     }
 
     public void setCurrentLevel(Double currentLevel) {

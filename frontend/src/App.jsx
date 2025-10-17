@@ -12,6 +12,7 @@ import DriverDashboard from './pages/DriverDashboard';
 import WasteCollectionStaffDashboard from './pages/WasteCollectionStaffDashboard';
 import SensorManagerDashboard from './pages/SensorManagerDashboard';
 import AssignedRoutes from './pages/AssignedRoutes';
+import AddSmartBin from './pages/AddSmartBin';
 import RouteMap from './pages/RouteMap'; // Add this import
 import CompletedRoutes from './pages/CompletedRoutes'; // Add this import
 
@@ -121,7 +122,14 @@ function App() {
               </PrivateRoute>
             }
           />
-
+          <Route
+            path="/add-smart-bin"
+            element={
+              <PrivateRoute allowedUserTypes={['SENSOR_MANAGER']}>
+                <AddSmartBin />
+              </PrivateRoute>
+            }
+          />
           <Route
             path="/citizen/report-bin-request"
             element={
