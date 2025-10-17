@@ -24,7 +24,6 @@ function CitizenDashboard() {
               <div className="space-y-2 text-gray-700">
                 <p><span className="font-medium">Email:</span> {user?.email}</p>
                 <p><span className="font-medium">Phone:</span> {user?.phone}</p>
-                <p><span className="font-medium">User ID:</span> {user?.userId}</p>
               </div>
             </div>
 

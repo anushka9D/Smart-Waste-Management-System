@@ -6,7 +6,10 @@ import com.swms.model.citizen.Citizen;
 import com.swms.model.citizen.CitizenWasteDisposalRequest;
 import com.swms.model.citizen.CitizenRequestUpdate;
 import com.swms.repository.citizen.CitizenRepository;
+import com.swms.security.JwtUtil;
 import com.swms.service.citizen.CitizenWasteDisposalRequestService;
+
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -15,8 +18,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.util.List;
 import java.util.Optional;
@@ -27,8 +33,11 @@ import java.util.Optional;
 public class CitizenWasteDisposalRequestController {
 
     @Autowired
+    private JwtUtil jwtUtil;
+
+    @Autowired
     private CitizenWasteDisposalRequestService requestService;
-    
+
     @Autowired
     private CitizenRepository citizenRepository;
 
@@ -115,15 +124,53 @@ public class CitizenWasteDisposalRequestController {
         if (userDetails == null) {
             throw new RuntimeException("User not authenticated");
         }
-        
-        // Get the citizen by email to retrieve the actual user ID
-        String email = userDetails.getUsername();
-        Optional<Citizen> citizenOpt = citizenRepository.findByEmail(email);
-        if (citizenOpt.isEmpty()) {
-            // Improved error message for debugging
-            throw new RuntimeException("Citizen not found with email: " + email + ". Current user details username: " + userDetails.getUsername());
+
+        // Extract token from SecurityContext
+        String token = null;
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (principal instanceof UserDetails) {
+            // Try to get token from Authorization header
+            HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes())
+                    .getRequest();
+            String authHeader = request.getHeader("Authorization");
+            if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                token = authHeader.substring(7).trim();
+            }
         }
-        
-        return citizenOpt.get().getUserId();
+
+        if (token == null) {
+            throw new RuntimeException("JWT token not found");
+        }
+
+        // First try to get userId from token claims
+        String userId = jwtUtil.getUserIdFromToken(token);
+        if (userId != null && !userId.isEmpty()) {
+            // Validate that userId exists in database
+            Optional<Citizen> citizenOpt = citizenRepository.findById(userId);
+            if (citizenOpt.isPresent()) {
+                return userId;
+            }
+        }
+
+        // Fallback to email if userId not found or invalid
+        String email = jwtUtil.getEmailFromToken(token);
+        // Check if email looks like a UUID (which would indicate an error)
+        if (email != null && email.contains("-") && email.length() == 36) {
+            // This seems to be a UUID, try to find citizen by userId instead
+            Optional<Citizen> citizenOpt = citizenRepository.findById(email);
+            if (citizenOpt.isPresent()) {
+                return email;
+            }
+        } else {
+            // Normal email case
+            Optional<Citizen> citizenOpt = citizenRepository.findByEmail(email);
+            if (citizenOpt.isEmpty()) {
+                throw new RuntimeException("Citizen not found with email: " + email);
+            }
+            return citizenOpt.get().getUserId();
+        }
+
+        throw new RuntimeException("Citizen not found with id: " + userId + " or email: " + email);
     }
+
 }

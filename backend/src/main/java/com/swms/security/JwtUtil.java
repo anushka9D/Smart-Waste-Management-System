@@ -43,7 +43,11 @@ public class JwtUtil {
     }
 
     public String getUserIdFromToken(String token) {
-        return getClaimsFromToken(token).get("userId", String.class);
+        try {
+            return getClaimsFromToken(token).get("userId", String.class);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     public String getNameFromToken(String token) {

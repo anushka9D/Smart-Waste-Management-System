@@ -34,11 +34,11 @@ public class CitizenWasteDisposalRequestService {
     @Autowired
     private CloudinaryService cloudinaryService;
 
-    public CitizenWasteDisposalRequest createRequest(String citizenEmail, CitizenWasteDisposalMultipartDTO requestDTO) {
-        // Validate citizen exists by email
-        Optional<Citizen> citizenOpt = citizenRepository.findByEmail(citizenEmail);
+    public CitizenWasteDisposalRequest createRequest(String citizenId, CitizenWasteDisposalMultipartDTO requestDTO) {
+        // Validate citizen exists by ID (not email)
+        Optional<Citizen> citizenOpt = citizenRepository.findById(citizenId);
         if (citizenOpt.isEmpty()) {
-            throw new RuntimeException("Citizen not found with email: " + citizenEmail);
+            throw new RuntimeException("Citizen not found with ID: " + citizenId);
         }
 
         Citizen citizen = citizenOpt.get();

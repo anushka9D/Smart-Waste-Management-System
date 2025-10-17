@@ -27,4 +27,32 @@ public class CitizenWasteDisposalMultipartDTO {
     
     private MultipartFile photo;
     
+    // Explicit getters (in case Lombok is not working)
+    public CitizenRequestCategory getCategory() {
+        return category;
+    }
+    
+    public String getBinId() {
+        return binId;
+    }
+    
+    public String getDescription() {
+        return description;
+    }
+    
+    public String getAddress() {
+        return address;
+    }
+    
+    public Double getLatitude() {
+        return latitude;
+    }
+    
+    public Double getLongitude() {
+        return longitude;
+    }
+    
+    public MultipartFile getPhoto() {
+        return photo;
+    }
 }
