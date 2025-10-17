@@ -294,6 +294,40 @@ export const cancelRequest = async (requestId) => {
   }
 };
 
+// Feedback APIs
+export const submitFeedback = async (feedbackData) => {
+  try {
+    const formData = new FormData();
+    formData.append('requestId', feedbackData.requestId);
+    formData.append('topic', feedbackData.topic);
+    formData.append('rating', feedbackData.rating);
+    if (feedbackData.comment) {
+      formData.append('comment', feedbackData.comment);
+    }
+    if (feedbackData.photo) {
+      formData.append('photo', feedbackData.photo);
+    }
+
+    const response = await api.post('/citizen/feedback', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  } catch (error) {
+    return error.response ? error.response.data : { success: false, message: 'Network error' };
+  }
+};
+
+export const getMyFeedback = async () => {
+  try {
+    const response = await api.get('/citizen/feedback');
+    return response.data;
+  } catch (error) {
+    return error.response ? error.response.data : { success: false, message: 'Network error' };
+  }
+};
+
 // Logout
 export const logout = () => {
   localStorage.removeItem('token');

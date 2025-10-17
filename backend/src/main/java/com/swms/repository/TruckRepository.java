@@ -10,21 +10,21 @@ import java.util.Optional;
 @Repository
 public interface TruckRepository extends MongoRepository<Truck, String> {
     
-    // Find truck by registration number
+   
     Optional<Truck> findByRegistrationNumber(String registrationNumber);
     
-    // Find trucks by current status
+    
     List<Truck> findByCurrentStatus(String currentStatus);
     
-    // Find available trucks
+    
     List<Truck> findByCurrentStatusAndAssignedDriverIdIsNull(String status);
     
-    // Find trucks by status and minimum capacity
+    
     List<Truck> findByCurrentStatusAndCapacityGreaterThanEqual(String status, double capacity);
     
-    // Find trucks assigned to a driver
+    
     List<Truck> findByAssignedDriverId(String driverId);
     
-    // Check if registration number exists
+    
     Boolean existsByRegistrationNumber(String registrationNumber);
 }
