@@ -98,7 +98,7 @@ public class SensorSimulationService {
         });
     }
 
-    private String calculateBinStatus(Double currentLevel) {
+    String calculateBinStatus(Double currentLevel) {
         if (currentLevel >= Full) {
             return "FULL";
         } else if (currentLevel >= Half_full) {
@@ -108,7 +108,7 @@ public class SensorSimulationService {
         }
     }
 
-    private String determineSensorColor(Double measurement) {
+    String determineSensorColor(Double measurement) {
         if (measurement >= 80.0) {
             return "RED";
         } else if (measurement >= 50.0) {
@@ -118,7 +118,7 @@ public class SensorSimulationService {
         }
     }
 
-    private void handleBinStatusChangeAlerts(SmartBin smartBin, String previousStatus, String newStatus) {
+    void handleBinStatusChangeAlerts(SmartBin smartBin, String previousStatus, String newStatus) {
         if (newStatus.equals("FULL") && !previousStatus.equals("FULL")) {
             alertService.createAlert(smartBin);
         }
