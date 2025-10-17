@@ -1,4 +1,4 @@
-package com.swms.backend;
+package com.swms;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
