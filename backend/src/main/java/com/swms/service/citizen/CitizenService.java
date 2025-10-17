@@ -1,8 +1,8 @@
-package com.swms.service;
+package com.swms.service.citizen;
 
-import com.swms.dto.CitizenRequest;
-import com.swms.model.Citizen;
-import com.swms.repository.CitizenRepository;
+import com.swms.dto.citizen.CitizenRequest;
+import com.swms.model.citizen.Citizen;
+import com.swms.repository.citizen.CitizenRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -32,7 +32,6 @@ public class CitizenService {
         citizen.setPhone(request.getPhone());
         citizen.setPassword(passwordEncoder.encode(request.getPassword()));
         citizen.setUserType("CITIZEN");
-        citizen.setAge(request.getAge());
         citizen.setCreatedAt(LocalDateTime.now());
         citizen.setUpdatedAt(LocalDateTime.now());
         citizen.setEnabled(true);
@@ -66,7 +65,6 @@ public class CitizenService {
             citizen.setName(request.getName());
             citizen.setEmail(request.getEmail());
             citizen.setPhone(request.getPhone());
-            citizen.setAge(request.getAge());
             citizen.setUpdatedAt(LocalDateTime.now());
             
             citizenRepository.save(citizen);
