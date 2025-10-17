@@ -47,6 +47,7 @@ public class SmartBinService {
         smartBin.setCoordinates(coordinates);
         smartBin.setCurrentLevel(0.0);
         smartBin.setCapacity(request.getCapacity());
+        smartBin.setWasteType(request.getWasteType());
         smartBin.setStatus("EMPTY");
         smartBin.setLastCollected(LocalDateTime.now());
         smartBin.setCreatedAt(LocalDateTime.now());
@@ -212,7 +213,8 @@ public class SmartBinService {
     }
 
     private String generateBinId() {
-        return "BIN-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+    int randomNum = (int) (Math.random() * 1000); // number 0 to 999
+    return "B" + String.format("%03d", randomNum);
     }
 
     private SmartBinDTO mapToDTO(SmartBin smartBin, String color) {
@@ -228,6 +230,7 @@ public class SmartBinService {
         smartBinDTO.setCoordinates(coordinatesDTO);
         smartBinDTO.setCurrentLevel(smartBin.getCurrentLevel());
         smartBinDTO.setCapacity(smartBin.getCapacity());
+        smartBinDTO.setWasteType(smartBin.getWasteType());
         smartBinDTO.setStatus(smartBin.getStatus());
         smartBinDTO.setLastCollected(smartBin.getLastCollected());
         smartBinDTO.setBinColor(color);

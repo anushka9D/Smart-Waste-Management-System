@@ -12,7 +12,8 @@ function AddSmartBin() {
     location: '',
     latitude: '',
     longitude: '',
-    capacity: '100'
+    capacity: '100',
+    wasteType: ''
   });
   const [notification, setNotification] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -23,29 +24,36 @@ function AddSmartBin() {
   };
 
   const handleSubmit = async () => {
-    if (!formData.location || !formData.latitude || !formData.longitude || !formData.capacity) {
+    if (!formData.location || !formData.latitude || !formData.longitude || !formData.capacity || !formData.wasteType) {
       showNotification('Please fill in all required fields', 'error');
       return;
     }
 
     setLoading(true);
     try {
-      const response = await fetch(`${API_BASE_URL}/smart-bins`, {
+      const response = await fetch(`${API_BASE_URL}/smartbin`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           location: formData.location,
           latitude: parseFloat(formData.latitude),
           longitude: parseFloat(formData.longitude),
-          capacity: parseFloat(formData.capacity)
+          capacity: 100.0,
+          wasteType: formData.wasteType
         })
       });
 
       if (response.ok) {
         showNotification('Smart bin created successfully!');
-        setTimeout(() => {
-          navigate('/smart-bin-monitoring');
-        }, 1500);
+
+        setFormData({
+          location: '',
+          latitude: '',
+          longitude: '',
+          capacity: '100',
+          wasteType: ''
+        });
+
       } else {
         showNotification('Failed to create smart bin', 'error');
       }
@@ -151,13 +159,27 @@ function AddSmartBin() {
                 <input
                   type="number"
                   value={formData.capacity}
-                  onChange={(e) => handleInputChange('capacity', e.target.value)}
-                  placeholder="100"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  min="10"
-                  max="500"
+                  disabled
+                  className="w-full px-4 py-3 bg-gray-100 border border-gray-300 rounded-lg"
                 />
-                <p className="text-xs text-gray-500 mt-1">Bin capacity in liters (10-500)</p>
+                <p className="text-xs text-gray-500 mt-1">Capacity is fixed at 100.0 liters</p>
+              </div>
+
+              {/* Waste Type Selector */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Waste Type <span className="text-red-500">*</span>
+                </label>
+                <select
+                  value={formData.wasteType}
+                  onChange={(e) => handleInputChange('wasteType', e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                >
+                  <option value="Plastic">Plastic</option>
+                  <option value="Organic">Organic</option>
+                  <option value="Metal">Metal</option>
+                </select>
+                <p className="text-xs text-gray-500 mt-1">Select the type of waste this bin is intended for.</p>
               </div>
 
               {/* Information Box */}
