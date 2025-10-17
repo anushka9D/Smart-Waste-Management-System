@@ -15,7 +15,11 @@ function AssignedRoutes() {
     const fetchAssignedRoutes = async () => {
       try {
         setLoading(true);
+        setError(null);
+        
+        // Use the correct endpoint for all assigned routes (no authentication required)
         const response = await fetch('http://localhost:8080/api/routes/assigned');
+        
         const data = await response.json();
         
         if (data.success) {

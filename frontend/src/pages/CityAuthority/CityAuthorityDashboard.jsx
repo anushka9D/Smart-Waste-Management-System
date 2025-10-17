@@ -1,8 +1,8 @@
-import { useAuth } from '../context/AuthContext';
-import AuthHeader from '../components/AuthHeader';
-import AuthFooter from '../components/AuthFooter';
+import { useAuth } from '../../context/AuthContext';
+import AuthHeader from '../../components/AuthHeader';
+import AuthFooter from '../../components/AuthFooter';
 import { useState, useEffect } from 'react';
-import { getRoutePreview, getSuitableTrucks, getAvailableDrivers, getAvailableStaff, createRouteWithResources } from '../services/api';
+import { getRoutePreview, getSuitableTrucks, getAvailableDrivers, getAvailableStaff, createRouteWithResources } from '../../services/api';
 import { Link } from 'react-router-dom';
 
 function CityAuthorityDashboard() {
@@ -20,6 +20,7 @@ function CityAuthorityDashboard() {
     const fetchData = async () => {
       try {
         setLoading(true);
+        setError(null); // Clear any previous errors
         
         // Fetch route preview
         const response = await getRoutePreview();
@@ -27,35 +28,53 @@ function CityAuthorityDashboard() {
         if (response.success) {
           setRoutePreview(response.data);
           
-          // Fetch suitable trucks for each route
-          const trucksData = {};
-          for (const route of response.data.routes) {
-            if (route.totalCapacity) {
-              const truckResponse = await getSuitableTrucks(route.totalCapacity);
-              if (truckResponse.success) {
-                trucksData[route.routeId] = truckResponse.data;
+          // Fetch suitable trucks for each route only if there are routes
+          if (response.data.routes && response.data.routes.length > 0) {
+            const trucksData = {};
+            for (const route of response.data.routes) {
+              if (route.totalCapacity) {
+                try {
+                  const truckResponse = await getSuitableTrucks(route.totalCapacity);
+                  if (truckResponse.success) {
+                    trucksData[route.routeId] = truckResponse.data;
+                  }
+                } catch (err) {
+                  console.error(`Error fetching trucks for route ${route.routeId}:`, err);
+                }
               }
             }
+            setSuitableTrucks(trucksData);
           }
-          setSuitableTrucks(trucksData);
         } else {
-          setError(response.message || 'Failed to fetch route preview');
+          // Even if response is not successful, we might still want to show the UI
+          // Set empty data to allow the UI to render properly
+          setRoutePreview({ routes: [], totalRoutes: 0 });
         }
         
         // Fetch available drivers
-        const driversResponse = await getAvailableDrivers();
-        if (driversResponse.success) {
-          setAvailableDrivers(driversResponse.data);
+        try {
+          const driversResponse = await getAvailableDrivers();
+          if (driversResponse.success) {
+            setAvailableDrivers(driversResponse.data);
+          }
+        } catch (err) {
+          console.error('Error fetching drivers:', err);
         }
         
         // Fetch available staff
-        const staffResponse = await getAvailableStaff();
-        if (staffResponse.success) {
-          setAvailableStaff(staffResponse.data);
+        try {
+          const staffResponse = await getAvailableStaff();
+          if (staffResponse.success) {
+            setAvailableStaff(staffResponse.data);
+          }
+        } catch (err) {
+          console.error('Error fetching staff:', err);
         }
       } catch (err) {
-        setError('Failed to connect to server');
         console.error('Error fetching data:', err);
+        // Set empty data to allow the UI to render properly even when there's an error
+        setRoutePreview({ routes: [], totalRoutes: 0 });
+        setError('Failed to connect to server. Showing available resources only.');
       } finally {
         setLoading(false);
       }
@@ -101,7 +120,7 @@ function CityAuthorityDashboard() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <AuthHeader />
+      
       
       <main className="flex-grow bg-gray-50 py-12 px-4">
         <div className="container mx-auto max-w-4xl">
@@ -160,8 +179,8 @@ function CityAuthorityDashboard() {
                   <p>Loading route preview...</p>
                 </div>
               ) : error ? (
-                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
-                  <strong className="font-bold">Error: </strong>
+                <div className="bg-yellow-50 border border-yellow-400 text-yellow-700 px-4 py-3 rounded relative" role="alert">
+                  <strong className="font-bold">Notice: </strong>
                   <span className="block sm:inline">{error}</span>
                 </div>
               ) : routePreview && routePreview.routes && routePreview.routes.length > 0 ? (
@@ -265,6 +284,33 @@ function CityAuthorityDashboard() {
                   <p className="text-yellow-700">
                     There are currently no routes to display. This could be because no bins are marked as "FULL" in the system.
                   </p>
+                  <div className="mt-4">
+                    <h4 className="font-medium text-yellow-800 mb-2">Available Resources:</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="bg-white p-3 rounded shadow-sm">
+                        <h5 className="font-medium text-gray-700">Drivers ({availableDrivers.length})</h5>
+                        <ul className="mt-2 text-sm text-gray-600">
+                          {availableDrivers.slice(0, 3).map(driver => (
+                            <li key={driver.userId}>{driver.name}</li>
+                          ))}
+                          {availableDrivers.length > 3 && (
+                            <li className="text-gray-500">+ {availableDrivers.length - 3} more</li>
+                          )}
+                        </ul>
+                      </div>
+                      <div className="bg-white p-3 rounded shadow-sm">
+                        <h5 className="font-medium text-gray-700">Staff ({availableStaff.length})</h5>
+                        <ul className="mt-2 text-sm text-gray-600">
+                          {availableStaff.slice(0, 3).map(staff => (
+                            <li key={staff.userId}>{staff.name}</li>
+                          ))}
+                          {availableStaff.length > 3 && (
+                            <li className="text-gray-500">+ {availableStaff.length - 3} more</li>
+                          )}
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               )}
             </div>

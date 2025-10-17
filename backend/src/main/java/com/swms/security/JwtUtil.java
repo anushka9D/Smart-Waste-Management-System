@@ -23,12 +23,13 @@ public class JwtUtil {
         return Keys.hmacShaKeyFor(secret.getBytes());
     }
 
-    public String generateToken(String userId, String name, String email, String userType) {
+    public String generateToken(String userId, String name, String email, String userType, String phone) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("userId", userId);
         claims.put("name", name);
         claims.put("userType", userType);
-        
+        claims.put("phone", phone);
+
         return Jwts.builder()
                 .claims(claims)
                 .subject(email)
@@ -38,12 +39,21 @@ public class JwtUtil {
                 .compact();
     }
 
+    // Add method to get phone from token
+    public String getPhoneFromToken(String token) {
+        return getClaimsFromToken(token).get("phone", String.class);
+    }
+
     public String getEmailFromToken(String token) {
         return getClaimsFromToken(token).getSubject();
     }
 
     public String getUserIdFromToken(String token) {
-        return getClaimsFromToken(token).get("userId", String.class);
+        try {
+            return getClaimsFromToken(token).get("userId", String.class);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     public String getNameFromToken(String token) {
