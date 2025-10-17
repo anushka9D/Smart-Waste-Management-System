@@ -40,48 +40,70 @@ public class JwtUtil {
     }
 
     public String getPhoneFromToken(String token) {
-        return getClaimsFromToken(token).get("phone", String.class);
+        Claims claims = getClaimsFromToken(token);
+        return claims != null ? claims.get("phone", String.class) : null;
     }
 
     public String getEmailFromToken(String token) {
-        return getClaimsFromToken(token).getSubject();
+        Claims claims = getClaimsFromToken(token);
+        return claims != null ? claims.getSubject() : null;
     }
 
     public String getUserIdFromToken(String token) {
         try {
-            return getClaimsFromToken(token).get("userId", String.class);
+            Claims claims = getClaimsFromToken(token);
+            return claims != null ? claims.get("userId", String.class) : null;
         } catch (Exception e) {
             return null;
         }
     }
 
     public String getNameFromToken(String token) {
-        return getClaimsFromToken(token).get("name", String.class);
+        Claims claims = getClaimsFromToken(token);
+        return claims != null ? claims.get("name", String.class) : null;
     }
 
     public String getUserTypeFromToken(String token) {
-        return getClaimsFromToken(token).get("userType", String.class);
+        Claims claims = getClaimsFromToken(token);
+        return claims != null ? claims.get("userType", String.class) : null;
     }
 
     public Date getExpirationDateFromToken(String token) {
-        return getClaimsFromToken(token).getExpiration();
+        Claims claims = getClaimsFromToken(token);
+        return claims != null ? claims.getExpiration() : null;
     }
 
     private Claims getClaimsFromToken(String token) {
-        return Jwts.parser()
-                .verifyWith(getSigningKey())
-                .build()
-                .parseSignedClaims(token)
-                .getPayload();
+        try {
+            return Jwts.parser()
+                    .verifyWith(getSigningKey())
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload();
+        } catch (ExpiredJwtException e) {
+            // Return the claims even if the token is expired
+            return e.getClaims();
+        } catch (Exception e) {
+            // Handle other invalid tokens
+            return null;
+        }
     }
 
     public Boolean isTokenExpired(String token) {
-        final Date expiration = getExpirationDateFromToken(token);
-        return expiration.before(new Date());
+        try {
+            final Date expiration = getExpirationDateFromToken(token);
+            return expiration != null && expiration.before(new Date());
+        } catch (Exception e) {
+            return true; // Consider invalid tokens as expired
+        }
     }
 
     public Boolean validateToken(String token, String email) {
-        final String tokenEmail = getEmailFromToken(token);
-        return (tokenEmail.equals(email) && !isTokenExpired(token));
+        try {
+            final String tokenEmail = getEmailFromToken(token);
+            return (tokenEmail != null && tokenEmail.equals(email) && !isTokenExpired(token));
+        } catch (Exception e) {
+            return false; // Consider invalid tokens as not valid
+        }
     }
 }
