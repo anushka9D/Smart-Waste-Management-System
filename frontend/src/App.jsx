@@ -18,8 +18,8 @@ import CompletedRoutes from './pages/CompletedRoutes'; // Add this import
 import Shell from './pages/CityAuthority/Shell'
 import Reports from './pages/CityAuthority/Reports'
 import Analytics from './pages/CityAuthority/Analytics'
-import Settings from './pages/CityAuthority/Settings'
 import Dashboard from './pages/CityAuthority/Dashboard'
+import Map from './pages/CityAuthority/Map';
 
 // Citizen Report Pages
 import ReportBinRequest from './pages/citizen/ReportBinRequest';
@@ -68,7 +68,7 @@ function App() {
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="reports" element={<Reports />} />
             <Route path="analytics" element={<Analytics />} />
-            <Route path="settings" element={<Settings />} />
+            <Route path="map" element={<Map />} />
           </Route>
 
           <Route
