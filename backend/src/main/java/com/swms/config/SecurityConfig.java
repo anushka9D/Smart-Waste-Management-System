@@ -73,13 +73,11 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/smartbin/**").permitAll()
                         .requestMatchers("/api/v1/bin-sensors/**").permitAll()
                         .requestMatchers("/api/v1/alerts/**").permitAll()
-<<<<<<< HEAD
+
                         .requestMatchers("/api/bins/**").permitAll()
                         .requestMatchers("/api/analytics/**").permitAll()
                         .requestMatchers("/api/map/bins/**").permitAll()
-=======
 
->>>>>>> a33a7c5b687fe7ca15e757a5beee7e2906660427
                         .anyRequest().authenticated())
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint(jwtAuthenticationEntryPoint))
