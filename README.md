@@ -1,6 +1,6 @@
 # Smart Waste Management System
 
-The Smart Waste Management System (SWMS) is an integrated solution designed to address the growing challenges of urban waste management. This system combines modern IoT sensors, mobile applications, and web platforms to streamline waste management operations and improve urban cleanliness.
+The Smart Waste Management System (SWMS) is an integrated solution designed to address the growing challenges of urban waste management. This system combines modern IoT sensors, mobile applications, and web platforms to streamline waste management operations and improve urban cleanliness.Used a layerd architecture
 
 ## Key Features
 
